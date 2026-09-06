@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loyverse BHD 3-Decimal POS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans h-screen flex flex-col overflow-hidden">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-emerald-700 text-white p-3 flex justify-between items-center shadow-md">
+        <div class="flex items-center space-x-3">
+            <span class="font-bold text-xl tracking-wide">POS (BHD 3-Dec)</span>
+            <span id="role-badge" class="bg-emerald-900 text-emerald-200 text-xs px-2 py-1 rounded-full uppercase tracking-wider font-semibold">Cashier</span>
+        </div>
+        <div class="flex items-center space-x-2">
+            <span id="user-name" class="text-sm font-medium hidden sm:inline">Cashier 1</span>
+            <button onclick="switchUser()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition">Switch PIN</button>
+        </div>
+    </header>
+
+    <!-- Main POS Interface Split View -->
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+        
+        <!-- Left Panel: Product Search, Scanner & Catalog -->
+        <div class="w-full md:w-3/5 lg:w-2/3 p-4 flex flex-col h-full overflow-hidden">
+            
+            <!-- Universal Search & Camera Scan Bar -->
+            <div class="flex space-x-2 mb-4">
+                <div class="relative flex-1">
+                    <input type="text" id="search-input" onkeyup="filterProducts()" placeholder="Search name or scan barcode..." 
+                           class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm shadow-sm">
+                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+                <button onclick="toggleCameraScanner()" class="bg-gray-800 hover:bg-black text-white px-4 py-2.5 rounded-lg flex items-center space-x-1 shadow text-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h0.93a2 2 0 001.664-.89l0.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l0.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span class="hidden sm:inline">Scan</span>
+                </button>
+            </div>
+
+            <!-- In-App Camera Viewfinder Container -->
+            <div id="camera-reader-wrapper" class="hidden mb-4 bg-black rounded-lg overflow-hidden relative max-h-48">
+                <div id="reader" class="w-full"></div>
+                <button onclick="toggleCameraScanner()" class="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 text-xs rounded shadow">Close Camera</button>
+            </div>
+
+            <!-- Product Grid -->
+            <div id="product-grid" class="flex-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 overflow-y-auto no-scrollbar pr-1">
+                <!-- Product Cards dynamically rendered here -->
+            </div>
+        </div>
+
+        <!-- Right Panel: Cart Register & Checkout -->
+        <div class="w-full md:w-2/5 lg:w-1/3 bg-white border-l border-gray-200 flex flex-col h-full shadow-lg">
+            
+            <div class="p-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="font-bold text-gray-700">Current Order</h2>
+                <button onclick="clearCart()" class="text-xs text-red-600 hover:text-red-800 font-medium">Clear All</button>
+            </div>
+
+            <!-- Cart Items List -->
+            <div id="cart-items" class="flex-1 overflow-y-auto p-3 space-y-3 no-scrollbar divide-y divide-gray-100">
+                <!-- Cart items dynamically rendered here -->
+            </div>
+
+            <!-- Pricing Summary Footer -->
+            <div class="p-4 bg-gray-50 border-t border-gray-200 space-y-2">
+                <div class="flex justify-between text-sm text-gray-600">
+                    <span>Subtotal</span>
+                    <span id="summary-subtotal" class="font-semibold">BHD 0.000</span>
+                </div>
+                <div class="flex justify-between text-sm text-gray-600">
+                    <span>VAT (10%)</span>
+                    <span id="summary-vat" class="font-semibold">BHD 0.000</span>
+                </div>
+                <div class="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-200">
+                    <span>Total Amount</span>
+                    <span id="summary-total" class="text-emerald-700">BHD 0.000</span>
+                </div>
+
+                <!-- Charge / Checkout Button -->
+                <button onclick="openPaymentModal()" class="w-full mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow-md transition text-center flex justify-between px-4">
+                    <span>PAY NOW</span>
+                    <span id="btn-total">BHD 0.000</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment & Receipt Modal -->
+    <div id="payment-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-5 space-y-4">
+            <h3 class="text-lg font-bold text-gray-800 border-b pb-2">Complete Payment</h3>
+            <div class="text-center py-2 bg-emerald-50 rounded-lg">
+                <p class="text-xs text-emerald-800 uppercase font-semibold tracking-wider">Total Amount Due</p>
+                <p id="modal-total" class="text-2xl font-black text-emerald-700">BHD 0.000</p>
+            </div>
+
+            <div>
+                <label class="text-xs font-semibold text-gray-600 uppercase">Payment Method</label>
+                <div class="grid grid-cols-3 gap-2 mt-1">
+                    <button onclick="setPaymentMethod('CASH')" class="pay-method-btn border-2 border-emerald-600 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">CASH</button>
+                    <button onclick="setPaymentMethod('CARD')" class="pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">CARD</button>
+                    <button onclick="setPaymentMethod('BENEFIT_PAY')" class="pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">BENEFIT</button>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-xs font-semibold text-gray-600 uppercase">Cash Tendered (BHD)</label>
+                <input type="number" id="cash-tendered" step="0.001" oninput="calculateChange()" placeholder="0.000" class="w-full mt-1 border border-gray-300 rounded-lg p-2 text-right font-bold text-lg">
+                <div class="flex justify-between text-sm mt-2 text-gray-700">
+                    <span>Change Due:</span>
+                    <span id="change-due" class="font-bold text-blue-600">BHD 0.000</span>
+                </div>
+            </div>
+
+            <div class="flex space-x-2 pt-2">
+                <button onclick="closePaymentModal()" class="w-1/2 border border-gray-300 text-gray-700 py-2 rounded-lg font-semibold text-sm">Cancel</button>
+                <button onclick="processSale()" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg font-bold text-sm shadow">Print & Complete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Thermal Printable Receipt Section -->
+    <div id="printable-receipt" class="hidden print:block text-black p-2 text-xs font-mono w-[58mm] mx-auto">
+        <div class="text-center font-bold text-sm">BARAKAT PERFUMES</div>
+        <div class="text-center text-[10px]">Al Janabiyah, Bahrain</div>
+        <div class="text-center text-[10px]">VAT Reg: 300012345600003</div>
+        <div class="my-2 border-b border-dashed border-black"></div>
+        <div id="receipt-date" class="text-[10px]">Date: </div>
+        <div id="receipt-number" class="text-[10px]">Receipt #: </div>
+        <div class="my-2 border-b border-dashed border-black"></div>
+        <div id="receipt-items" class="space-y-1"></div>
+        <div class="my-2 border-b border-dashed border-black"></div>
+        <div class="flex justify-between font-bold"><span>TOTAL:</span><span id="receipt-total"></span></div>
+        <div class="flex justify-between"><span>PAYMENT:</span><span id="receipt-method"></span></div>
+        <div class="my-2 border-b border-dashed border-black"></div>
+        <div class="text-center text-[10px]">Thank you for shopping!</div>
+    </div>
+
+    <script>
+        // --- 3-DECIMAL CURRENCY FORMATTER ENGINE ---
+        const formatBHD = (amount) => {
+            return 'BHD ' + (Math.round(amount * 1000) / 1000).toFixed(3);
+        };
+
+        // --- LOCAL IN-MEMORY PRODUCTS DATABASE ---
+        let products = [
+            { id: '1', name: 'Dior Sauvage EDP 100ml', sku: '3348901250141', price: 48.500, stock: 12, threshold: 3, image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=300' },
+            { id: '2', name: 'Bleu de Chanel 100ml', sku: '3145891073607', price: 52.000, stock: 1, threshold: 2, image: 'https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=300' },
+            { id: '3', name: 'Lattafa Khamrah 100ml', sku: '6291108730012', price: 12.500, stock: 0, threshold: 2, image: 'https://images.unsplash.com/photo-1547887537-6158d64c35b3?w=300' }
+        ];
+
+        let cart = [];
+        let selectedPaymentMethod = 'CASH';
+        let html5QrCode = null;
+
+        // --- RENDER PRODUCTS GRID ---
+        function renderProducts(list = products) {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '';
+            list.forEach(p => {
+                let badgeColor = p.stock > p.threshold ? 'bg-emerald-100 text-emerald-800' : p.stock > 0 ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800';
+                let badgeText = p.stock > p.threshold ? `${p.stock} in stock` : p.stock > 0 ? `Low: ${p.stock} left` : 'Out of Stock';
+
+                grid.innerHTML += `
+                    <div onclick="addToCart('${p.id}')" class="bg-white border border-gray-200 rounded-xl p-2.5 flex flex-col justify-between shadow-sm hover:shadow-md transition cursor-pointer relative overflow-hidden">
+                        <img src="${p.image}" alt="${p.name}" class="w-full h-24 object-cover rounded-lg mb-2">
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-xs line-clamp-1">${p.name}</h4>
+                            <p class="text-[10px] text-gray-400">SKU: ${p.sku}</p>
+                            <p class="font-extrabold text-emerald-700 text-sm mt-1">${formatBHD(p.price)}</p>
+                        </div>
+                        <span class="mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full inline-block text-center ${badgeColor}">
+                            ${badgeText}
+                        </span>
+                    </div>
+                `;
+            });
+        }
+
+        // --- CART ENGINE ---
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product || product.stock <= 0) return alert('Item out of stock!');
+
+            const cartItem = cart.find(item => item.id === productId);
+            if (cartItem) {
+                if (cartItem.qty < product.stock) cartItem.qty++;
+            } else {
+                cart.push({ ...product, qty: 1 });
+            }
+            updateCartUI();
+        }
+
+        function updateCartQuantity(productId, change) {
+            const cartItem = cart.find(item => item.id === productId);
+            if (!cartItem) return;
+
+            cartItem.qty += change;
+            if (cartItem.qty <= 0) {
+                cart = cart.filter(item => item.id !== productId);
+            }
+            updateCartUI();
+        }
+
+        function clearCart() {
+            cart = [];
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const cartContainer = document.getElementById('cart-items');
+            cartContainer.innerHTML = '';
+            
+            let subtotal = 0;
+            cart.forEach(item => {
+                const itemTotal = item.price * item.qty;
+                subtotal += itemTotal;
+                cartContainer.innerHTML += `
+                    <div class="flex items-center justify-between pt-2">
+                        <div class="flex-1 pr-2">
+                            <h5 class="text-xs font-bold text-gray-800">${item.name}</h5>
+                            <p class="text-[11px] text-gray-500">${formatBHD(item.price)} × ${item.qty}</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="updateCartQuantity('${item.id}', -1)" class="w-6 h-6 bg-gray-200 text-gray-700 font-bold rounded flex items-center justify-center">-</button>
+                            <span class="text-xs font-bold">${item.qty}</span>
+                            <button onclick="updateCartQuantity('${item.id}', 1)" class="w-6 h-6 bg-emerald-600 text-white font-bold rounded flex items-center justify-center">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const vat = subtotal * 0.10;
+            const total = subtotal + vat;
+
+            document.getElementById('summary-subtotal').innerText = formatBHD(subtotal);
+            document.getElementById('summary-vat').innerText = formatBHD(vat);
+            document.getElementById('summary-total').innerText = formatBHD(total);
+            document.getElementById('btn-total').innerText = formatBHD(total);
+            document.getElementById('modal-total').innerText = formatBHD(total);
+        }
+
+        // --- SEARCH ENGINE ---
+        function filterProducts() {
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
+            const filtered = products.filter(p => p.name.toLowerCase().includes(query) || p.sku.includes(query));
+            
+            // Auto-add if exact barcode zapped
+            if (filtered.length === 1 && filtered[0].sku === query) {
+                addToCart(filtered[0].id);
+                document.getElementById('search-input').value = '';
+                renderProducts(products);
+                return;
+            }
+            renderProducts(filtered);
+        }
+
+        // --- MOBILE CAMERA BARCODE SCANNER ---
+        function toggleCameraScanner() {
+            const wrapper = document.getElementById('camera-reader-wrapper');
+            if (wrapper.classList.contains('hidden')) {
+                wrapper.classList.remove('hidden');
+                html5QrCode = new Html5Qrcode("reader");
+                html5QrCode.start(
+                    { facingMode: "environment" }, 
+                    { fps: 10, qrbox: { width: 250, height: 150 } },
+                    (decodedText) => {
+                        document.getElementById('search-input').value = decodedText;
+                        filterProducts();
+                        toggleCameraScanner();
+                    }
+                );
+            } else {
+                if (html5QrCode) html5QrCode.stop();
+                wrapper.classList.add('hidden');
+            }
+        }
+
+        // --- PAYMENT & PRINTING ---
+        function openPaymentModal() {
+            if (cart.length === 0) return alert('Cart is empty!');
+            document.getElementById('payment-modal').classList.remove('hidden');
+        }
+
+        function closePaymentModal() {
+            document.getElementById('payment-modal').classList.add('hidden');
+        }
+
+        function setPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            document.querySelectorAll('.pay-method-btn').forEach(btn => {
+                btn.classList.remove('border-emerald-600', 'text-emerald-700');
+                btn.classList.add('border-gray-300', 'text-gray-700');
+            });
+            event.target.classList.add('border-emerald-600', 'text-emerald-700');
+        }
+
+        function calculateChange() {
+            const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0) * 1.10;
+            const tendered = parseFloat(document.getElementById('cash-tendered').value) || 0;
+            const change = tendered - total;
+            document.getElementById('change-due').innerText = formatBHD(change > 0 ? change : 0);
+        }
+
+        function processSale() {
+            // Deduct inventory
+            cart.forEach(cartItem => {
+                const prod = products.find(p => p.id === cartItem.id);
+                if (prod) prod.stock -= cartItem.qty;
+            });
+
+            // Print Receipt
+            window.print();
+
+            // Reset
+            cart = [];
+            updateCartUI();
+            renderProducts();
+            closePaymentModal();
+            alert('Sale Completed Successfully!');
+        }
+
+        function switchUser() {
+            const pin = prompt('Enter 4-Digit User PIN:');
+            if (pin === '1234') {
+                document.getElementById('user-name').innerText = 'Owner (Admin)';
+                document.getElementById('role-badge').innerText = 'ADMIN';
+            } else if (pin === '0000') {
+                document.getElementById('user-name').innerText = 'Cashier 1';
+                document.getElementById('role-badge').innerText = 'CASHIER';
+            } else {
+                alert('Invalid PIN!');
+            }
+        }
+
+        // Initial Load
+        renderProducts();
+    </script>
+</body>
+</html>
