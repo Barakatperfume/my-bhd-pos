@@ -147,12 +147,12 @@
 
     <script>
 // --- SUPABASE CONFIGURATION ---
-// Replace the quotes below with the URL and key you copied in Step 1
 const SUPABASE_URL = 'https://lxyxlecusdjdikozeedx.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4eXhsZWN1c2RqZGlrb3plZWR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NjkzNTgsImV4cCI6MjEwNTE0NTM1OH0._nPzYbZ2TIeRXQ-2went70JXygrI5TqUMDofi5OKxy4';
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+       
 let products = [];
 let cart = [];
 let selectedPaymentMethod = 'CASH';
