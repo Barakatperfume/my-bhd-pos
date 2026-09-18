@@ -51,13 +51,13 @@
     <!-- Main POS Interface Split View -->
     <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
         
-        <!-- Left Panel: Product Search, Category Filter & Catalog -->
+        <!-- Left Panel: Product Search & Catalog -->
         <div class="w-full md:w-3/5 lg:w-2/3 p-4 flex flex-col h-full overflow-hidden">
             
             <!-- Universal Search Bar -->
             <div class="flex space-x-2 mb-3">
                 <div class="relative flex-1">
-                    <input type="text" id="search-input" onkeyup="filterProducts()" placeholder="Search name or scan barcode..." 
+                    <input type="text" id="search-input" onkeyup="filterProducts()" placeholder="Search name, category, or scan barcode..." 
                            class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm shadow-sm">
                     <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
@@ -65,11 +65,6 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h0.93a2 2 0 001.664-.89l0.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l0.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     <span class="hidden sm:inline">Scan</span>
                 </button>
-            </div>
-
-            <!-- Dynamic Category Selector Pills -->
-            <div id="category-bar" class="flex space-x-2 overflow-x-auto pb-2 mb-2 no-scrollbar text-xs">
-                <!-- Dynamic Pills rendered here -->
             </div>
 
             <!-- Product Grid -->
@@ -266,64 +261,6 @@
         </div>
     </div>
 
-    <!-- Hidden Printable Templates -->
-    <template id="template-receipt-58mm">
-        <div style="width: 58mm; padding: 4px; font-family: monospace; font-size: 10px; color: black; line-height: 1.2;">
-            <div style="text-align: center;">
-                <div style="font-weight: bold; font-size: 12px; text-transform: uppercase;">BARAKAT PERFUMES</div>
-                <div>District 1, Janabiya | CR: 13812-04</div>
-            </div>
-            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
-            <div>
-                <div><strong>Customer:</strong> <span class="t-cust-name"></span></div>
-                <div><strong>Phone:</strong> <span class="t-cust-phone"></span></div>
-            </div>
-            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
-            <div class="t-items-list" style="display: flex; flex-direction: column; gap: 4px;"></div>
-            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
-            <div style="display: flex; flex-direction: column; gap: 2px;">
-                <div style="display: flex; justify-content: space-between;"><span>Gross:</span><span class="t-gross"></span></div>
-                <div class="t-disc-row" style="display: flex; justify-content: space-between;"><span>Discount:</span><span class="t-disc-val"></span></div>
-                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 11px;"><span>TOTAL:</span><span class="t-total"></span></div>
-            </div>
-            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
-            <div style="text-align: center; font-size: 8px;" class="t-timestamp"></div>
-        </div>
-    </template>
-
-    <template id="template-receipt-a4">
-        <div style="width: 100%; max-width: 800px; margin: 0 auto; padding: 12px; font-family: sans-serif; font-size: 11px; color: #111827; background: white;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #047857; padding-bottom: 8px;">
-                <div>
-                    <h1 style="font-size: 18px; font-weight: 900; color: #065f46; margin: 0;">BARAKAT PERFUMES</h1>
-                    <p style="margin: 1px 0; color: #4b5563; font-size: 10px;">District 1, Janabiya | CR: 13812-04 | Tel: 36051011</p>
-                </div>
-                <div style="text-align: right;">
-                    <p style="font-weight: bold; margin: 0; font-size: 11px;">TAX INVOICE</p>
-                </div>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin: 8px 0; padding: 8px; background: #f9fafb; border-radius: 6px; font-size: 10px;">
-                <div>Customer: <strong class="t-cust-name"></strong> | Phone: <span class="t-cust-phone"></span></div>
-                <div>Date: <span class="t-timestamp"></span></div>
-            </div>
-            <table style="width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 10px;">
-                <thead>
-                    <tr style="background: #047857; color: white;">
-                        <th style="padding: 6px; text-align: left;">Item</th>
-                        <th style="padding: 6px; text-align: center;">Qty</th>
-                        <th style="padding: 6px; text-align: right;">Price</th>
-                        <th style="padding: 6px; text-align: right;">Total</th>
-                    </tr>
-                </thead>
-                <tbody class="t-items-table-body"></tbody>
-            </table>
-            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; border-top: 1px solid #9ca3af; padding-top: 4px; color: #065f46;">
-                <span>Total Bill:</span>
-                <span class="t-total font-mono"></span>
-            </div>
-        </div>
-    </template>
-
     <script>
 // --- SUPABASE & APP STATE ---
 const SUPABASE_URL = 'https://lxyxlecusdjdikozeedx.supabase.co';
@@ -340,7 +277,6 @@ let products = [
 let salesHistory = [];
 let cart = [];
 let currentUserRole = 'CASHIER'; // CASHIER or MANAGER
-let selectedCategory = 'ALL';
 let discountType = 'FIXED';
 let selectedPaymentType = 'SINGLE';
 let singlePaymentMethod = 'CASH';
@@ -356,30 +292,13 @@ let netTotalInclusive = 0;
 
 const formatBHD = (amount) => 'BHD ' + (Math.round((amount || 0) * 1000) / 1000).toFixed(3);
 
-// --- CATEGORY & PRODUCT RENDERING ---
-function renderCategoryBar() {
-    const bar = document.getElementById('category-bar');
-    const categories = ['ALL', ...new Set(products.map(p => p.category || 'Uncategorized'))];
-    
-    bar.innerHTML = categories.map(cat => `
-        <button onclick="selectCategory('${cat}')" class="px-3 py-1.5 rounded-full font-bold transition whitespace-nowrap ${selectedCategory === cat ? 'bg-emerald-700 text-white shadow' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'}">
-            ${cat}
-        </button>
-    `).join('');
-}
-
-function selectCategory(cat) {
-    selectedCategory = cat;
-    renderCategoryBar();
-    filterProducts();
-}
-
+// --- PRODUCT RENDERING & FILTERING ---
 function renderProducts(list = products) {
     const grid = document.getElementById('product-grid');
     grid.innerHTML = '';
 
     if (!list || list.length === 0) {
-        grid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-10">No products found in this category.</p>';
+        grid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-10">No products found.</p>';
         return;
     }
     
@@ -405,11 +324,10 @@ function renderProducts(list = products) {
 function filterProducts() {
     const query = document.getElementById('search-input').value.toLowerCase().trim();
     const filtered = products.filter(p => {
-        const matchesCat = selectedCategory === 'ALL' || p.category === selectedCategory;
-        const matchesSearch = (p.name && p.name.toLowerCase().includes(query)) ||
-                              (p.sku && p.sku.toLowerCase().includes(query)) ||
-                              (p.barcode && p.barcode.toLowerCase().includes(query));
-        return matchesCat && matchesSearch;
+        return (p.name && p.name.toLowerCase().includes(query)) ||
+               (p.category && p.category.toLowerCase().includes(query)) ||
+               (p.sku && p.sku.toLowerCase().includes(query)) ||
+               (p.barcode && p.barcode.toLowerCase().includes(query));
     });
     renderProducts(filtered);
 }
@@ -674,7 +592,6 @@ function saveItemChanges(id) {
         p.cost_price = parseFloat(document.getElementById(`edit-cost-${id}`).value) || 0;
     }
 
-    renderCategoryBar();
     renderProducts();
     alert(`Item "${p.name}" updated successfully!`);
 }
@@ -697,7 +614,6 @@ function switchUser() {
 }
 
 // Initial Launch Setup
-renderCategoryBar();
 renderProducts();
     </script>
 </body>
