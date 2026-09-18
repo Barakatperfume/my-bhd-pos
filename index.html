@@ -12,40 +12,28 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Print Media Styles */
+        /* Media Print Isolation */
         @media print {
-            body * { visibility: hidden; }
-            
-            /* Print mode: 58mm Thermal */
-            body.print-mode-58mm #printable-receipt-58mm, 
-            body.print-mode-58mm #printable-receipt-58mm * { 
-                visibility: visible; 
-            }
-            body.print-mode-58mm #printable-receipt-58mm {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 58mm;
-            }
-
-            /* Print mode: A4 Standard */
-            body.print-mode-a4 #printable-receipt-a4, 
-            body.print-mode-a4 #printable-receipt-a4 * { 
-                visibility: visible; 
-            }
-            body.print-mode-a4 #printable-receipt-a4 {
+            body > * { display: none !important; }
+            #print-container, #print-container * { display: block !important; visibility: visible !important; }
+            #print-container {
                 position: absolute;
                 left: 0;
                 top: 0;
                 width: 100%;
+                margin: 0;
+                padding: 0;
             }
             @page {
-                margin: 5mm;
+                margin: 0;
             }
         }
     </style>
 </head>
 <body class="bg-gray-100 font-sans h-screen flex flex-col overflow-hidden">
+
+    <!-- Isolated Container for Printing -->
+    <div id="print-container" class="hidden"></div>
 
     <!-- Top Navigation Bar -->
     <header class="bg-emerald-700 text-white p-3 flex justify-between items-center shadow-md">
@@ -112,13 +100,37 @@
                 <!-- Cart items dynamically rendered here -->
             </div>
 
-            <!-- Pricing Summary Footer (VAT Inclusive) -->
+            <!-- Pricing Summary & Discount Controls Footer -->
             <div class="p-4 bg-gray-50 border-t border-gray-200 space-y-2">
-                <div class="flex justify-between text-sm text-gray-600">
+                
+                <!-- Discount Control Panel -->
+                <div class="bg-white p-2 rounded-lg border border-gray-200 space-y-1.5 shadow-sm">
+                    <div class="flex justify-between items-center">
+                        <label class="text-[11px] font-bold text-gray-700 uppercase">Apply Discount</label>
+                        <div class="flex space-x-1">
+                            <button id="disc-type-bhd" onclick="setDiscountType('FIXED')" class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-600 text-white">BHD</button>
+                            <button id="disc-type-pct" onclick="setDiscountType('PERCENT')" class="px-2 py-0.5 text-[10px] font-bold rounded bg-gray-200 text-gray-700">%</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="discount-title" placeholder="Title (e.g. Promo)" class="border border-gray-300 rounded px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
+                        <input type="number" id="discount-val" step="0.001" oninput="updateCartUI()" placeholder="Amount / %" class="border border-gray-300 rounded px-2 py-1 text-xs text-right font-bold outline-none focus:ring-1 focus:ring-emerald-500">
+                    </div>
+                </div>
+
+                <div class="flex justify-between text-xs text-gray-600">
+                    <span>Gross Total</span>
+                    <span id="summary-gross" class="font-semibold">BHD 0.000</span>
+                </div>
+                <div id="row-discount" class="flex justify-between text-xs text-red-600 hidden">
+                    <span id="label-discount-title">Discount</span>
+                    <span id="summary-discount" class="font-semibold">-BHD 0.000</span>
+                </div>
+                <div class="flex justify-between text-xs text-gray-600">
                     <span>Subtotal (Excl. VAT)</span>
                     <span id="summary-subtotal" class="font-semibold">BHD 0.000</span>
                 </div>
-                <div class="flex justify-between text-sm text-gray-600">
+                <div class="flex justify-between text-xs text-gray-600">
                     <span>VAT (10% Incl.)</span>
                     <span id="summary-vat" class="font-semibold">BHD 0.000</span>
                 </div>
@@ -128,7 +140,7 @@
                 </div>
 
                 <!-- Charge / Checkout Button -->
-                <button onclick="openPaymentModal()" class="w-full mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow-md transition text-center flex justify-between px-4">
+                <button onclick="openPaymentModal()" class="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow-md transition text-center flex justify-between px-4">
                     <span>PAY NOW</span>
                     <span id="btn-total">BHD 0.000</span>
                 </button>
@@ -160,9 +172,9 @@
                 <div>
                     <label class="text-xs font-semibold text-gray-600 uppercase">Method</label>
                     <div class="grid grid-cols-3 gap-2 mt-1">
-                        <button id="btn-pay-cash" onclick="setSingleMethod('CASH')" class="pay-method-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">CASH</button>
-                        <button id="btn-pay-card" onclick="setSingleMethod('CARD')" class="pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">CARD</button>
-                        <button id="btn-pay-benefit" onclick="setSingleMethod('BENEFIT_PAY')" class="pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">BENEFIT</button>
+                        <button id="btn-single-cash" onclick="setSingleMethod('CASH')" class="pay-method-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">CASH</button>
+                        <button id="btn-single-card" onclick="setSingleMethod('CARD')" class="pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">CARD</button>
+                        <button id="btn-single-benefit" onclick="setSingleMethod('BENEFIT_PAY')" class="pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">BENEFIT</button>
                     </div>
                 </div>
 
@@ -178,9 +190,19 @@
 
             <!-- Split Payment Mode Container -->
             <div id="split-payment-container" class="hidden space-y-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                <!-- Primary Payment Selection -->
                 <div>
-                    <label class="text-xs font-semibold text-gray-600 uppercase">1. Cash Payment (BHD)</label>
-                    <input type="number" id="split-cash-amount" step="0.001" oninput="calculateSplitBalance()" placeholder="e.g. 10.000" class="w-full mt-1 border border-gray-300 rounded-lg p-2 text-right font-bold text-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <label class="text-xs font-semibold text-gray-600 uppercase">1. Select Primary Payment Method</label>
+                    <div class="grid grid-cols-3 gap-2 mt-1">
+                        <button id="btn-split-pri-cash" onclick="setSplitPrimaryMethod('CASH')" class="split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center">CASH</button>
+                        <button id="btn-split-pri-card" onclick="setSplitPrimaryMethod('CARD')" class="split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">CARD</button>
+                        <button id="btn-split-pri-benefit" onclick="setSplitPrimaryMethod('BENEFIT_PAY')" class="split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">BENEFIT</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label id="label-split-pri-amount" class="text-xs font-semibold text-gray-600 uppercase">Primary Paid Amount (BHD)</label>
+                    <input type="number" id="split-pri-amount" step="0.001" oninput="calculateSplitBalance()" placeholder="0.000" class="w-full mt-1 border border-gray-300 rounded-lg p-2 text-right font-bold text-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                 </div>
 
                 <div class="p-2.5 bg-blue-50 border border-blue-200 rounded-lg flex justify-between items-center text-sm font-bold text-blue-900">
@@ -188,11 +210,13 @@
                     <span id="split-remaining-balance" class="text-base text-blue-700">BHD 0.000</span>
                 </div>
 
+                <!-- Secondary Payment Selection -->
                 <div>
-                    <label class="text-xs font-semibold text-gray-600 uppercase">2. Pay Remaining Balance via</label>
-                    <div class="grid grid-cols-2 gap-2 mt-1">
-                        <button id="btn-split-card" onclick="setSplitSecondaryMethod('CARD')" class="split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">CARD</button>
-                        <button id="btn-split-benefit" onclick="setSplitSecondaryMethod('BENEFIT_PAY')" class="split-sec-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">BENEFIT</button>
+                    <label class="text-xs font-semibold text-gray-600 uppercase">2. Pay Balance Using</label>
+                    <div class="grid grid-cols-3 gap-2 mt-1">
+                        <button id="btn-split-sec-cash" onclick="setSplitSecondaryMethod('CASH')" class="split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">CASH</button>
+                        <button id="btn-split-sec-card" onclick="setSplitSecondaryMethod('CARD')" class="split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center">CARD</button>
+                        <button id="btn-split-sec-benefit" onclick="setSplitSecondaryMethod('BENEFIT_PAY')" class="split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">BENEFIT</button>
                     </div>
                 </div>
             </div>
@@ -201,7 +225,7 @@
             <div>
                 <label class="text-xs font-semibold text-gray-600 uppercase">Print Format</label>
                 <div class="grid grid-cols-2 gap-2 mt-1">
-                    <button id="btn-print-58mm" onclick="setPrintFormat('58mm')" class="print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">58mm Receipt</button>
+                    <button id="btn-print-58mm" onclick="setPrintFormat('58mm')" class="print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">58mm Thermal</button>
                     <button id="btn-print-a4" onclick="setPrintFormat('A4')" class="print-fmt-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">A4 Invoice</button>
                 </div>
             </div>
@@ -214,135 +238,121 @@
         </div>
     </div>
 
-    <!-- Thermal Printable Receipt Section (58mm) -->
-    <div id="printable-receipt-58mm" class="hidden text-black p-1 text-[10px] font-mono leading-tight">
-        <div class="text-center">
-            <img src="PCBH_LOGO-BG.png" alt="Logo" class="h-12 mx-auto mb-1 object-contain">
-            <div class="font-bold text-xs uppercase">BARAKAT PERFUMES</div>
-            <div>District 1, Janabiya</div>
-            <div>CR: 13812-04</div>
-            <div>Tel: 36051011</div>
-        </div>
-
-        <div class="my-1 border-b border-dashed border-black"></div>
-
-        <div>
-            <div><span class="font-bold">Customer:</span> <span class="receipt-cust-name">Walk-in Customer</span></div>
-            <div><span class="font-bold">Phone:</span> <span class="receipt-cust-phone">N/A</span></div>
-        </div>
-
-        <div class="my-1 border-b border-dashed border-black"></div>
-
-        <div class="receipt-items-list space-y-1"></div>
-
-        <div class="my-1 border-b border-dashed border-black"></div>
-
-        <!-- Loyalty Points -->
-        <div>
-            <div class="flex justify-between"><span>Points Earned:</span><span class="receipt-pts-earned">0</span></div>
-            <div class="flex justify-between font-bold"><span>Points Balance:</span><span class="receipt-pts-balance">0</span></div>
-        </div>
-
-        <div class="my-1 border-b border-dashed border-black"></div>
-
-        <!-- Summary & Breakdowns -->
-        <div class="space-y-0.5">
-            <div class="flex justify-between"><span>Subtotal (Excl. VAT):</span><span class="receipt-subtotal"></span></div>
-            <div class="flex justify-between"><span>VAT (10% Incl.):</span><span class="receipt-vat"></span></div>
-            <div class="flex justify-between font-black text-xs pt-0.5 border-t border-black"><span>TOTAL BILL:</span><span class="receipt-total"></span></div>
-        </div>
-
-        <div class="my-1 border-b border-dashed border-black"></div>
-
-        <div>
-            <div class="font-bold mb-0.5">Payment Method(s):</div>
-            <div class="receipt-payments-breakdown space-y-0.5"></div>
-        </div>
-
-        <div class="my-1 border-b border-dashed border-black"></div>
-
-        <div class="text-center space-y-1">
-            <div class="font-bold">Thank you for shopping!</div>
-            <div>Follow us:</div>
-            <div>Instagram: @perfume_club.bh</div>
-            <div>www.theperfumesclub.com</div>
-            <div>WhatsApp: 36051011</div>
-            <div class="text-[8px] leading-tight mt-1 px-1">
-                Return Policy: Returns accepted within 3 days with unopened box and original receipt. No returns or exchanges on discounted items.
+    <!-- Hidden Template: Thermal Printable Receipt (58mm) -->
+    <template id="template-receipt-58mm">
+        <div style="width: 58mm; padding: 4px; font-family: monospace; font-size: 10px; color: black; line-height: 1.2;">
+            <div style="text-align: center;">
+                <img src="PCBH_LOGO-BG.png" alt="Logo" style="height: 48px; margin: 0 auto 4px auto; display: block; object-fit: contain;">
+                <div style="font-weight: bold; font-size: 12px; text-transform: uppercase;">BARAKAT PERFUMES</div>
+                <div>District 1, Janabiya</div>
+                <div>CR: 13812-04</div>
+                <div>Tel: 36051011</div>
             </div>
-            <div class="text-[8px] mt-1 font-bold receipt-timestamp"></div>
-        </div>
-    </div>
-
-    <!-- Standard Printable Invoice Section (A4) -->
-    <div id="printable-receipt-a4" class="hidden text-black p-8 font-sans max-w-4xl mx-auto bg-white">
-        <!-- Header -->
-        <div class="flex justify-between items-start border-b-2 border-emerald-700 pb-4">
+            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
             <div>
-                <h1 class="text-2xl font-black text-emerald-800">BARAKAT PERFUMES</h1>
-                <p class="text-xs text-gray-600">Branch: District 1, Janabiya</p>
-                <p class="text-xs text-gray-600">CR: 13812-04 | Tel: 36051011</p>
+                <div><strong>Customer:</strong> <span class="t-cust-name">Walk-in Customer</span></div>
+                <div><strong>Phone:</strong> <span class="t-cust-phone">N/A</span></div>
             </div>
-            <div class="text-right">
-                <img src="PCBH_LOGO-BG.png" alt="Logo" class="h-16 ml-auto object-contain mb-1">
-                <p class="text-sm font-bold text-gray-800">TAX INVOICE</p>
-            </div>
-        </div>
-
-        <!-- Customer & Date Details -->
-        <div class="grid grid-cols-2 gap-4 my-4 p-3 bg-gray-50 rounded-lg text-xs">
+            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
+            <div class="t-items-list" style="display: flex; flex-direction: column; gap: 4px;"></div>
+            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
             <div>
-                <p class="font-bold text-gray-700">Customer Details:</p>
-                <p class="text-sm font-semibold receipt-cust-name">Walk-in Customer</p>
-                <p class="text-gray-600">Phone: <span class="receipt-cust-phone">N/A</span></p>
+                <div style="display: flex; justify-content: space-between;"><span>Points Earned:</span><span class="t-pts-earned">0</span></div>
+                <div style="display: flex; justify-between; font-weight: bold;"><span>Points Balance:</span><span class="t-pts-balance">0</span></div>
             </div>
-            <div class="text-right">
-                <p class="font-bold text-gray-700">Invoice Information:</p>
-                <p class="text-gray-600">Date & Time: <span class="receipt-timestamp"></span></p>
+            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="display: flex; justify-content: space-between;"><span>Gross Total:</span><span class="t-gross"></span></div>
+                <div class="t-disc-row" style="display: flex; justify-content: space-between; color: black;"><span>Discount:</span><span class="t-disc-val"></span></div>
+                <div style="display: flex; justify-content: space-between;"><span>Subtotal (Excl. VAT):</span><span class="t-subtotal"></span></div>
+                <div style="display: flex; justify-between;"><span>VAT (10% Incl.):</span><span class="t-vat"></span></div>
+                <div style="display: flex; justify-between; font-weight: bold; font-size: 11px; border-top: 1px solid black; padding-top: 2px;"><span>TOTAL BILL:</span><span class="t-total"></span></div>
             </div>
-        </div>
-
-        <!-- Products Table -->
-        <table class="w-full text-left border-collapse my-4 text-xs">
-            <thead>
-                <tr class="bg-emerald-700 text-white font-bold">
-                    <th class="p-2">Item Description</th>
-                    <th class="p-2 text-center">Qty</th>
-                    <th class="p-2 text-right">Unit Price</th>
-                    <th class="p-2 text-right">Total (BHD)</th>
-                </tr>
-            </thead>
-            <tbody class="receipt-items-table-body divide-y divide-gray-200"></tbody>
-        </table>
-
-        <!-- Loyalty Points Box -->
-        <div class="my-3 p-2 bg-emerald-50 border border-emerald-200 rounded text-xs flex justify-between">
-            <span>Loyalty Points Earned: <strong class="receipt-pts-earned">0</strong></span>
-            <span>Total Points Balance: <strong class="receipt-pts-balance">0</strong></span>
-        </div>
-
-        <!-- Total Breakdown & Payments -->
-        <div class="grid grid-cols-2 gap-6 my-4 pt-2 border-t border-gray-300 text-xs">
+            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
             <div>
-                <p class="font-bold text-gray-700 mb-1">Payment Method(s):</p>
-                <div class="receipt-payments-breakdown space-y-1 bg-gray-50 p-2 rounded"></div>
+                <div style="font-weight: bold; margin-bottom: 2px;">Payment Method(s):</div>
+                <div class="t-payments-breakdown" style="display: flex; flex-direction: column; gap: 2px;"></div>
             </div>
-            <div class="space-y-1 text-right">
-                <div class="flex justify-between"><span>Subtotal (Excl. VAT):</span><span class="receipt-subtotal font-mono"></span></div>
-                <div class="flex justify-between"><span>VAT (10% Incl.):</span><span class="receipt-vat font-mono"></span></div>
-                <div class="flex justify-between text-sm font-black pt-2 border-t border-gray-400 text-emerald-800"><span>Total Bill:</span><span class="receipt-total font-mono"></span></div>
+            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
+            <div style="text-align: center; display: flex; flex-direction: column; gap: 3px;">
+                <div style="font-weight: bold;">Thank you for shopping!</div>
+                <div>Follow us:</div>
+                <div>Instagram: @perfume_club.bh</div>
+                <div>www.theperfumesclub.com</div>
+                <div>WhatsApp: 36051011</div>
+                <div style="font-size: 8px; margin-top: 4px;">Return Policy: Returns accepted within 3 days with unopened box and original receipt. No returns or exchanges on discounted items.</div>
+                <div style="font-size: 8px; font-weight: bold; margin-top: 4px;" class="t-timestamp"></div>
             </div>
         </div>
+    </template>
 
-        <!-- Footer -->
-        <div class="mt-8 pt-4 border-t border-gray-200 text-center text-xs space-y-1 text-gray-600">
-            <p class="font-bold text-gray-800">Thank you for shopping with us!</p>
-            <p>Follow us on Instagram: <strong>@perfume_club.bh</strong> | Web: <strong>www.theperfumesclub.com</strong> | WhatsApp: <strong>36051011</strong></p>
-            <p class="text-[10px] text-gray-500 max-w-lg mx-auto mt-2">
-                <strong>Return Policy:</strong> Returns accepted within 3 days with unopened box and original receipt. No returns or exchanges on discounted items.
-            </p>
+    <!-- Hidden Template: A4 Tax Invoice -->
+    <template id="template-receipt-a4">
+        <div style="width: 100%; padding: 32px; font-family: sans-serif; font-size: 12px; color: #111827; background: white;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #047857; padding-bottom: 16px;">
+                <div>
+                    <h1 style="font-size: 22px; font-weight: 900; color: #065f46; margin: 0;">BARAKAT PERFUMES</h1>
+                    <p style="margin: 2px 0; color: #4b5563;">Branch: District 1, Janabiya</p>
+                    <p style="margin: 2px 0; color: #4b5563;">CR: 13812-04 | Tel: 36051011</p>
+                </div>
+                <div style="text-align: right;">
+                    <img src="PCBH_LOGO-BG.png" alt="Logo" style="height: 60px; margin-left: auto; object-fit: contain; margin-bottom: 4px;">
+                    <p style="font-weight: bold; margin: 0; color: #1f2937;">TAX INVOICE</p>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; padding: 12px; background: #f9fafb; border-radius: 8px;">
+                <div>
+                    <p style="font-weight: bold; margin: 0; color: #374151;">Customer Details:</p>
+                    <p style="font-weight: 600; margin: 2px 0;" class="t-cust-name">Walk-in Customer</p>
+                    <p style="margin: 0; color: #4b5563;">Phone: <span class="t-cust-phone">N/A</span></p>
+                </div>
+                <div style="text-align: right;">
+                    <p style="font-weight: bold; margin: 0; color: #374151;">Invoice Information:</p>
+                    <p style="margin: 2px 0; color: #4b5563;">Date & Time: <span class="t-timestamp"></span></p>
+                </div>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+                <thead>
+                    <tr style="background: #047857; color: white; text-align: left;">
+                        <th style="padding: 8px;">Item Description</th>
+                        <th style="padding: 8px; text-align: center;">Qty</th>
+                        <th style="padding: 8px; text-align: right;">Unit Price</th>
+                        <th style="padding: 8px; text-align: right;">Total (BHD)</th>
+                    </tr>
+                </thead>
+                <tbody class="t-items-table-body" style="border-bottom: 1px solid #e5e7eb;"></tbody>
+            </table>
+
+            <div style="margin: 12px 0; padding: 8px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; display: flex; justify-content: space-between;">
+                <span>Loyalty Points Earned: <strong class="t-pts-earned">0</strong></span>
+                <span>Total Points Balance: <strong class="t-pts-balance">0</strong></span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px; padding-top: 8px; border-top: 1px solid #d1d5db;">
+                <div>
+                    <p style="font-weight: bold; color: #374151; margin-bottom: 4px;">Payment Method(s):</p>
+                    <div class="t-payments-breakdown" style="background: #f9fafb; padding: 8px; border-radius: 6px;"></div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px; text-align: right;">
+                    <div style="display: flex; justify-content: space-between;"><span>Gross Total:</span><span class="t-gross font-mono"></span></div>
+                    <div class="t-disc-row" style="display: flex; justify-content: space-between; color: #dc2626;"><span>Discount:</span><span class="t-disc-val font-mono"></span></div>
+                    <div style="display: flex; justify-content: space-between;"><span>Subtotal (Excl. VAT):</span><span class="t-subtotal font-mono"></span></div>
+                    <div style="display: flex; justify-content: space-between;"><span>VAT (10% Incl.):</span><span class="t-vat font-mono"></span></div>
+                    <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: 14px; border-top: 1px solid #9ca3af; padding-top: 4px; color: #065f46;"><span>Total Bill:</span><span class="t-total font-mono"></span></div>
+                </div>
+            </div>
+
+            <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e7eb; text-align: center; color: #4b5563;">
+                <p style="font-weight: bold; color: #111827; margin: 0;">Thank you for shopping with us!</p>
+                <p style="margin: 4px 0;">Follow us on Instagram: <strong>@perfume_club.bh</strong> | Web: <strong>www.theperfumesclub.com</strong> | WhatsApp: <strong>36051011</strong></p>
+                <p style="font-size: 10px; color: #6b7280; max-width: 500px; margin: 8px auto 0 auto;">
+                    <strong>Return Policy:</strong> Returns accepted within 3 days with unopened box and original receipt. No returns or exchanges on discounted items.
+                </p>
+            </div>
         </div>
-    </div>
+    </template>
 
     <script>
 // --- SUPABASE CONFIGURATION ---
@@ -353,11 +363,16 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 
 let products = [];
 let cart = [];
+let discountType = 'FIXED'; // FIXED or PERCENT
 let selectedPaymentType = 'SINGLE'; // SINGLE or SPLIT
 let singlePaymentMethod = 'CASH'; // CASH, CARD, BENEFIT_PAY
-let splitSecondaryMethod = 'CARD'; // CARD or BENEFIT_PAY
+let splitPrimaryMethod = 'CASH'; // CASH, CARD, BENEFIT_PAY
+let splitSecondaryMethod = 'CARD'; // CASH, CARD, BENEFIT_PAY
 let selectedPrintFormat = '58mm'; // 58mm or A4
-let currentTotalInclusive = 0;
+
+let grossTotal = 0;
+let discountAmount = 0;
+let netTotalInclusive = 0;
 
 // --- 3-DECIMAL CURRENCY FORMATTER ENGINE ---
 const formatBHD = (amount) => {
@@ -372,7 +387,7 @@ async function fetchProducts() {
 
     if (error) {
         console.error('Error fetching products:', error);
-        alert('Failed to load products from database: ' + error.message);
+        alert('Failed to load products: ' + error.message);
         return;
     }
 
@@ -396,7 +411,7 @@ function renderProducts(list = products) {
         let lowThreshold = p.low_stock_threshold ?? 5;
         
         let badgeColor = stock > lowThreshold ? 'bg-emerald-100 text-emerald-800' : stock > 0 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800';
-        let badgeText = stock > lowThreshold ? `${stock} in stock` : stock > 0 ? `Low stock: ${stock}` : 'Out of Stock';
+        let badgeText = stock > lowThreshold ? `${stock} in stock` : stock > 0 ? `Low: ${stock}` : 'Out of Stock';
 
         grid.innerHTML += `
             <div onclick="addToCart('${p.id}')" class="bg-white border border-gray-200 rounded-xl p-3 flex flex-col justify-between shadow-sm hover:shadow-md transition cursor-pointer relative group">
@@ -415,7 +430,7 @@ function renderProducts(list = products) {
     });
 }
 
-// --- CART ENGINE ---
+// --- CART & DISCOUNT ENGINE ---
 function addToCart(productId) {
     const product = products.find(p => p.id === productId);
     if (!product) return alert('Item not found!');
@@ -444,6 +459,23 @@ function clearCart() {
     cart = [];
     document.getElementById('cust-name-input').value = '';
     document.getElementById('cust-phone-input').value = '';
+    document.getElementById('discount-val').value = '';
+    document.getElementById('discount-title').value = '';
+    updateCartUI();
+}
+
+function setDiscountType(type) {
+    discountType = type;
+    const btnBhd = document.getElementById('disc-type-bhd');
+    const btnPct = document.getElementById('disc-type-pct');
+
+    if (type === 'FIXED') {
+        btnBhd.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-600 text-white';
+        btnPct.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-gray-200 text-gray-700';
+    } else {
+        btnPct.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-600 text-white';
+        btnBhd.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-gray-200 text-gray-700';
+    }
     updateCartUI();
 }
 
@@ -451,10 +483,10 @@ function updateCartUI() {
     const cartContainer = document.getElementById('cart-items');
     cartContainer.innerHTML = '';
     
-    let totalInclusive = 0;
+    grossTotal = 0;
     cart.forEach(item => {
         const itemTotal = (item.retail_price || 0) * item.qty;
-        totalInclusive += itemTotal;
+        grossTotal += itemTotal;
         cartContainer.innerHTML += `
             <div class="flex items-center justify-between pt-2">
                 <div class="flex-1 pr-2">
@@ -470,16 +502,37 @@ function updateCartUI() {
         `;
     });
 
-    // Deduct 10% VAT from within the total amount
-    currentTotalInclusive = totalInclusive;
-    const subtotalExclVat = totalInclusive / 1.10;
-    const vatIncluded = totalInclusive - subtotalExclVat;
+    // Discount Math
+    const inputVal = parseFloat(document.getElementById('discount-val').value) || 0;
+    const customTitle = document.getElementById('discount-title').value.trim();
+    const discLabel = customTitle !== '' ? customTitle : 'Discount';
+
+    if (discountType === 'FIXED') {
+        discountAmount = Math.min(inputVal, grossTotal);
+    } else {
+        discountAmount = grossTotal * (Math.min(inputVal, 100) / 100);
+    }
+
+    netTotalInclusive = Math.max(0, grossTotal - discountAmount);
+    const subtotalExclVat = netTotalInclusive / 1.10;
+    const vatIncluded = netTotalInclusive - subtotalExclVat;
+
+    document.getElementById('summary-gross').innerText = formatBHD(grossTotal);
+    
+    const discRow = document.getElementById('row-discount');
+    if (discountAmount > 0) {
+        discRow.classList.remove('hidden');
+        document.getElementById('label-discount-title').innerText = discLabel;
+        document.getElementById('summary-discount').innerText = '-' + formatBHD(discountAmount);
+    } else {
+        discRow.classList.add('hidden');
+    }
 
     document.getElementById('summary-subtotal').innerText = formatBHD(subtotalExclVat);
     document.getElementById('summary-vat').innerText = formatBHD(vatIncluded);
-    document.getElementById('summary-total').innerText = formatBHD(totalInclusive);
-    document.getElementById('btn-total').innerText = formatBHD(totalInclusive);
-    document.getElementById('modal-total').innerText = formatBHD(totalInclusive);
+    document.getElementById('summary-total').innerText = formatBHD(netTotalInclusive);
+    document.getElementById('btn-total').innerText = formatBHD(netTotalInclusive);
+    document.getElementById('modal-total').innerText = formatBHD(netTotalInclusive);
 }
 
 // --- SEARCH ENGINE ---
@@ -500,7 +553,7 @@ function filterProducts() {
     renderProducts(filtered);
 }
 
-// --- PAYMENT MODAL & SPLIT PAYMENT CONTROLLERS ---
+// --- PAYMENT MODAL & FLEXIBLE SPLIT PAYMENT CONTROLLERS ---
 function openPaymentModal() {
     if (cart.length === 0) {
         alert('Cart is empty. Please add products to check out.');
@@ -508,10 +561,12 @@ function openPaymentModal() {
     }
     document.getElementById('payment-modal').classList.remove('hidden');
     document.getElementById('cash-tendered').value = '';
-    document.getElementById('split-cash-amount').value = '';
+    document.getElementById('split-pri-amount').value = '';
     document.getElementById('change-due').innerText = formatBHD(0);
     setPaymentType('SINGLE');
     setSingleMethod('CASH');
+    setSplitPrimaryMethod('CASH');
+    setSplitSecondaryMethod('CARD');
     setPrintFormat('58mm');
 }
 
@@ -542,9 +597,9 @@ function setPaymentType(type) {
 
 function setSingleMethod(method) {
     singlePaymentMethod = method;
-    const cashBtn = document.getElementById('btn-pay-cash');
-    const cardBtn = document.getElementById('btn-pay-card');
-    const benefitBtn = document.getElementById('btn-pay-benefit');
+    const cashBtn = document.getElementById('btn-single-cash');
+    const cardBtn = document.getElementById('btn-single-card');
+    const benefitBtn = document.getElementById('btn-single-benefit');
     const cashWrapper = document.getElementById('single-cash-wrapper');
 
     [cashBtn, cardBtn, benefitBtn].forEach(btn => {
@@ -563,18 +618,45 @@ function setSingleMethod(method) {
     }
 }
 
+function setSplitPrimaryMethod(method) {
+    splitPrimaryMethod = method;
+    const cashBtn = document.getElementById('btn-split-pri-cash');
+    const cardBtn = document.getElementById('btn-split-pri-card');
+    const benefitBtn = document.getElementById('btn-split-pri-benefit');
+    const labelPri = document.getElementById('label-split-pri-amount');
+
+    [cashBtn, cardBtn, benefitBtn].forEach(btn => {
+        btn.className = 'split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center';
+    });
+
+    if (method === 'CASH') {
+        cashBtn.className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+        labelPri.innerText = 'Primary Paid via Cash (BHD)';
+    } else if (method === 'CARD') {
+        cardBtn.className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+        labelPri.innerText = 'Primary Paid via Card (BHD)';
+    } else {
+        benefitBtn.className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+        labelPri.innerText = 'Primary Paid via Benefit (BHD)';
+    }
+}
+
 function setSplitSecondaryMethod(method) {
     splitSecondaryMethod = method;
-    const cardBtn = document.getElementById('btn-split-card');
-    const benefitBtn = document.getElementById('btn-split-benefit');
+    const cashBtn = document.getElementById('btn-split-sec-cash');
+    const cardBtn = document.getElementById('btn-split-sec-card');
+    const benefitBtn = document.getElementById('btn-split-sec-benefit');
 
-    cardBtn.className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center';
-    benefitBtn.className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center';
+    [cashBtn, cardBtn, benefitBtn].forEach(btn => {
+        btn.className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center';
+    });
 
-    if (method === 'CARD') {
-        cardBtn.className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
+    if (method === 'CASH') {
+        cashBtn.className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+    } else if (method === 'CARD') {
+        cardBtn.className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
     } else {
-        benefitBtn.className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
+        benefitBtn.className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
     }
 }
 
@@ -595,112 +677,128 @@ function setPrintFormat(fmt) {
 
 function calculateSingleChange() {
     const tendered = parseFloat(document.getElementById('cash-tendered').value) || 0;
-    const change = tendered - currentTotalInclusive;
+    const change = tendered - netTotalInclusive;
     document.getElementById('change-due').innerText = formatBHD(change > 0 ? change : 0);
 }
 
 function calculateSplitBalance() {
-    const cashInput = parseFloat(document.getElementById('split-cash-amount').value) || 0;
-    const remaining = currentTotalInclusive - cashInput;
+    const priInput = parseFloat(document.getElementById('split-pri-amount').value) || 0;
+    const remaining = netTotalInclusive - priInput;
     document.getElementById('split-remaining-balance').innerText = formatBHD(remaining > 0 ? remaining : 0);
 }
 
 // --- SALE PROCESSING & PRINTING ---
 function processSale() {
     let paymentBreakdownHTML = '';
-    let splitCash = 0;
-    let splitRem = 0;
 
     if (selectedPaymentType === 'SINGLE') {
         if (singlePaymentMethod === 'CASH') {
             const tendered = parseFloat(document.getElementById('cash-tendered').value) || 0;
-            if (tendered < currentTotalInclusive) {
+            if (tendered < netTotalInclusive) {
                 alert('Tendered cash amount is less than total due.');
                 return;
             }
-            const change = tendered - currentTotalInclusive;
+            const change = tendered - netTotalInclusive;
             paymentBreakdownHTML = `
-                <div class="flex justify-between"><span>CASH:</span><span>${formatBHD(currentTotalInclusive)}</span></div>
-                <div class="flex justify-between text-gray-500"><span>Tendered:</span><span>${formatBHD(tendered)}</span></div>
-                <div class="flex justify-between text-gray-500"><span>Change:</span><span>${formatBHD(change)}</span></div>
+                <div style="display: flex; justify-content: space-between;"><span>CASH:</span><span>${formatBHD(netTotalInclusive)}</span></div>
+                <div style="display: flex; justify-content: space-between; color: #6b7280;"><span>Tendered:</span><span>${formatBHD(tendered)}</span></div>
+                <div style="display: flex; justify-content: space-between; color: #6b7280;"><span>Change:</span><span>${formatBHD(change)}</span></div>
             `;
         } else {
-            paymentBreakdownHTML = `<div class="flex justify-between"><span>${singlePaymentMethod}:</span><span>${formatBHD(currentTotalInclusive)}</span></div>`;
+            paymentBreakdownHTML = `<div style="display: flex; justify-content: space-between;"><span>${singlePaymentMethod}:</span><span>${formatBHD(netTotalInclusive)}</span></div>`;
         }
     } else { // SPLIT PAYMENT
-        splitCash = parseFloat(document.getElementById('split-cash-amount').value) || 0;
-        if (splitCash <= 0 || splitCash >= currentTotalInclusive) {
-            alert('Please enter a valid partial cash amount (greater than 0 and less than total).');
+        const priAmount = parseFloat(document.getElementById('split-pri-amount').value) || 0;
+        if (priAmount <= 0 || priAmount >= netTotalInclusive) {
+            alert('Please enter a valid partial primary amount (greater than 0 and less than total).');
             return;
         }
-        splitRem = currentTotalInclusive - splitCash;
+        const remAmount = netTotalInclusive - priAmount;
         paymentBreakdownHTML = `
-            <div class="flex justify-between"><span>CASH:</span><span>${formatBHD(splitCash)}</span></div>
-            <div class="flex justify-between"><span>${splitSecondaryMethod}:</span><span>${formatBHD(splitRem)}</span></div>
+            <div style="display: flex; justify-content: space-between;"><span>${splitPrimaryMethod}:</span><span>${formatBHD(priAmount)}</span></div>
+            <div style="display: flex; justify-content: space-between;"><span>${splitSecondaryMethod}:</span><span>${formatBHD(remAmount)}</span></div>
         `;
     }
 
     // Customer & Loyalty calculation
     const custName = document.getElementById('cust-name-input').value.trim() || 'Walk-in Customer';
     const custPhone = document.getElementById('cust-phone-input').value.trim() || 'N/A';
-    
-    // Loyalty Rule: 1 Point per 1 BHD spent
-    const ptsEarned = Math.floor(currentTotalInclusive);
-    const ptsBalance = ptsEarned; // Replace with user account cumulative balance if synced
+    const ptsEarned = Math.floor(netTotalInclusive);
+    const ptsBalance = ptsEarned; 
 
-    // Shared calculations
-    const subtotalExclVat = currentTotalInclusive / 1.10;
-    const vatIncluded = currentTotalInclusive - subtotalExclVat;
+    // Math summaries
+    const subtotalExclVat = netTotalInclusive / 1.10;
+    const vatIncluded = netTotalInclusive - subtotalExclVat;
     const timestampStr = new Date().toLocaleString('en-GB');
 
-    // Populate standard variables in DOM elements (58mm & A4)
-    document.querySelectorAll('.receipt-cust-name').forEach(el => el.innerText = custName);
-    document.querySelectorAll('.receipt-cust-phone').forEach(el => el.innerText = custPhone);
-    document.querySelectorAll('.receipt-pts-earned').forEach(el => el.innerText = ptsEarned);
-    document.querySelectorAll('.receipt-pts-balance').forEach(el => el.innerText = ptsBalance);
-    document.querySelectorAll('.receipt-subtotal').forEach(el => el.innerText = formatBHD(subtotalExclVat));
-    document.querySelectorAll('.receipt-vat').forEach(el => el.innerText = formatBHD(vatIncluded));
-    document.querySelectorAll('.receipt-total').forEach(el => el.innerText = formatBHD(currentTotalInclusive));
-    document.querySelectorAll('.receipt-timestamp').forEach(el => el.innerText = timestampStr);
-    document.querySelectorAll('.receipt-payments-breakdown').forEach(el => el.innerHTML = paymentBreakdownHTML);
+    // Build Receipt HTML dynamically from Template
+    const templateId = selectedPrintFormat === '58mm' ? 'template-receipt-58mm' : 'template-receipt-a4';
+    const templateContent = document.getElementById(templateId).content.cloneNode(true);
 
-    // Populate 58mm items
-    const receiptItems58mm = document.getElementById('printable-receipt-58mm').querySelector('.receipt-items-list');
-    receiptItems58mm.innerHTML = '';
-    cart.forEach(item => {
-        receiptItems58mm.innerHTML += `
-            <div>
-                <div class="font-bold">${item.name}</div>
-                <div class="flex justify-between text-gray-600">
-                    <span>${item.qty} x ${formatBHD(item.retail_price)}</span>
-                    <span>${formatBHD(item.retail_price * item.qty)}</span>
+    templateContent.querySelector('.t-cust-name').innerText = custName;
+    templateContent.querySelector('.t-cust-phone').innerText = custPhone;
+    templateContent.querySelector('.t-pts-earned').innerText = ptsEarned;
+    templateContent.querySelector('.t-pts-balance').innerText = ptsBalance;
+    templateContent.querySelector('.t-gross').innerText = formatBHD(grossTotal);
+    templateContent.querySelector('.t-subtotal').innerText = formatBHD(subtotalExclVat);
+    templateContent.querySelector('.t-vat').innerText = formatBHD(vatIncluded);
+    templateContent.querySelector('.t-total').innerText = formatBHD(netTotalInclusive);
+    templateContent.querySelector('.t-timestamp').innerText = timestampStr;
+    templateContent.querySelector('.t-payments-breakdown').innerHTML = paymentBreakdownHTML;
+
+    // Handle Discount display in receipt
+    const discRow = templateContent.querySelector('.t-disc-row');
+    if (discountAmount > 0) {
+        const customTitle = document.getElementById('discount-title').value.trim();
+        const discLabel = customTitle !== '' ? customTitle : 'Discount';
+        discRow.querySelector('span:first-child').innerText = discLabel + ':';
+        discRow.querySelector('.t-disc-val').innerText = '-' + formatBHD(discountAmount);
+    } else {
+        discRow.style.display = 'none';
+    }
+
+    // Render items list based on layout
+    if (selectedPrintFormat === '58mm') {
+        const itemsContainer = templateContent.querySelector('.t-items-list');
+        cart.forEach(item => {
+            itemsContainer.innerHTML += `
+                <div>
+                    <div style="font-weight: bold;">${item.name}</div>
+                    <div style="display: flex; justify-content: space-between; color: #4b5563;">
+                        <span>${item.qty} x ${formatBHD(item.retail_price)}</span>
+                        <span>${formatBHD(item.retail_price * item.qty)}</span>
+                    </div>
                 </div>
-            </div>
-        `;
-    });
+            `;
+        });
+    } else {
+        const tableBody = templateContent.querySelector('.t-items-table-body');
+        cart.forEach(item => {
+            tableBody.innerHTML += `
+                <tr style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="padding: 8px;">
+                        <div style="font-weight: bold; color: #1f2937;">${item.name}</div>
+                        <div style="font-size: 10px; color: #9ca3af; font-family: monospace;">SKU: ${item.sku || 'N/A'}</div>
+                    </td>
+                    <td style="padding: 8px; text-align: center; font-weight: 600;">${item.qty}</td>
+                    <td style="padding: 8px; text-align: right; font-family: monospace;">${formatBHD(item.retail_price)}</td>
+                    <td style="padding: 8px; text-align: right; font-family: monospace; font-weight: bold;">${formatBHD(item.retail_price * item.qty)}</td>
+                </tr>
+            `;
+        });
+    }
 
-    // Populate A4 Table items
-    const receiptTableBodyA4 = document.getElementById('printable-receipt-a4').querySelector('.receipt-items-table-body');
-    receiptTableBodyA4.innerHTML = '';
-    cart.forEach(item => {
-        receiptTableBodyA4.innerHTML += `
-            <tr>
-                <td class="p-2 border-b border-gray-200">
-                    <div class="font-bold text-gray-800">${item.name}</div>
-                    <div class="text-[10px] text-gray-400 font-mono">SKU: ${item.sku || 'N/A'}</div>
-                </td>
-                <td class="p-2 border-b border-gray-200 text-center font-semibold">${item.qty}</td>
-                <td class="p-2 border-b border-gray-200 text-right font-mono">${formatBHD(item.retail_price)}</td>
-                <td class="p-2 border-b border-gray-200 text-right font-mono font-bold">${formatBHD(item.retail_price * item.qty)}</td>
-            </tr>
-        `;
-    });
-
-    // Apply print mode class to body and trigger native print
-    document.body.classList.remove('print-mode-58mm', 'print-mode-a4');
-    document.body.classList.add(selectedPrintFormat === '58mm' ? 'print-mode-58mm' : 'print-mode-a4');
+    // Populate print container and trigger native print
+    const printContainer = document.getElementById('print-container');
+    printContainer.innerHTML = '';
+    printContainer.appendChild(templateContent);
+    printContainer.classList.remove('hidden');
 
     window.print();
+
+    // Clean up print container
+    printContainer.classList.add('hidden');
+    printContainer.innerHTML = '';
 
     // Reset and close
     clearCart();
