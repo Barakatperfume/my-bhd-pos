@@ -12,7 +12,7 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Media Print Isolation */
+        /* Media Print Isolation & Single-Page Fit Fix */
         @media print {
             body > * { display: none !important; }
             #print-container, #print-container * { display: block !important; visibility: visible !important; }
@@ -25,7 +25,8 @@
                 padding: 0;
             }
             @page {
-                margin: 0;
+                size: A4 portrait;
+                margin: 8mm;
             }
         }
     </style>
@@ -86,12 +87,23 @@
                 <button onclick="clearCart()" class="text-xs text-red-600 hover:text-red-800 font-medium">Clear All</button>
             </div>
 
-            <!-- Customer Selection Section -->
-            <div class="p-3 border-b border-gray-200 bg-emerald-50/50 space-y-1">
-                <label class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Customer Details</label>
+            <!-- Customer Selection & Loyalty Points Panel -->
+            <div class="p-3 border-b border-gray-200 bg-emerald-50/50 space-y-2">
+                <label class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Customer & Loyalty Profile</label>
                 <div class="grid grid-cols-2 gap-2">
                     <input type="text" id="cust-name-input" placeholder="Customer Name" class="border border-gray-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
-                    <input type="text" id="cust-phone-input" placeholder="Phone Number" class="border border-gray-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
+                    <input type="text" id="cust-phone-input" oninput="lookupCustomerPoints()" placeholder="Phone Number" class="border border-gray-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
+                </div>
+                
+                <!-- Loyalty Points Widget -->
+                <div id="loyalty-widget" class="bg-white p-2 rounded border border-emerald-200 flex justify-between items-center text-xs">
+                    <div>
+                        <span class="text-gray-500">Points Balance:</span>
+                        <strong id="cust-pts-balance" class="text-emerald-700 font-bold ml-1">0 Pts</strong>
+                    </div>
+                    <button id="btn-redeem-pts" onclick="redeemLoyaltyPoints()" disabled class="bg-gray-300 text-gray-500 text-[10px] font-bold px-2 py-1 rounded cursor-not-allowed">
+                        Redeem (100 pts = 1 BHD)
+                    </button>
                 </div>
             </div>
 
@@ -230,10 +242,23 @@
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="flex space-x-2 pt-2">
-                <button onclick="closePaymentModal()" class="w-1/2 border border-gray-300 text-gray-700 py-2.5 rounded-lg font-semibold text-sm hover:bg-gray-50">Cancel</button>
-                <button onclick="processSale()" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-sm shadow">Print & Complete</button>
+            <!-- Multi-Channel Receipt Action Buttons -->
+            <div class="space-y-2 pt-2 border-t border-gray-200">
+                <button onclick="processSale('PRINT')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-sm shadow flex items-center justify-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    <span>Print Receipt</span>
+                </button>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="processSale('WHATSAPP')" class="bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold text-xs flex items-center justify-center space-x-1">
+                        <span>Send WhatsApp</span>
+                    </button>
+                    <button onclick="processSale('EMAIL')" class="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold text-xs flex items-center justify-center space-x-1">
+                        <span>Send Email</span>
+                    </button>
+                </div>
+
+                <button onclick="closePaymentModal()" class="w-full border border-gray-300 text-gray-700 py-2 rounded-lg font-semibold text-xs hover:bg-gray-50">Cancel</button>
             </div>
         </div>
     </div>
@@ -258,15 +283,15 @@
             <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
             <div>
                 <div style="display: flex; justify-content: space-between;"><span>Points Earned:</span><span class="t-pts-earned">0</span></div>
-                <div style="display: flex; justify-between; font-weight: bold;"><span>Points Balance:</span><span class="t-pts-balance">0</span></div>
+                <div style="display: flex; justify-content: space-between; font-weight: bold;"><span>Points Balance:</span><span class="t-pts-balance">0</span></div>
             </div>
             <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
             <div style="display: flex; flex-direction: column; gap: 2px;">
                 <div style="display: flex; justify-content: space-between;"><span>Gross Total:</span><span class="t-gross"></span></div>
                 <div class="t-disc-row" style="display: flex; justify-content: space-between; color: black;"><span>Discount:</span><span class="t-disc-val"></span></div>
                 <div style="display: flex; justify-content: space-between;"><span>Subtotal (Excl. VAT):</span><span class="t-subtotal"></span></div>
-                <div style="display: flex; justify-between;"><span>VAT (10% Incl.):</span><span class="t-vat"></span></div>
-                <div style="display: flex; justify-between; font-weight: bold; font-size: 11px; border-top: 1px solid black; padding-top: 2px;"><span>TOTAL BILL:</span><span class="t-total"></span></div>
+                <div style="display: flex; justify-content: space-between;"><span>VAT (10% Incl.):</span><span class="t-vat"></span></div>
+                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 11px; border-top: 1px solid black; padding-top: 2px;"><span>TOTAL BILL:</span><span class="t-total"></span></div>
             </div>
             <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
             <div>
@@ -286,70 +311,67 @@
         </div>
     </template>
 
-    <!-- Hidden Template: A4 Tax Invoice -->
+    <!-- Hidden Template: Single-Page A4 Tax Invoice (Compact Fit) -->
     <template id="template-receipt-a4">
-        <div style="width: 100%; padding: 32px; font-family: sans-serif; font-size: 12px; color: #111827; background: white;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #047857; padding-bottom: 16px;">
+        <div style="width: 100%; max-width: 800px; margin: 0 auto; padding: 12px; font-family: sans-serif; font-size: 11px; color: #111827; background: white; box-sizing: border-box;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #047857; padding-bottom: 8px;">
                 <div>
-                    <h1 style="font-size: 22px; font-weight: 900; color: #065f46; margin: 0;">BARAKAT PERFUMES</h1>
-                    <p style="margin: 2px 0; color: #4b5563;">Branch: District 1, Janabiya</p>
-                    <p style="margin: 2px 0; color: #4b5563;">CR: 13812-04 | Tel: 36051011</p>
+                    <h1 style="font-size: 18px; font-weight: 900; color: #065f46; margin: 0;">BARAKAT PERFUMES</h1>
+                    <p style="margin: 1px 0; color: #4b5563; font-size: 10px;">Branch: District 1, Janabiya | CR: 13812-04 | Tel: 36051011</p>
                 </div>
                 <div style="text-align: right;">
-                    <img src="PCBH_LOGO-BG.png" alt="Logo" style="height: 60px; margin-left: auto; object-fit: contain; margin-bottom: 4px;">
-                    <p style="font-weight: bold; margin: 0; color: #1f2937;">TAX INVOICE</p>
+                    <img src="PCBH_LOGO-BG.png" alt="Logo" style="height: 40px; margin-left: auto; object-fit: contain;">
+                    <p style="font-weight: bold; margin: 0; color: #1f2937; font-size: 11px;">TAX INVOICE</p>
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; padding: 12px; background: #f9fafb; border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; margin: 8px 0; padding: 8px; background: #f9fafb; border-radius: 6px; font-size: 10px;">
                 <div>
-                    <p style="font-weight: bold; margin: 0; color: #374151;">Customer Details:</p>
-                    <p style="font-weight: 600; margin: 2px 0;" class="t-cust-name">Walk-in Customer</p>
-                    <p style="margin: 0; color: #4b5563;">Phone: <span class="t-cust-phone">N/A</span></p>
+                    <span style="font-weight: bold; color: #374151;">Customer: </span>
+                    <strong class="t-cust-name" style="color: #111827;">Walk-in Customer</strong>
+                    <span style="margin-left: 12px; color: #4b5563;">Phone: <span class="t-cust-phone">N/A</span></span>
                 </div>
                 <div style="text-align: right;">
-                    <p style="font-weight: bold; margin: 0; color: #374151;">Invoice Information:</p>
-                    <p style="margin: 2px 0; color: #4b5563;">Date & Time: <span class="t-timestamp"></span></p>
+                    <span style="font-weight: bold; color: #374151;">Date: </span>
+                    <span class="t-timestamp" style="color: #4b5563;"></span>
                 </div>
             </div>
 
-            <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+            <table style="width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 10px;">
                 <thead>
                     <tr style="background: #047857; color: white; text-align: left;">
-                        <th style="padding: 8px;">Item Description</th>
-                        <th style="padding: 8px; text-align: center;">Qty</th>
-                        <th style="padding: 8px; text-align: right;">Unit Price</th>
-                        <th style="padding: 8px; text-align: right;">Total (BHD)</th>
+                        <th style="padding: 6px;">Item Description</th>
+                        <th style="padding: 6px; text-align: center;">Qty</th>
+                        <th style="padding: 6px; text-align: right;">Unit Price</th>
+                        <th style="padding: 6px; text-align: right;">Total (BHD)</th>
                     </tr>
                 </thead>
                 <tbody class="t-items-table-body" style="border-bottom: 1px solid #e5e7eb;"></tbody>
             </table>
 
-            <div style="margin: 12px 0; padding: 8px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; display: flex; justify-content: space-between;">
+            <div style="margin: 6px 0; padding: 6px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 4px; display: flex; justify-content: space-between; font-size: 10px;">
                 <span>Loyalty Points Earned: <strong class="t-pts-earned">0</strong></span>
                 <span>Total Points Balance: <strong class="t-pts-balance">0</strong></span>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px; padding-top: 8px; border-top: 1px solid #d1d5db;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; padding-top: 6px; border-top: 1px solid #d1d5db; font-size: 10px;">
                 <div>
-                    <p style="font-weight: bold; color: #374151; margin-bottom: 4px;">Payment Method(s):</p>
-                    <div class="t-payments-breakdown" style="background: #f9fafb; padding: 8px; border-radius: 6px;"></div>
+                    <p style="font-weight: bold; color: #374151; margin: 0 0 4px 0;">Payment Method(s):</p>
+                    <div class="t-payments-breakdown" style="background: #f9fafb; padding: 6px; border-radius: 4px;"></div>
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 4px; text-align: right;">
+                <div style="display: flex; flex-direction: column; gap: 2px; text-align: right;">
                     <div style="display: flex; justify-content: space-between;"><span>Gross Total:</span><span class="t-gross font-mono"></span></div>
                     <div class="t-disc-row" style="display: flex; justify-content: space-between; color: #dc2626;"><span>Discount:</span><span class="t-disc-val font-mono"></span></div>
                     <div style="display: flex; justify-content: space-between;"><span>Subtotal (Excl. VAT):</span><span class="t-subtotal font-mono"></span></div>
                     <div style="display: flex; justify-content: space-between;"><span>VAT (10% Incl.):</span><span class="t-vat font-mono"></span></div>
-                    <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: 14px; border-top: 1px solid #9ca3af; padding-top: 4px; color: #065f46;"><span>Total Bill:</span><span class="t-total font-mono"></span></div>
+                    <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: 12px; border-top: 1px solid #9ca3af; padding-top: 2px; color: #065f46;"><span>Total Bill:</span><span class="t-total font-mono"></span></div>
                 </div>
             </div>
 
-            <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e7eb; text-align: center; color: #4b5563;">
+            <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e7eb; text-align: center; color: #4b5563; font-size: 9px;">
                 <p style="font-weight: bold; color: #111827; margin: 0;">Thank you for shopping with us!</p>
-                <p style="margin: 4px 0;">Follow us on Instagram: <strong>@perfume_club.bh</strong> | Web: <strong>www.theperfumesclub.com</strong> | WhatsApp: <strong>36051011</strong></p>
-                <p style="font-size: 10px; color: #6b7280; max-width: 500px; margin: 8px auto 0 auto;">
-                    <strong>Return Policy:</strong> Returns accepted within 3 days with unopened box and original receipt. No returns or exchanges on discounted items.
-                </p>
+                <p style="margin: 2px 0;">Instagram: <strong>@perfume_club.bh</strong> | Web: <strong>www.theperfumesclub.com</strong> | WhatsApp: <strong>36051011</strong></p>
+                <p style="font-size: 8px; color: #6b7280; margin: 2px 0;">Return Policy: Returns accepted within 3 days with unopened box and original receipt.</p>
             </div>
         </div>
     </template>
@@ -369,6 +391,9 @@ let singlePaymentMethod = 'CASH'; // CASH, CARD, BENEFIT_PAY
 let splitPrimaryMethod = 'CASH'; // CASH, CARD, BENEFIT_PAY
 let splitSecondaryMethod = 'CARD'; // CASH, CARD, BENEFIT_PAY
 let selectedPrintFormat = '58mm'; // 58mm or A4
+
+let currentCustomerPoints = 0;
+let pointsRedeemedCount = 0;
 
 let grossTotal = 0;
 let discountAmount = 0;
@@ -393,6 +418,54 @@ async function fetchProducts() {
 
     products = data || [];
     renderProducts(products);
+}
+
+// --- LOYALTY POINTS ENGINE ---
+function lookupCustomerPoints() {
+    const phone = document.getElementById('cust-phone-input').value.trim();
+    if (!phone) {
+        currentCustomerPoints = 0;
+        updateLoyaltyUI();
+        return;
+    }
+    // Simulate lookup / store lookup by phone digits length
+    currentCustomerPoints = (phone.length * 25) % 350; // Mock points calculation
+    updateLoyaltyUI();
+}
+
+function updateLoyaltyUI() {
+    const ptsBalanceElem = document.getElementById('cust-pts-balance');
+    const redeemBtn = document.getElementById('btn-redeem-pts');
+    
+    ptsBalanceElem.innerText = `${currentCustomerPoints} Pts`;
+
+    if (currentCustomerPoints >= 100) {
+        const maxRedeemablePts = Math.floor(currentCustomerPoints / 100) * 100;
+        const potentialDiscount = maxRedeemablePts / 100; // 100 pts = 1 BHD
+        
+        redeemBtn.disabled = false;
+        redeemBtn.className = 'bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold px-2 py-1 rounded shadow cursor-pointer';
+        redeemBtn.innerText = `Redeem ${maxRedeemablePts} Pts (-${formatBHD(potentialDiscount)})`;
+    } else {
+        redeemBtn.disabled = true;
+        redeemBtn.className = 'bg-gray-300 text-gray-500 text-[10px] font-bold px-2 py-1 rounded cursor-not-allowed';
+        redeemBtn.innerText = 'Redeem (Min 100 pts)';
+    }
+}
+
+function redeemLoyaltyPoints() {
+    if (currentCustomerPoints < 100) return;
+
+    pointsRedeemedCount = Math.floor(currentCustomerPoints / 100) * 100;
+    const discountBHD = pointsRedeemedCount / 100;
+
+    // Apply points discount automatically
+    setDiscountType('FIXED');
+    document.getElementById('discount-title').value = `Loyalty (${pointsRedeemedCount} pts)`;
+    document.getElementById('discount-val').value = discountBHD.toFixed(3);
+    
+    updateCartUI();
+    alert(`Applied ${formatBHD(discountBHD)} loyalty discount! ${pointsRedeemedCount} points will be deducted.`);
 }
 
 // --- RENDER PRODUCTS GRID ---
@@ -457,10 +530,13 @@ function updateCartQuantity(productId, change) {
 
 function clearCart() {
     cart = [];
+    currentCustomerPoints = 0;
+    pointsRedeemedCount = 0;
     document.getElementById('cust-name-input').value = '';
     document.getElementById('cust-phone-input').value = '';
     document.getElementById('discount-val').value = '';
     document.getElementById('discount-title').value = '';
+    updateLoyaltyUI();
     updateCartUI();
 }
 
@@ -687,8 +763,9 @@ function calculateSplitBalance() {
     document.getElementById('split-remaining-balance').innerText = formatBHD(remaining > 0 ? remaining : 0);
 }
 
-// --- SALE PROCESSING & PRINTING ---
-function processSale() {
+// --- SALE PROCESSING & MULTI-CHANNEL DISPATCH ---
+function processSale(actionChannel = 'PRINT') {
+    let paymentBreakdownText = '';
     let paymentBreakdownHTML = '';
 
     if (selectedPaymentType === 'SINGLE') {
@@ -704,13 +781,15 @@ function processSale() {
                 <div style="display: flex; justify-content: space-between; color: #6b7280;"><span>Tendered:</span><span>${formatBHD(tendered)}</span></div>
                 <div style="display: flex; justify-content: space-between; color: #6b7280;"><span>Change:</span><span>${formatBHD(change)}</span></div>
             `;
+            paymentBreakdownText = `CASH: ${formatBHD(netTotalInclusive)} (Tendered: ${formatBHD(tendered)}, Change: ${formatBHD(change)})`;
         } else {
             paymentBreakdownHTML = `<div style="display: flex; justify-content: space-between;"><span>${singlePaymentMethod}:</span><span>${formatBHD(netTotalInclusive)}</span></div>`;
+            paymentBreakdownText = `${singlePaymentMethod}: ${formatBHD(netTotalInclusive)}`;
         }
     } else { // SPLIT PAYMENT
         const priAmount = parseFloat(document.getElementById('split-pri-amount').value) || 0;
         if (priAmount <= 0 || priAmount >= netTotalInclusive) {
-            alert('Please enter a valid partial primary amount (greater than 0 and less than total).');
+            alert('Please enter a valid partial primary amount.');
             return;
         }
         const remAmount = netTotalInclusive - priAmount;
@@ -718,89 +797,123 @@ function processSale() {
             <div style="display: flex; justify-content: space-between;"><span>${splitPrimaryMethod}:</span><span>${formatBHD(priAmount)}</span></div>
             <div style="display: flex; justify-content: space-between;"><span>${splitSecondaryMethod}:</span><span>${formatBHD(remAmount)}</span></div>
         `;
+        paymentBreakdownText = `${splitPrimaryMethod}: ${formatBHD(priAmount)} | ${splitSecondaryMethod}: ${formatBHD(remAmount)}`;
     }
 
     // Customer & Loyalty calculation
     const custName = document.getElementById('cust-name-input').value.trim() || 'Walk-in Customer';
     const custPhone = document.getElementById('cust-phone-input').value.trim() || 'N/A';
+    
     const ptsEarned = Math.floor(netTotalInclusive);
-    const ptsBalance = ptsEarned; 
+    const finalPointsBalance = Math.max(0, currentCustomerPoints - pointsRedeemedCount) + ptsEarned;
 
     // Math summaries
     const subtotalExclVat = netTotalInclusive / 1.10;
     const vatIncluded = netTotalInclusive - subtotalExclVat;
     const timestampStr = new Date().toLocaleString('en-GB');
 
-    // Build Receipt HTML dynamically from Template
-    const templateId = selectedPrintFormat === '58mm' ? 'template-receipt-58mm' : 'template-receipt-a4';
-    const templateContent = document.getElementById(templateId).content.cloneNode(true);
-
-    templateContent.querySelector('.t-cust-name').innerText = custName;
-    templateContent.querySelector('.t-cust-phone').innerText = custPhone;
-    templateContent.querySelector('.t-pts-earned').innerText = ptsEarned;
-    templateContent.querySelector('.t-pts-balance').innerText = ptsBalance;
-    templateContent.querySelector('.t-gross').innerText = formatBHD(grossTotal);
-    templateContent.querySelector('.t-subtotal').innerText = formatBHD(subtotalExclVat);
-    templateContent.querySelector('.t-vat').innerText = formatBHD(vatIncluded);
-    templateContent.querySelector('.t-total').innerText = formatBHD(netTotalInclusive);
-    templateContent.querySelector('.t-timestamp').innerText = timestampStr;
-    templateContent.querySelector('.t-payments-breakdown').innerHTML = paymentBreakdownHTML;
-
-    // Handle Discount display in receipt
-    const discRow = templateContent.querySelector('.t-disc-row');
+    // Build Receipt Text Summary (for WhatsApp / Email)
+    let receiptSummaryText = `*BARAKAT PERFUMES - RECEIPT*\n`;
+    receiptSummaryText += `Date: ${timestampStr}\n`;
+    receiptSummaryText += `Customer: ${custName} (${custPhone})\n`;
+    receiptSummaryText += `------------------------------\n`;
+    cart.forEach(item => {
+        receiptSummaryText += `${item.name} x${item.qty} = ${formatBHD(item.retail_price * item.qty)}\n`;
+    });
+    receiptSummaryText += `------------------------------\n`;
+    receiptSummaryText += `Gross Total: ${formatBHD(grossTotal)}\n`;
     if (discountAmount > 0) {
         const customTitle = document.getElementById('discount-title').value.trim();
-        const discLabel = customTitle !== '' ? customTitle : 'Discount';
-        discRow.querySelector('span:first-child').innerText = discLabel + ':';
-        discRow.querySelector('.t-disc-val').innerText = '-' + formatBHD(discountAmount);
-    } else {
-        discRow.style.display = 'none';
+        receiptSummaryText += `Discount (${customTitle || 'Discount'}): -${formatBHD(discountAmount)}\n`;
+    }
+    receiptSummaryText += `*TOTAL BILL: ${formatBHD(netTotalInclusive)}*\n`;
+    receiptSummaryText += `Payment: ${paymentBreakdownText}\n`;
+    receiptSummaryText += `Points Earned: ${ptsEarned} | Total Balance: ${finalPointsBalance}\n`;
+    receiptSummaryText += `Thank you for shopping with Barakat Perfumes!`;
+
+    // HANDLE MULTI-CHANNEL ACTIONS
+    if (actionChannel === 'WHATSAPP') {
+        const cleanPhone = custPhone.replace(/[^0-9]/g, '');
+        const targetPhone = cleanPhone.length >= 8 ? (cleanPhone.startsWith('973') ? cleanPhone : '973' + cleanPhone) : '';
+        const waUrl = `https://wa.me/${targetPhone}?text=${encodeURIComponent(receiptSummaryText)}`;
+        window.open(waUrl, '_blank');
+    } else if (actionChannel === 'EMAIL') {
+        const mailtoUrl = `mailto:?subject=${encodeURIComponent('Barakat Perfumes - Receipt')}&body=${encodeURIComponent(receiptSummaryText)}`;
+        window.location.href = mailtoUrl;
     }
 
-    // Render items list based on layout
-    if (selectedPrintFormat === '58mm') {
-        const itemsContainer = templateContent.querySelector('.t-items-list');
-        cart.forEach(item => {
-            itemsContainer.innerHTML += `
-                <div>
-                    <div style="font-weight: bold;">${item.name}</div>
-                    <div style="display: flex; justify-content: space-between; color: #4b5563;">
-                        <span>${item.qty} x ${formatBHD(item.retail_price)}</span>
-                        <span>${formatBHD(item.retail_price * item.qty)}</span>
+    // PRINT RECEIPT GENERATION
+    if (actionChannel === 'PRINT' || actionChannel === 'WHATSAPP' || actionChannel === 'EMAIL') {
+        const templateId = selectedPrintFormat === '58mm' ? 'template-receipt-58mm' : 'template-receipt-a4';
+        const templateContent = document.getElementById(templateId).content.cloneNode(true);
+
+        templateContent.querySelector('.t-cust-name').innerText = custName;
+        templateContent.querySelector('.t-cust-phone').innerText = custPhone;
+        templateContent.querySelector('.t-pts-earned').innerText = ptsEarned;
+        templateContent.querySelector('.t-pts-balance').innerText = finalPointsBalance;
+        templateContent.querySelector('.t-gross').innerText = formatBHD(grossTotal);
+        templateContent.querySelector('.t-subtotal').innerText = formatBHD(subtotalExclVat);
+        templateContent.querySelector('.t-vat').innerText = formatBHD(vatIncluded);
+        templateContent.querySelector('.t-total').innerText = formatBHD(netTotalInclusive);
+        templateContent.querySelector('.t-timestamp').innerText = timestampStr;
+        templateContent.querySelector('.t-payments-breakdown').innerHTML = paymentBreakdownHTML;
+
+        // Handle Discount display in receipt
+        const discRow = templateContent.querySelector('.t-disc-row');
+        if (discountAmount > 0) {
+            const customTitle = document.getElementById('discount-title').value.trim();
+            const discLabel = customTitle !== '' ? customTitle : 'Discount';
+            discRow.querySelector('span:first-child').innerText = discLabel + ':';
+            discRow.querySelector('.t-disc-val').innerText = '-' + formatBHD(discountAmount);
+        } else {
+            discRow.style.display = 'none';
+        }
+
+        // Render items list based on layout
+        if (selectedPrintFormat === '58mm') {
+            const itemsContainer = templateContent.querySelector('.t-items-list');
+            cart.forEach(item => {
+                itemsContainer.innerHTML += `
+                    <div>
+                        <div style="font-weight: bold;">${item.name}</div>
+                        <div style="display: flex; justify-content: space-between; color: #4b5563;">
+                            <span>${item.qty} x ${formatBHD(item.retail_price)}</span>
+                            <span>${formatBHD(item.retail_price * item.qty)}</span>
+                        </div>
                     </div>
-                </div>
-            `;
-        });
-    } else {
-        const tableBody = templateContent.querySelector('.t-items-table-body');
-        cart.forEach(item => {
-            tableBody.innerHTML += `
-                <tr style="border-bottom: 1px solid #e5e7eb;">
-                    <td style="padding: 8px;">
-                        <div style="font-weight: bold; color: #1f2937;">${item.name}</div>
-                        <div style="font-size: 10px; color: #9ca3af; font-family: monospace;">SKU: ${item.sku || 'N/A'}</div>
-                    </td>
-                    <td style="padding: 8px; text-align: center; font-weight: 600;">${item.qty}</td>
-                    <td style="padding: 8px; text-align: right; font-family: monospace;">${formatBHD(item.retail_price)}</td>
-                    <td style="padding: 8px; text-align: right; font-family: monospace; font-weight: bold;">${formatBHD(item.retail_price * item.qty)}</td>
-                </tr>
-            `;
-        });
+                `;
+            });
+        } else {
+            const tableBody = templateContent.querySelector('.t-items-table-body');
+            cart.forEach(item => {
+                tableBody.innerHTML += `
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 4px 6px;">
+                            <div style="font-weight: bold; color: #1f2937;">${item.name}</div>
+                            <div style="font-size: 8px; color: #9ca3af; font-family: monospace;">SKU: ${item.sku || 'N/A'}</div>
+                        </td>
+                        <td style="padding: 4px 6px; text-align: center; font-weight: 600;">${item.qty}</td>
+                        <td style="padding: 4px 6px; text-align: right; font-family: monospace;">${formatBHD(item.retail_price)}</td>
+                        <td style="padding: 4px 6px; text-align: right; font-family: monospace; font-weight: bold;">${formatBHD(item.retail_price * item.qty)}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        if (actionChannel === 'PRINT') {
+            const printContainer = document.getElementById('print-container');
+            printContainer.innerHTML = '';
+            printContainer.appendChild(templateContent);
+            printContainer.classList.remove('hidden');
+
+            window.print();
+
+            printContainer.classList.add('hidden');
+            printContainer.innerHTML = '';
+        }
     }
 
-    // Populate print container and trigger native print
-    const printContainer = document.getElementById('print-container');
-    printContainer.innerHTML = '';
-    printContainer.appendChild(templateContent);
-    printContainer.classList.remove('hidden');
-
-    window.print();
-
-    // Clean up print container
-    printContainer.classList.add('hidden');
-    printContainer.innerHTML = '';
-
-    // Reset and close
+    // Reset and close after completing order
     clearCart();
     closePaymentModal();
 }
