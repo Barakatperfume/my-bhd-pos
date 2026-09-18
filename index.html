@@ -12,6 +12,7 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* Media Print Isolation & Single-Page Fit Fix */
         @media print {
             body > * { display: none !important; }
             #print-container, #print-container * { display: block !important; visibility: visible !important; }
@@ -42,22 +43,21 @@
             <span id="role-badge" class="bg-emerald-900 text-emerald-200 text-xs px-2 py-1 rounded-full uppercase tracking-wider font-semibold">Cashier</span>
         </div>
         <div class="flex items-center space-x-2">
-            <button onclick="openManageItemsModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition">Manage Items</button>
-            <button onclick="openSalesHistoryModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition">Sales History</button>
-            <button onclick="switchUser()" class="bg-emerald-900 hover:bg-black text-white text-xs px-3 py-1.5 rounded transition">Switch Role</button>
+            <span id="user-name" class="text-sm font-medium hidden sm:inline">Cashier 1</span>
+            <button onclick="switchUser()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition">Switch PIN</button>
         </div>
     </header>
 
     <!-- Main POS Interface Split View -->
     <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
         
-        <!-- Left Panel: Product Search & Catalog -->
+        <!-- Left Panel: Product Search, Scanner & Catalog -->
         <div class="w-full md:w-3/5 lg:w-2/3 p-4 flex flex-col h-full overflow-hidden">
             
-            <!-- Universal Search Bar -->
-            <div class="flex space-x-2 mb-3">
+            <!-- Universal Search & Camera Scan Bar -->
+            <div class="flex space-x-2 mb-4">
                 <div class="relative flex-1">
-                    <input type="text" id="search-input" onkeyup="filterProducts()" placeholder="Search name, category, or scan barcode..." 
+                    <input type="text" id="search-input" onkeyup="filterProducts()" placeholder="Search name or scan barcode..." 
                            class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm shadow-sm">
                     <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
@@ -65,6 +65,12 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h0.93a2 2 0 001.664-.89l0.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l0.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     <span class="hidden sm:inline">Scan</span>
                 </button>
+            </div>
+
+            <!-- In-App Camera Viewfinder Container -->
+            <div id="camera-reader-wrapper" class="hidden mb-4 bg-black rounded-lg overflow-hidden relative max-h-48">
+                <div id="reader" class="w-full"></div>
+                <button onclick="toggleCameraScanner()" class="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 text-xs rounded shadow">Close Camera</button>
             </div>
 
             <!-- Product Grid -->
@@ -75,6 +81,7 @@
 
         <!-- Right Panel: Cart Register & Checkout -->
         <div class="w-full md:w-2/5 lg:w-1/3 bg-white border-l border-gray-200 flex flex-col h-full shadow-lg">
+            
             <div class="p-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
                 <h2 class="font-bold text-gray-700">Current Order</h2>
                 <button onclick="clearCart()" class="text-xs text-red-600 hover:text-red-800 font-medium">Clear All</button>
@@ -88,6 +95,7 @@
                     <input type="text" id="cust-phone-input" oninput="lookupCustomerPoints()" placeholder="Phone Number" class="border border-gray-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
                 </div>
                 
+                <!-- Loyalty Points Widget -->
                 <div id="loyalty-widget" class="bg-white p-2 rounded border border-emerald-200 flex justify-between items-center text-xs">
                     <div>
                         <span class="text-gray-500">Points Balance:</span>
@@ -100,10 +108,14 @@
             </div>
 
             <!-- Cart Items List -->
-            <div id="cart-items" class="flex-1 overflow-y-auto p-3 space-y-3 no-scrollbar divide-y divide-gray-100"></div>
+            <div id="cart-items" class="flex-1 overflow-y-auto p-3 space-y-3 no-scrollbar divide-y divide-gray-100">
+                <!-- Cart items dynamically rendered here -->
+            </div>
 
             <!-- Pricing Summary & Discount Controls Footer -->
             <div class="p-4 bg-gray-50 border-t border-gray-200 space-y-2">
+                
+                <!-- Discount Control Panel -->
                 <div class="bg-white p-2 rounded-lg border border-gray-200 space-y-1.5 shadow-sm">
                     <div class="flex justify-between items-center">
                         <label class="text-[11px] font-bold text-gray-700 uppercase">Apply Discount</label>
@@ -139,6 +151,7 @@
                     <span id="summary-total" class="text-emerald-700">BHD 0.000</span>
                 </div>
 
+                <!-- Charge / Checkout Button -->
                 <button onclick="openPaymentModal()" class="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow-md transition text-center flex justify-between px-4">
                     <span>PAY NOW</span>
                     <span id="btn-total">BHD 0.000</span>
@@ -147,15 +160,17 @@
         </div>
     </div>
 
-    <!-- Modal 1: Payment & Checkout -->
+    <!-- Payment & Receipt Modal -->
     <div id="payment-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
         <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-5 space-y-4 my-auto">
             <h3 class="text-lg font-bold text-gray-800 border-b pb-2">Complete Payment</h3>
+            
             <div class="text-center py-2 bg-emerald-50 rounded-lg">
                 <p class="text-xs text-emerald-800 uppercase font-semibold tracking-wider">Total Amount Due</p>
                 <p id="modal-total" class="text-2xl font-black text-emerald-700">BHD 0.000</p>
             </div>
 
+            <!-- Payment Type Selection -->
             <div>
                 <label class="text-xs font-semibold text-gray-600 uppercase">Payment Option</label>
                 <div class="grid grid-cols-2 gap-2 mt-1">
@@ -164,6 +179,7 @@
                 </div>
             </div>
 
+            <!-- Single Payment Mode Container -->
             <div id="single-payment-container" class="space-y-3">
                 <div>
                     <label class="text-xs font-semibold text-gray-600 uppercase">Method</label>
@@ -173,6 +189,7 @@
                         <button id="btn-single-benefit" onclick="setSingleMethod('BENEFIT_PAY')" class="pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">BENEFIT</button>
                     </div>
                 </div>
+
                 <div id="single-cash-wrapper">
                     <label class="text-xs font-semibold text-gray-600 uppercase">Cash Tendered (BHD)</label>
                     <input type="number" id="cash-tendered" step="0.001" oninput="calculateSingleChange()" placeholder="0.000" class="w-full mt-1 border border-gray-300 rounded-lg p-2 text-right font-bold text-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
@@ -183,23 +200,29 @@
                 </div>
             </div>
 
+            <!-- Split Payment Mode Container -->
             <div id="split-payment-container" class="hidden space-y-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                <!-- Primary Payment Selection -->
                 <div>
-                    <label class="text-xs font-semibold text-gray-600 uppercase">1. Primary Method</label>
+                    <label class="text-xs font-semibold text-gray-600 uppercase">1. Select Primary Payment Method</label>
                     <div class="grid grid-cols-3 gap-2 mt-1">
                         <button id="btn-split-pri-cash" onclick="setSplitPrimaryMethod('CASH')" class="split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center">CASH</button>
                         <button id="btn-split-pri-card" onclick="setSplitPrimaryMethod('CARD')" class="split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">CARD</button>
                         <button id="btn-split-pri-benefit" onclick="setSplitPrimaryMethod('BENEFIT_PAY')" class="split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">BENEFIT</button>
                     </div>
                 </div>
+
                 <div>
-                    <label id="label-split-pri-amount" class="text-xs font-semibold text-gray-600 uppercase">Primary Amount (BHD)</label>
+                    <label id="label-split-pri-amount" class="text-xs font-semibold text-gray-600 uppercase">Primary Paid Amount (BHD)</label>
                     <input type="number" id="split-pri-amount" step="0.001" oninput="calculateSplitBalance()" placeholder="0.000" class="w-full mt-1 border border-gray-300 rounded-lg p-2 text-right font-bold text-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                 </div>
+
                 <div class="p-2.5 bg-blue-50 border border-blue-200 rounded-lg flex justify-between items-center text-sm font-bold text-blue-900">
                     <span>Remaining Balance:</span>
                     <span id="split-remaining-balance" class="text-base text-blue-700">BHD 0.000</span>
                 </div>
+
+                <!-- Secondary Payment Selection -->
                 <div>
                     <label class="text-xs font-semibold text-gray-600 uppercase">2. Pay Balance Using</label>
                     <div class="grid grid-cols-3 gap-2 mt-1">
@@ -210,6 +233,7 @@
                 </div>
             </div>
 
+            <!-- Receipt Print Format Selector -->
             <div>
                 <label class="text-xs font-semibold text-gray-600 uppercase">Print Format</label>
                 <div class="grid grid-cols-2 gap-2 mt-1">
@@ -218,81 +242,233 @@
                 </div>
             </div>
 
+            <!-- Multi-Channel Receipt Action Buttons -->
             <div class="space-y-2 pt-2 border-t border-gray-200">
                 <button onclick="processSale('PRINT')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-sm shadow flex items-center justify-center space-x-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                     <span>Print Receipt</span>
                 </button>
+                
                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="processSale('WHATSAPP')" class="bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold text-xs text-center">Send WhatsApp</button>
-                    <button onclick="processSale('EMAIL')" class="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold text-xs text-center">Send Email</button>
+                    <button onclick="processSale('WHATSAPP')" class="bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold text-xs flex items-center justify-center space-x-1">
+                        <span>Send WhatsApp</span>
+                    </button>
+                    <button onclick="processSale('EMAIL')" class="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold text-xs flex items-center justify-center space-x-1">
+                        <span>Send Email</span>
+                    </button>
                 </div>
+
                 <button onclick="closePaymentModal()" class="w-full border border-gray-300 text-gray-700 py-2 rounded-lg font-semibold text-xs hover:bg-gray-50">Cancel</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal 2: Sales History & Receipts -->
-    <div id="sales-history-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-5 space-y-4 my-auto max-h-[85vh] flex flex-col">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="text-lg font-bold text-gray-800">Sales & Receipt History</h3>
-                <button onclick="closeSalesHistoryModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+    <!-- Hidden Template: Thermal Printable Receipt (58mm) -->
+    <template id="template-receipt-58mm">
+        <div style="width: 58mm; padding: 4px; font-family: monospace; font-size: 10px; color: black; line-height: 1.2;">
+            <div style="text-align: center;">
+                <img src="PCBH_LOGO-BG.png" alt="Logo" style="height: 48px; margin: 0 auto 4px auto; display: block; object-fit: contain;">
+                <div style="font-weight: bold; font-size: 12px; text-transform: uppercase;">BARAKAT PERFUMES</div>
+                <div>District 1, Janabiya</div>
+                <div>CR: 13812-04</div>
+                <div>Tel: 36051011</div>
             </div>
-            <div id="sales-history-list" class="flex-1 overflow-y-auto space-y-3 no-scrollbar pr-1">
-                <!-- Sales Receipts dynamically rendered here -->
+            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
+            <div>
+                <div><strong>Customer:</strong> <span class="t-cust-name">Walk-in Customer</span></div>
+                <div><strong>Phone:</strong> <span class="t-cust-phone">N/A</span></div>
+            </div>
+            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
+            <div class="t-items-list" style="display: flex; flex-direction: column; gap: 4px;"></div>
+            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
+            <div>
+                <div style="display: flex; justify-content: space-between;"><span>Points Earned:</span><span class="t-pts-earned">0</span></div>
+                <div style="display: flex; justify-content: space-between; font-weight: bold;"><span>Points Balance:</span><span class="t-pts-balance">0</span></div>
+            </div>
+            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="display: flex; justify-content: space-between;"><span>Gross Total:</span><span class="t-gross"></span></div>
+                <div class="t-disc-row" style="display: flex; justify-content: space-between; color: black;"><span>Discount:</span><span class="t-disc-val"></span></div>
+                <div style="display: flex; justify-content: space-between;"><span>Subtotal (Excl. VAT):</span><span class="t-subtotal"></span></div>
+                <div style="display: flex; justify-content: space-between;"><span>VAT (10% Incl.):</span><span class="t-vat"></span></div>
+                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 11px; border-top: 1px solid black; padding-top: 2px;"><span>TOTAL BILL:</span><span class="t-total"></span></div>
+            </div>
+            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
+            <div>
+                <div style="font-weight: bold; margin-bottom: 2px;">Payment Method(s):</div>
+                <div class="t-payments-breakdown" style="display: flex; flex-direction: column; gap: 2px;"></div>
+            </div>
+            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
+            <div style="text-align: center; display: flex; flex-direction: column; gap: 3px;">
+                <div style="font-weight: bold;">Thank you for shopping!</div>
+                <div>Follow us:</div>
+                <div>Instagram: @perfume_club.bh</div>
+                <div>www.theperfumesclub.com</div>
+                <div>WhatsApp: 36051011</div>
+                <div style="font-size: 8px; margin-top: 4px;">Return Policy: Returns accepted within 3 days with unopened box and original receipt. No returns or exchanges on discounted items.</div>
+                <div style="font-size: 8px; font-weight: bold; margin-top: 4px;" class="t-timestamp"></div>
             </div>
         </div>
-    </div>
+    </template>
 
-    <!-- Modal 3: Item Management & Editing -->
-    <div id="manage-items-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full p-5 space-y-4 my-auto max-h-[85vh] flex flex-col">
-            <div class="flex justify-between items-center border-b pb-2">
+    <!-- Hidden Template: Single-Page A4 Tax Invoice (Compact Fit) -->
+    <template id="template-receipt-a4">
+        <div style="width: 100%; max-width: 800px; margin: 0 auto; padding: 12px; font-family: sans-serif; font-size: 11px; color: #111827; background: white; box-sizing: border-box;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #047857; padding-bottom: 8px;">
                 <div>
-                    <h3 class="text-lg font-bold text-gray-800">Inventory Item Management</h3>
-                    <p class="text-xs text-gray-500">Edit item details and prices. <span id="cost-access-status" class="font-bold text-emerald-700"></span></p>
+                    <h1 style="font-size: 18px; font-weight: 900; color: #065f46; margin: 0;">BARAKAT PERFUMES</h1>
+                    <p style="margin: 1px 0; color: #4b5563; font-size: 10px;">Branch: District 1, Janabiya | CR: 13812-04 | Tel: 36051011</p>
                 </div>
-                <button onclick="closeManageItemsModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+                <div style="text-align: right;">
+                    <img src="PCBH_LOGO-BG.png" alt="Logo" style="height: 40px; margin-left: auto; object-fit: contain;">
+                    <p style="font-weight: bold; margin: 0; color: #1f2937; font-size: 11px;">TAX INVOICE</p>
+                </div>
             </div>
-            <div id="manage-items-list" class="flex-1 overflow-y-auto space-y-3 no-scrollbar pr-1">
-                <!-- Editable Item Cards dynamically rendered here -->
+
+            <div style="display: flex; justify-content: space-between; margin: 8px 0; padding: 8px; background: #f9fafb; border-radius: 6px; font-size: 10px;">
+                <div>
+                    <span style="font-weight: bold; color: #374151;">Customer: </span>
+                    <strong class="t-cust-name" style="color: #111827;">Walk-in Customer</strong>
+                    <span style="margin-left: 12px; color: #4b5563;">Phone: <span class="t-cust-phone">N/A</span></span>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-weight: bold; color: #374151;">Date: </span>
+                    <span class="t-timestamp" style="color: #4b5563;"></span>
+                </div>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 10px;">
+                <thead>
+                    <tr style="background: #047857; color: white; text-align: left;">
+                        <th style="padding: 6px;">Item Description</th>
+                        <th style="padding: 6px; text-align: center;">Qty</th>
+                        <th style="padding: 6px; text-align: right;">Unit Price</th>
+                        <th style="padding: 6px; text-align: right;">Total (BHD)</th>
+                    </tr>
+                </thead>
+                <tbody class="t-items-table-body" style="border-bottom: 1px solid #e5e7eb;"></tbody>
+            </table>
+
+            <div style="margin: 6px 0; padding: 6px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 4px; display: flex; justify-content: space-between; font-size: 10px;">
+                <span>Loyalty Points Earned: <strong class="t-pts-earned">0</strong></span>
+                <span>Total Points Balance: <strong class="t-pts-balance">0</strong></span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; padding-top: 6px; border-top: 1px solid #d1d5db; font-size: 10px;">
+                <div>
+                    <p style="font-weight: bold; color: #374151; margin: 0 0 4px 0;">Payment Method(s):</p>
+                    <div class="t-payments-breakdown" style="background: #f9fafb; padding: 6px; border-radius: 4px;"></div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 2px; text-align: right;">
+                    <div style="display: flex; justify-content: space-between;"><span>Gross Total:</span><span class="t-gross font-mono"></span></div>
+                    <div class="t-disc-row" style="display: flex; justify-content: space-between; color: #dc2626;"><span>Discount:</span><span class="t-disc-val font-mono"></span></div>
+                    <div style="display: flex; justify-content: space-between;"><span>Subtotal (Excl. VAT):</span><span class="t-subtotal font-mono"></span></div>
+                    <div style="display: flex; justify-content: space-between;"><span>VAT (10% Incl.):</span><span class="t-vat font-mono"></span></div>
+                    <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: 12px; border-top: 1px solid #9ca3af; padding-top: 2px; color: #065f46;"><span>Total Bill:</span><span class="t-total font-mono"></span></div>
+                </div>
+            </div>
+
+            <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e7eb; text-align: center; color: #4b5563; font-size: 9px;">
+                <p style="font-weight: bold; color: #111827; margin: 0;">Thank you for shopping with us!</p>
+                <p style="margin: 2px 0;">Instagram: <strong>@perfume_club.bh</strong> | Web: <strong>www.theperfumesclub.com</strong> | WhatsApp: <strong>36051011</strong></p>
+                <p style="font-size: 8px; color: #6b7280; margin: 2px 0;">Return Policy: Returns accepted within 3 days with unopened box and original receipt.</p>
             </div>
         </div>
-    </div>
+    </template>
 
     <script>
-// --- SUPABASE & APP STATE ---
+// --- SUPABASE CONFIGURATION ---
 const SUPABASE_URL = 'https://lxyxlecusdjdikozeedx.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4eXhsZWN1c2RqZGlrb3plZWR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NjkzNTgsImV4cCI6MjEwNTE0NTM1OH0._nPzYbZ2TIeRXQ-2went70JXygrI5TqUMDofi5OKxy4';
+
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let products = [
-    { id: '1', name: 'Gucci Flora Gorgeous Gardenia', category: 'Gucci', sku: 'GUC-FLO-100', barcode: '800561029801', retail_price: 48.500, cost_price: 32.000, stock_quantity: 12 },
-    { id: '2', name: 'Gucci Guilty Pour Homme', category: 'Gucci', sku: 'GUC-GUI-090', barcode: '800561029802', retail_price: 42.000, cost_price: 27.500, stock_quantity: 8 },
-    { id: '3', name: 'Lattafa Maahir Black Edition', category: 'Lattafa', sku: 'LAT-MAH-100', barcode: '629110745601', retail_price: 14.000, cost_price: 8.000, stock_quantity: 25 },
-    { id: '4', name: 'RIIFFS Imperial Blue', category: 'RIIFFS', sku: 'RIF-IMP-100', barcode: '629110899101', retail_price: 12.500, cost_price: 6.500, stock_quantity: 18 }
-];
-
-let salesHistory = [];
+let products = [];
 let cart = [];
-let currentUserRole = 'CASHIER'; // CASHIER or MANAGER
-let discountType = 'FIXED';
-let selectedPaymentType = 'SINGLE';
-let singlePaymentMethod = 'CASH';
-let splitPrimaryMethod = 'CASH';
-let splitSecondaryMethod = 'CARD';
-let selectedPrintFormat = '58mm';
+let discountType = 'FIXED'; // FIXED or PERCENT
+let selectedPaymentType = 'SINGLE'; // SINGLE or SPLIT
+let singlePaymentMethod = 'CASH'; // CASH, CARD, BENEFIT_PAY
+let splitPrimaryMethod = 'CASH'; // CASH, CARD, BENEFIT_PAY
+let splitSecondaryMethod = 'CARD'; // CASH, CARD, BENEFIT_PAY
+let selectedPrintFormat = '58mm'; // 58mm or A4
 
 let currentCustomerPoints = 0;
 let pointsRedeemedCount = 0;
+
 let grossTotal = 0;
 let discountAmount = 0;
 let netTotalInclusive = 0;
 
-const formatBHD = (amount) => 'BHD ' + (Math.round((amount || 0) * 1000) / 1000).toFixed(3);
+// --- 3-DECIMAL CURRENCY FORMATTER ENGINE ---
+const formatBHD = (amount) => {
+    return 'BHD ' + (Math.round((amount || 0) * 1000) / 1000).toFixed(3);
+};
 
-// --- PRODUCT RENDERING & FILTERING ---
+// --- FETCH PRODUCTS FROM SUPABASE ---
+async function fetchProducts() {
+    const { data, error } = await supabaseClient
+        .from('products')
+        .select('*');
+
+    if (error) {
+        console.error('Error fetching products:', error);
+        alert('Failed to load products: ' + error.message);
+        return;
+    }
+
+    products = data || [];
+    renderProducts(products);
+}
+
+// --- LOYALTY POINTS ENGINE ---
+function lookupCustomerPoints() {
+    const phone = document.getElementById('cust-phone-input').value.trim();
+    if (!phone) {
+        currentCustomerPoints = 0;
+        updateLoyaltyUI();
+        return;
+    }
+    // Simulate lookup / store lookup by phone digits length
+    currentCustomerPoints = (phone.length * 25) % 350; // Mock points calculation
+    updateLoyaltyUI();
+}
+
+function updateLoyaltyUI() {
+    const ptsBalanceElem = document.getElementById('cust-pts-balance');
+    const redeemBtn = document.getElementById('btn-redeem-pts');
+    
+    ptsBalanceElem.innerText = `${currentCustomerPoints} Pts`;
+
+    if (currentCustomerPoints >= 100) {
+        const maxRedeemablePts = Math.floor(currentCustomerPoints / 100) * 100;
+        const potentialDiscount = maxRedeemablePts / 100; // 100 pts = 1 BHD
+        
+        redeemBtn.disabled = false;
+        redeemBtn.className = 'bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold px-2 py-1 rounded shadow cursor-pointer';
+        redeemBtn.innerText = `Redeem ${maxRedeemablePts} Pts (-${formatBHD(potentialDiscount)})`;
+    } else {
+        redeemBtn.disabled = true;
+        redeemBtn.className = 'bg-gray-300 text-gray-500 text-[10px] font-bold px-2 py-1 rounded cursor-not-allowed';
+        redeemBtn.innerText = 'Redeem (Min 100 pts)';
+    }
+}
+
+function redeemLoyaltyPoints() {
+    if (currentCustomerPoints < 100) return;
+
+    pointsRedeemedCount = Math.floor(currentCustomerPoints / 100) * 100;
+    const discountBHD = pointsRedeemedCount / 100;
+
+    // Apply points discount automatically
+    setDiscountType('FIXED');
+    document.getElementById('discount-title').value = `Loyalty (${pointsRedeemedCount} pts)`;
+    document.getElementById('discount-val').value = discountBHD.toFixed(3);
+    
+    updateCartUI();
+    alert(`Applied ${formatBHD(discountBHD)} loyalty discount! ${pointsRedeemedCount} points will be deducted.`);
+}
+
+// --- RENDER PRODUCTS GRID ---
 function renderProducts(list = products) {
     const grid = document.getElementById('product-grid');
     grid.innerHTML = '';
@@ -304,49 +480,51 @@ function renderProducts(list = products) {
     
     list.forEach(p => {
         let stock = p.stock_quantity ?? 0;
-        let badgeColor = stock > 5 ? 'bg-emerald-100 text-emerald-800' : stock > 0 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800';
+        let price = p.retail_price ?? 0;
+        let lowThreshold = p.low_stock_threshold ?? 5;
+        
+        let badgeColor = stock > lowThreshold ? 'bg-emerald-100 text-emerald-800' : stock > 0 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800';
+        let badgeText = stock > lowThreshold ? `${stock} in stock` : stock > 0 ? `Low: ${stock}` : 'Out of Stock';
 
         grid.innerHTML += `
-            <div onclick="addToCart('${p.id}')" class="bg-white border border-gray-200 rounded-xl p-3 flex flex-col justify-between shadow-sm hover:shadow-md transition cursor-pointer">
+            <div onclick="addToCart('${p.id}')" class="bg-white border border-gray-200 rounded-xl p-3 flex flex-col justify-between shadow-sm hover:shadow-md transition cursor-pointer relative group">
                 <div>
-                    <span class="text-[9px] font-bold uppercase tracking-wider text-emerald-600">${p.category || 'General'}</span>
-                    <h4 class="font-bold text-gray-900 text-xs leading-tight line-clamp-2">${p.name}</h4>
+                    <h4 class="font-bold text-gray-900 text-sm leading-tight line-clamp-2">${p.name || 'Unnamed Product'}</h4>
+                    <p class="text-[11px] text-gray-400 mt-1 font-mono">${p.sku ? 'SKU: ' + p.sku : ''}</p>
                 </div>
                 <div class="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between">
-                    <span class="font-black text-emerald-700 text-xs">${formatBHD(p.retail_price)}</span>
-                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full ${badgeColor}">${stock} left</span>
+                    <span class="font-black text-emerald-700 text-sm">${formatBHD(price)}</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeColor}">
+                        ${badgeText}
+                    </span>
                 </div>
             </div>
         `;
     });
 }
 
-function filterProducts() {
-    const query = document.getElementById('search-input').value.toLowerCase().trim();
-    const filtered = products.filter(p => {
-        return (p.name && p.name.toLowerCase().includes(query)) ||
-               (p.category && p.category.toLowerCase().includes(query)) ||
-               (p.sku && p.sku.toLowerCase().includes(query)) ||
-               (p.barcode && p.barcode.toLowerCase().includes(query));
-    });
-    renderProducts(filtered);
-}
+// --- CART & DISCOUNT ENGINE ---
+function addToCart(productId) {
+    const product = products.find(p => p.id === productId);
+    if (!product) return alert('Item not found!');
 
-// --- CART & LOYALTY ---
-function addToCart(id) {
-    const p = products.find(prod => prod.id === id);
-    if (!p) return;
-    const item = cart.find(c => c.id === id);
-    if (item) item.qty++;
-    else cart.push({ ...p, qty: 1 });
+    const cartItem = cart.find(item => item.id === productId);
+    if (cartItem) {
+        cartItem.qty++;
+    } else {
+        cart.push({ ...product, qty: 1 });
+    }
     updateCartUI();
 }
 
-function updateCartQuantity(id, chg) {
-    const item = cart.find(c => c.id === id);
-    if (!item) return;
-    item.qty += chg;
-    if (item.qty <= 0) cart = cart.filter(c => c.id !== id);
+function updateCartQuantity(productId, change) {
+    const cartItem = cart.find(item => item.id === productId);
+    if (!cartItem) return;
+
+    cartItem.qty += change;
+    if (cartItem.qty <= 0) {
+        cart = cart.filter(item => item.id !== productId);
+    }
     updateCartUI();
 }
 
@@ -357,264 +535,399 @@ function clearCart() {
     document.getElementById('cust-name-input').value = '';
     document.getElementById('cust-phone-input').value = '';
     document.getElementById('discount-val').value = '';
+    document.getElementById('discount-title').value = '';
     updateLoyaltyUI();
-    updateCartUI();
-}
-
-function lookupCustomerPoints() {
-    const phone = document.getElementById('cust-phone-input').value.trim();
-    currentCustomerPoints = phone ? (phone.length * 25) % 350 : 0;
-    updateLoyaltyUI();
-}
-
-function updateLoyaltyUI() {
-    const ptsBalanceElem = document.getElementById('cust-pts-balance');
-    const redeemBtn = document.getElementById('btn-redeem-pts');
-    ptsBalanceElem.innerText = `${currentCustomerPoints} Pts`;
-
-    if (currentCustomerPoints >= 100) {
-        const maxPts = Math.floor(currentCustomerPoints / 100) * 100;
-        redeemBtn.disabled = false;
-        redeemBtn.className = 'bg-emerald-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow cursor-pointer';
-        redeemBtn.innerText = `Redeem ${maxPts} Pts (-${formatBHD(maxPts / 100)})`;
-    } else {
-        redeemBtn.disabled = true;
-        redeemBtn.className = 'bg-gray-300 text-gray-500 text-[10px] font-bold px-2 py-1 rounded cursor-not-allowed';
-        redeemBtn.innerText = 'Redeem (Min 100 pts)';
-    }
-}
-
-function redeemLoyaltyPoints() {
-    if (currentCustomerPoints < 100) return;
-    pointsRedeemedCount = Math.floor(currentCustomerPoints / 100) * 100;
-    setDiscountType('FIXED');
-    document.getElementById('discount-title').value = `Loyalty (${pointsRedeemedCount} pts)`;
-    document.getElementById('discount-val').value = (pointsRedeemedCount / 100).toFixed(3);
     updateCartUI();
 }
 
 function setDiscountType(type) {
     discountType = type;
-    document.getElementById('disc-type-bhd').className = type === 'FIXED' ? 'px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-600 text-white' : 'px-2 py-0.5 text-[10px] font-bold rounded bg-gray-200 text-gray-700';
-    document.getElementById('disc-type-pct').className = type === 'PERCENT' ? 'px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-600 text-white' : 'px-2 py-0.5 text-[10px] font-bold rounded bg-gray-200 text-gray-700';
+    const btnBhd = document.getElementById('disc-type-bhd');
+    const btnPct = document.getElementById('disc-type-pct');
+
+    if (type === 'FIXED') {
+        btnBhd.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-600 text-white';
+        btnPct.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-gray-200 text-gray-700';
+    } else {
+        btnPct.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-600 text-white';
+        btnBhd.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-gray-200 text-gray-700';
+    }
     updateCartUI();
 }
 
 function updateCartUI() {
-    const container = document.getElementById('cart-items');
-    container.innerHTML = '';
+    const cartContainer = document.getElementById('cart-items');
+    cartContainer.innerHTML = '';
+    
     grossTotal = 0;
-
     cart.forEach(item => {
-        grossTotal += (item.retail_price || 0) * item.qty;
-        container.innerHTML += `
+        const itemTotal = (item.retail_price || 0) * item.qty;
+        grossTotal += itemTotal;
+        cartContainer.innerHTML += `
             <div class="flex items-center justify-between pt-2">
                 <div class="flex-1 pr-2">
                     <h5 class="text-xs font-bold text-gray-800">${item.name}</h5>
                     <p class="text-[11px] text-gray-500">${formatBHD(item.retail_price)} × ${item.qty}</p>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <button onclick="updateCartQuantity('${item.id}', -1)" class="w-6 h-6 bg-gray-200 text-gray-700 font-bold rounded">-</button>
+                    <button onclick="updateCartQuantity('${item.id}', -1)" class="w-6 h-6 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded flex items-center justify-center">-</button>
                     <span class="text-xs font-bold w-4 text-center">${item.qty}</span>
-                    <button onclick="updateCartQuantity('${item.id}', 1)" class="w-6 h-6 bg-emerald-600 text-white font-bold rounded">+</button>
+                    <button onclick="updateCartQuantity('${item.id}', 1)" class="w-6 h-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded flex items-center justify-center">+</button>
                 </div>
             </div>
         `;
     });
 
-    const val = parseFloat(document.getElementById('discount-val').value) || 0;
-    discountAmount = discountType === 'FIXED' ? Math.min(val, grossTotal) : grossTotal * (Math.min(val, 100) / 100);
+    // Discount Math
+    const inputVal = parseFloat(document.getElementById('discount-val').value) || 0;
+    const customTitle = document.getElementById('discount-title').value.trim();
+    const discLabel = customTitle !== '' ? customTitle : 'Discount';
+
+    if (discountType === 'FIXED') {
+        discountAmount = Math.min(inputVal, grossTotal);
+    } else {
+        discountAmount = grossTotal * (Math.min(inputVal, 100) / 100);
+    }
+
     netTotalInclusive = Math.max(0, grossTotal - discountAmount);
+    const subtotalExclVat = netTotalInclusive / 1.10;
+    const vatIncluded = netTotalInclusive - subtotalExclVat;
 
     document.getElementById('summary-gross').innerText = formatBHD(grossTotal);
-    document.getElementById('summary-discount').innerText = '-' + formatBHD(discountAmount);
-    document.getElementById('row-discount').classList.toggle('hidden', discountAmount <= 0);
-    document.getElementById('summary-subtotal').innerText = formatBHD(netTotalInclusive / 1.10);
-    document.getElementById('summary-vat').innerText = formatBHD(netTotalInclusive - (netTotalInclusive / 1.10));
+    
+    const discRow = document.getElementById('row-discount');
+    if (discountAmount > 0) {
+        discRow.classList.remove('hidden');
+        document.getElementById('label-discount-title').innerText = discLabel;
+        document.getElementById('summary-discount').innerText = '-' + formatBHD(discountAmount);
+    } else {
+        discRow.classList.add('hidden');
+    }
+
+    document.getElementById('summary-subtotal').innerText = formatBHD(subtotalExclVat);
+    document.getElementById('summary-vat').innerText = formatBHD(vatIncluded);
     document.getElementById('summary-total').innerText = formatBHD(netTotalInclusive);
     document.getElementById('btn-total').innerText = formatBHD(netTotalInclusive);
     document.getElementById('modal-total').innerText = formatBHD(netTotalInclusive);
 }
 
-// --- CHECKOUT & SALE PROCESSING ---
-function openPaymentModal() {
-    if (cart.length === 0) return alert('Cart is empty.');
-    document.getElementById('payment-modal').classList.remove('hidden');
-}
-function closePaymentModal() { document.getElementById('payment-modal').classList.add('hidden'); }
-
-function processSale(action) {
-    const custName = document.getElementById('cust-name-input').value.trim() || 'Walk-in Customer';
-    const custPhone = document.getElementById('cust-phone-input').value.trim() || 'N/A';
-    const ptsEarned = Math.floor(netTotalInclusive);
-
-    const saleRecord = {
-        id: 'REC-' + Date.now(),
-        date: new Date().toLocaleString('en-GB'),
-        custName, custPhone,
-        items: [...cart],
-        grossTotal, discountAmount, netTotalInclusive,
-        ptsEarned, ptsRedeemed: pointsRedeemedCount,
-        status: 'COMPLETED'
-    };
-
-    // Deduct stock
-    cart.forEach(c => {
-        const p = products.find(prod => prod.id === c.id);
-        if (p) p.stock_quantity = Math.max(0, p.stock_quantity - c.qty);
-    });
-
-    salesHistory.unshift(saleRecord);
-    renderProducts();
-
-    if (action === 'WHATSAPP') {
-        window.open(`https://wa.me/${custPhone}?text=${encodeURIComponent('Receipt total: ' + formatBHD(netTotalInclusive))}`, '_blank');
-    } else if (action === 'EMAIL') {
-        window.location.href = `mailto:?subject=Receipt&body=${encodeURIComponent('Receipt total: ' + formatBHD(netTotalInclusive))}`;
-    }
-
-    clearCart();
-    closePaymentModal();
-    alert('Transaction Completed Successfully!');
-}
-
-// --- SALES HISTORY & REFUNDS ENGINE ---
-function openSalesHistoryModal() {
-    document.getElementById('sales-history-modal').classList.remove('hidden');
-    renderSalesHistory();
-}
-function closeSalesHistoryModal() { document.getElementById('sales-history-modal').classList.add('hidden'); }
-
-function renderSalesHistory() {
-    const list = document.getElementById('sales-history-list');
-    list.innerHTML = '';
-
-    if (salesHistory.length === 0) {
-        list.innerHTML = '<p class="text-center text-gray-500 py-8 text-xs">No previous sales records found.</p>';
+// --- SEARCH ENGINE ---
+function filterProducts() {
+    const query = document.getElementById('search-input').value.toLowerCase().trim();
+    const filtered = products.filter(p => 
+        (p.name && p.name.toLowerCase().includes(query)) || 
+        (p.sku && p.sku.toLowerCase().includes(query)) ||
+        (p.barcode && p.barcode.toLowerCase().includes(query))
+    );
+    
+    if (filtered.length === 1 && ((filtered[0].sku && filtered[0].sku.toLowerCase() === query) || (filtered[0].barcode && filtered[0].barcode.toLowerCase() === query))) {
+        addToCart(filtered[0].id);
+        document.getElementById('search-input').value = '';
+        renderProducts(products);
         return;
     }
+    renderProducts(filtered);
+}
 
-    salesHistory.forEach(s => {
-        list.innerHTML += `
-            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50 flex flex-col space-y-2">
-                <div class="flex justify-between items-center text-xs border-b pb-1">
-                    <div>
-                        <strong class="text-gray-800">${s.id}</strong>
-                        <span class="text-gray-500 text-[10px] ml-2">${s.date}</span>
-                    </div>
-                    <span class="px-2 py-0.5 rounded-full font-bold text-[10px] ${s.status === 'REFUNDED' ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800'}">${s.status}</span>
-                </div>
-                <div class="text-xs text-gray-600">
-                    <div>Customer: <strong>${s.custName}</strong> (${s.custPhone})</div>
-                    <div>Items: ${s.items.map(i => `${i.name} (x${i.qty})`).join(', ')}</div>
-                    <div>Total: <strong class="text-emerald-700">${formatBHD(s.netTotalInclusive)}</strong> | Points Earned: ${s.ptsEarned}</div>
-                </div>
-                <div class="flex space-x-2 pt-1 border-t">
-                    <button onclick="reprintReceipt('${s.id}')" class="bg-gray-800 text-white text-[10px] px-2.5 py-1 rounded">Print</button>
-                    <button onclick="resendWhatsApp('${s.id}')" class="bg-green-600 text-white text-[10px] px-2.5 py-1 rounded">WhatsApp</button>
-                    ${s.status !== 'REFUNDED' ? `<button onclick="processRefund('${s.id}')" class="bg-red-600 text-white text-[10px] px-2.5 py-1 rounded font-bold">Issue Refund</button>` : ''}
-                </div>
-            </div>
+// --- PAYMENT MODAL & FLEXIBLE SPLIT PAYMENT CONTROLLERS ---
+function openPaymentModal() {
+    if (cart.length === 0) {
+        alert('Cart is empty. Please add products to check out.');
+        return;
+    }
+    document.getElementById('payment-modal').classList.remove('hidden');
+    document.getElementById('cash-tendered').value = '';
+    document.getElementById('split-pri-amount').value = '';
+    document.getElementById('change-due').innerText = formatBHD(0);
+    setPaymentType('SINGLE');
+    setSingleMethod('CASH');
+    setSplitPrimaryMethod('CASH');
+    setSplitSecondaryMethod('CARD');
+    setPrintFormat('58mm');
+}
+
+function closePaymentModal() {
+    document.getElementById('payment-modal').classList.add('hidden');
+}
+
+function setPaymentType(type) {
+    selectedPaymentType = type;
+    const singleBtn = document.getElementById('mode-single-btn');
+    const splitBtn = document.getElementById('mode-split-btn');
+    const singleContainer = document.getElementById('single-payment-container');
+    const splitContainer = document.getElementById('split-payment-container');
+
+    if (type === 'SINGLE') {
+        singleBtn.className = 'border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
+        splitBtn.className = 'border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center';
+        singleContainer.classList.remove('hidden');
+        splitContainer.classList.add('hidden');
+    } else {
+        splitBtn.className = 'border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
+        singleBtn.className = 'border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center';
+        singleContainer.classList.add('hidden');
+        splitContainer.classList.remove('hidden');
+        calculateSplitBalance();
+    }
+}
+
+function setSingleMethod(method) {
+    singlePaymentMethod = method;
+    const cashBtn = document.getElementById('btn-single-cash');
+    const cardBtn = document.getElementById('btn-single-card');
+    const benefitBtn = document.getElementById('btn-single-benefit');
+    const cashWrapper = document.getElementById('single-cash-wrapper');
+
+    [cashBtn, cardBtn, benefitBtn].forEach(btn => {
+        btn.className = 'pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center';
+    });
+
+    if (method === 'CASH') {
+        cashBtn.className = 'pay-method-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
+        cashWrapper.style.display = 'block';
+    } else if (method === 'CARD') {
+        cardBtn.className = 'pay-method-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
+        cashWrapper.style.display = 'none';
+    } else if (method === 'BENEFIT_PAY') {
+        benefitBtn.className = 'pay-method-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
+        cashWrapper.style.display = 'none';
+    }
+}
+
+function setSplitPrimaryMethod(method) {
+    splitPrimaryMethod = method;
+    const cashBtn = document.getElementById('btn-split-pri-cash');
+    const cardBtn = document.getElementById('btn-split-pri-card');
+    const benefitBtn = document.getElementById('btn-split-pri-benefit');
+    const labelPri = document.getElementById('label-split-pri-amount');
+
+    [cashBtn, cardBtn, benefitBtn].forEach(btn => {
+        btn.className = 'split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center';
+    });
+
+    if (method === 'CASH') {
+        cashBtn.className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+        labelPri.innerText = 'Primary Paid via Cash (BHD)';
+    } else if (method === 'CARD') {
+        cardBtn.className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+        labelPri.innerText = 'Primary Paid via Card (BHD)';
+    } else {
+        benefitBtn.className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+        labelPri.innerText = 'Primary Paid via Benefit (BHD)';
+    }
+}
+
+function setSplitSecondaryMethod(method) {
+    splitSecondaryMethod = method;
+    const cashBtn = document.getElementById('btn-split-sec-cash');
+    const cardBtn = document.getElementById('btn-split-sec-card');
+    const benefitBtn = document.getElementById('btn-split-sec-benefit');
+
+    [cashBtn, cardBtn, benefitBtn].forEach(btn => {
+        btn.className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center';
+    });
+
+    if (method === 'CASH') {
+        cashBtn.className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+    } else if (method === 'CARD') {
+        cardBtn.className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+    } else {
+        benefitBtn.className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+    }
+}
+
+function setPrintFormat(fmt) {
+    selectedPrintFormat = fmt;
+    const btn58 = document.getElementById('btn-print-58mm');
+    const btnA4 = document.getElementById('btn-print-a4');
+
+    btn58.className = 'print-fmt-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center';
+    btnA4.className = 'print-fmt-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center';
+
+    if (fmt === '58mm') {
+        btn58.className = 'print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
+    } else {
+        btnA4.className = 'print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
+    }
+}
+
+function calculateSingleChange() {
+    const tendered = parseFloat(document.getElementById('cash-tendered').value) || 0;
+    const change = tendered - netTotalInclusive;
+    document.getElementById('change-due').innerText = formatBHD(change > 0 ? change : 0);
+}
+
+function calculateSplitBalance() {
+    const priInput = parseFloat(document.getElementById('split-pri-amount').value) || 0;
+    const remaining = netTotalInclusive - priInput;
+    document.getElementById('split-remaining-balance').innerText = formatBHD(remaining > 0 ? remaining : 0);
+}
+
+// --- SALE PROCESSING & MULTI-CHANNEL DISPATCH ---
+function processSale(actionChannel = 'PRINT') {
+    let paymentBreakdownText = '';
+    let paymentBreakdownHTML = '';
+
+    if (selectedPaymentType === 'SINGLE') {
+        if (singlePaymentMethod === 'CASH') {
+            const tendered = parseFloat(document.getElementById('cash-tendered').value) || 0;
+            if (tendered < netTotalInclusive) {
+                alert('Tendered cash amount is less than total due.');
+                return;
+            }
+            const change = tendered - netTotalInclusive;
+            paymentBreakdownHTML = `
+                <div style="display: flex; justify-content: space-between;"><span>CASH:</span><span>${formatBHD(netTotalInclusive)}</span></div>
+                <div style="display: flex; justify-content: space-between; color: #6b7280;"><span>Tendered:</span><span>${formatBHD(tendered)}</span></div>
+                <div style="display: flex; justify-content: space-between; color: #6b7280;"><span>Change:</span><span>${formatBHD(change)}</span></div>
+            `;
+            paymentBreakdownText = `CASH: ${formatBHD(netTotalInclusive)} (Tendered: ${formatBHD(tendered)}, Change: ${formatBHD(change)})`;
+        } else {
+            paymentBreakdownHTML = `<div style="display: flex; justify-content: space-between;"><span>${singlePaymentMethod}:</span><span>${formatBHD(netTotalInclusive)}</span></div>`;
+            paymentBreakdownText = `${singlePaymentMethod}: ${formatBHD(netTotalInclusive)}`;
+        }
+    } else { // SPLIT PAYMENT
+        const priAmount = parseFloat(document.getElementById('split-pri-amount').value) || 0;
+        if (priAmount <= 0 || priAmount >= netTotalInclusive) {
+            alert('Please enter a valid partial primary amount.');
+            return;
+        }
+        const remAmount = netTotalInclusive - priAmount;
+        paymentBreakdownHTML = `
+            <div style="display: flex; justify-content: space-between;"><span>${splitPrimaryMethod}:</span><span>${formatBHD(priAmount)}</span></div>
+            <div style="display: flex; justify-content: space-between;"><span>${splitSecondaryMethod}:</span><span>${formatBHD(remAmount)}</span></div>
         `;
-    });
-}
-
-function processRefund(receiptId) {
-    const sale = salesHistory.find(s => s.id === receiptId);
-    if (!sale || sale.status === 'REFUNDED') return;
-
-    if (!confirm(`Are you sure you want to refund ${sale.id}? Inventory will be restored and ${sale.ptsEarned} loyalty points will be deducted.`)) return;
-
-    // Restore stock
-    sale.items.forEach(item => {
-        const p = products.find(prod => prod.id === item.id);
-        if (p) p.stock_quantity += item.qty;
-    });
-
-    sale.status = 'REFUNDED';
-    alert(`Refund Processed!\n-${sale.ptsEarned} Loyalty points deducted from ${sale.custName}.\nInventory restored.`);
-    renderSalesHistory();
-    renderProducts();
-}
-
-function reprintReceipt(id) { alert('Sending ' + id + ' to printer...'); }
-function resendWhatsApp(id) { alert('Sending ' + id + ' via WhatsApp...'); }
-
-// --- MANAGING ITEMS & ROLE-BASED COST MASKING ---
-function openManageItemsModal() {
-    document.getElementById('manage-items-modal').classList.remove('hidden');
-    document.getElementById('cost-access-status').innerText = currentUserRole === 'MANAGER' ? '(Manager: Full Access)' : '(Cashier: Cost Price Hidden)';
-    renderManageItems();
-}
-function closeManageItemsModal() { document.getElementById('manage-items-modal').classList.add('hidden'); }
-
-function renderManageItems() {
-    const container = document.getElementById('manage-items-list');
-    container.innerHTML = '';
-
-    products.forEach(p => {
-        const isMgr = currentUserRole === 'MANAGER';
-        container.innerHTML += `
-            <div class="border border-gray-200 p-3 rounded-lg bg-gray-50 grid grid-cols-1 sm:grid-cols-6 gap-2 items-center text-xs">
-                <div class="sm:col-span-2">
-                    <label class="text-[9px] font-bold text-gray-400 uppercase">Product Name</label>
-                    <input type="text" id="edit-name-${p.id}" value="${p.name}" class="w-full border rounded px-2 py-1 font-bold">
-                </div>
-                <div>
-                    <label class="text-[9px] font-bold text-gray-400 uppercase">Retail Price (BHD)</label>
-                    <input type="number" id="edit-price-${p.id}" step="0.001" value="${p.retail_price}" class="w-full border rounded px-2 py-1 font-bold text-emerald-700">
-                </div>
-                <div>
-                    <label class="text-[9px] font-bold text-gray-400 uppercase">Cost Price</label>
-                    <input type="text" ${!isMgr ? 'disabled' : ''} id="edit-cost-${p.id}" value="${isMgr ? p.cost_price : '***'}" class="w-full border rounded px-2 py-1 ${!isMgr ? 'bg-gray-200 text-gray-400' : 'bg-white font-bold'}">
-                </div>
-                <div>
-                    <label class="text-[9px] font-bold text-gray-400 uppercase">Stock Qty</label>
-                    <input type="number" id="edit-stock-${p.id}" value="${p.stock_quantity}" class="w-full border rounded px-2 py-1 font-bold">
-                </div>
-                <div class="flex items-end">
-                    <button onclick="saveItemChanges('${p.id}')" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-1 rounded">Save</button>
-                </div>
-            </div>
-        `;
-    });
-}
-
-function saveItemChanges(id) {
-    const p = products.find(prod => prod.id === id);
-    if (!p) return;
-
-    p.name = document.getElementById(`edit-name-${id}`).value;
-    p.retail_price = parseFloat(document.getElementById(`edit-price-${id}`).value) || 0;
-    p.stock_quantity = parseInt(document.getElementById(`edit-stock-${id}`).value) || 0;
-
-    if (currentUserRole === 'MANAGER') {
-        p.cost_price = parseFloat(document.getElementById(`edit-cost-${id}`).value) || 0;
+        paymentBreakdownText = `${splitPrimaryMethod}: ${formatBHD(priAmount)} | ${splitSecondaryMethod}: ${formatBHD(remAmount)}`;
     }
 
-    renderProducts();
-    alert(`Item "${p.name}" updated successfully!`);
+    // Customer & Loyalty calculation
+    const custName = document.getElementById('cust-name-input').value.trim() || 'Walk-in Customer';
+    const custPhone = document.getElementById('cust-phone-input').value.trim() || 'N/A';
+    
+    const ptsEarned = Math.floor(netTotalInclusive);
+    const finalPointsBalance = Math.max(0, currentCustomerPoints - pointsRedeemedCount) + ptsEarned;
+
+    // Math summaries
+    const subtotalExclVat = netTotalInclusive / 1.10;
+    const vatIncluded = netTotalInclusive - subtotalExclVat;
+    const timestampStr = new Date().toLocaleString('en-GB');
+
+    // Build Receipt Text Summary (for WhatsApp / Email)
+    let receiptSummaryText = `*BARAKAT PERFUMES - RECEIPT*\n`;
+    receiptSummaryText += `Date: ${timestampStr}\n`;
+    receiptSummaryText += `Customer: ${custName} (${custPhone})\n`;
+    receiptSummaryText += `------------------------------\n`;
+    cart.forEach(item => {
+        receiptSummaryText += `${item.name} x${item.qty} = ${formatBHD(item.retail_price * item.qty)}\n`;
+    });
+    receiptSummaryText += `------------------------------\n`;
+    receiptSummaryText += `Gross Total: ${formatBHD(grossTotal)}\n`;
+    if (discountAmount > 0) {
+        const customTitle = document.getElementById('discount-title').value.trim();
+        receiptSummaryText += `Discount (${customTitle || 'Discount'}): -${formatBHD(discountAmount)}\n`;
+    }
+    receiptSummaryText += `*TOTAL BILL: ${formatBHD(netTotalInclusive)}*\n`;
+    receiptSummaryText += `Payment: ${paymentBreakdownText}\n`;
+    receiptSummaryText += `Points Earned: ${ptsEarned} | Total Balance: ${finalPointsBalance}\n`;
+    receiptSummaryText += `Thank you for shopping with Barakat Perfumes!`;
+
+    // HANDLE MULTI-CHANNEL ACTIONS
+    if (actionChannel === 'WHATSAPP') {
+        const cleanPhone = custPhone.replace(/[^0-9]/g, '');
+        const targetPhone = cleanPhone.length >= 8 ? (cleanPhone.startsWith('973') ? cleanPhone : '973' + cleanPhone) : '';
+        const waUrl = `https://wa.me/${targetPhone}?text=${encodeURIComponent(receiptSummaryText)}`;
+        window.open(waUrl, '_blank');
+    } else if (actionChannel === 'EMAIL') {
+        const mailtoUrl = `mailto:?subject=${encodeURIComponent('Barakat Perfumes - Receipt')}&body=${encodeURIComponent(receiptSummaryText)}`;
+        window.location.href = mailtoUrl;
+    }
+
+    // PRINT RECEIPT GENERATION
+    if (actionChannel === 'PRINT' || actionChannel === 'WHATSAPP' || actionChannel === 'EMAIL') {
+        const templateId = selectedPrintFormat === '58mm' ? 'template-receipt-58mm' : 'template-receipt-a4';
+        const templateContent = document.getElementById(templateId).content.cloneNode(true);
+
+        templateContent.querySelector('.t-cust-name').innerText = custName;
+        templateContent.querySelector('.t-cust-phone').innerText = custPhone;
+        templateContent.querySelector('.t-pts-earned').innerText = ptsEarned;
+        templateContent.querySelector('.t-pts-balance').innerText = finalPointsBalance;
+        templateContent.querySelector('.t-gross').innerText = formatBHD(grossTotal);
+        templateContent.querySelector('.t-subtotal').innerText = formatBHD(subtotalExclVat);
+        templateContent.querySelector('.t-vat').innerText = formatBHD(vatIncluded);
+        templateContent.querySelector('.t-total').innerText = formatBHD(netTotalInclusive);
+        templateContent.querySelector('.t-timestamp').innerText = timestampStr;
+        templateContent.querySelector('.t-payments-breakdown').innerHTML = paymentBreakdownHTML;
+
+        // Handle Discount display in receipt
+        const discRow = templateContent.querySelector('.t-disc-row');
+        if (discountAmount > 0) {
+            const customTitle = document.getElementById('discount-title').value.trim();
+            const discLabel = customTitle !== '' ? customTitle : 'Discount';
+            discRow.querySelector('span:first-child').innerText = discLabel + ':';
+            discRow.querySelector('.t-disc-val').innerText = '-' + formatBHD(discountAmount);
+        } else {
+            discRow.style.display = 'none';
+        }
+
+        // Render items list based on layout
+        if (selectedPrintFormat === '58mm') {
+            const itemsContainer = templateContent.querySelector('.t-items-list');
+            cart.forEach(item => {
+                itemsContainer.innerHTML += `
+                    <div>
+                        <div style="font-weight: bold;">${item.name}</div>
+                        <div style="display: flex; justify-content: space-between; color: #4b5563;">
+                            <span>${item.qty} x ${formatBHD(item.retail_price)}</span>
+                            <span>${formatBHD(item.retail_price * item.qty)}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        } else {
+            const tableBody = templateContent.querySelector('.t-items-table-body');
+            cart.forEach(item => {
+                tableBody.innerHTML += `
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 4px 6px;">
+                            <div style="font-weight: bold; color: #1f2937;">${item.name}</div>
+                            <div style="font-size: 8px; color: #9ca3af; font-family: monospace;">SKU: ${item.sku || 'N/A'}</div>
+                        </td>
+                        <td style="padding: 4px 6px; text-align: center; font-weight: 600;">${item.qty}</td>
+                        <td style="padding: 4px 6px; text-align: right; font-family: monospace;">${formatBHD(item.retail_price)}</td>
+                        <td style="padding: 4px 6px; text-align: right; font-family: monospace; font-weight: bold;">${formatBHD(item.retail_price * item.qty)}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        if (actionChannel === 'PRINT') {
+            const printContainer = document.getElementById('print-container');
+            printContainer.innerHTML = '';
+            printContainer.appendChild(templateContent);
+            printContainer.classList.remove('hidden');
+
+            window.print();
+
+            printContainer.classList.add('hidden');
+            printContainer.innerHTML = '';
+        }
+    }
+
+    // Reset and close after completing order
+    clearCart();
+    closePaymentModal();
 }
 
 function switchUser() {
-    if (currentUserRole === 'CASHIER') {
-        const pin = prompt('Enter Manager PIN (Default: 1234):');
-        if (pin === '1234') {
-            currentUserRole = 'MANAGER';
-            document.getElementById('role-badge').innerText = 'Manager';
-            alert('Switched to Manager Role. Cost Prices unlocked.');
-        } else {
-            alert('Invalid PIN!');
-        }
-    } else {
-        currentUserRole = 'CASHIER';
-        document.getElementById('role-badge').innerText = 'Cashier';
-        alert('Switched to Cashier Role. Cost Prices hidden.');
-    }
+    alert('User switched');
 }
 
-// Initial Launch Setup
-renderProducts();
+function toggleCameraScanner() {
+    alert('Camera scanner toggled');
+}
+
+// Initial Load
+fetchProducts();
     </script>
 </body>
 </html>
