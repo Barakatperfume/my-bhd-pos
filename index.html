@@ -148,11 +148,11 @@
 
     <script>
 // --- SUPABASE CONFIGURATION ---
-// Replace the quotes below with the URL and key you copied in Step 1
 const SUPABASE_URL = 'https://lxyxlecusdjdikozeedx.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4eXhsZWN1c2RqZGlrb3plZWR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NjkzNTgsImV4cCI6MjEwNTE0NTM1OH0._nPzYbZ2TIeRXQ-2went70JXygrI5TqUMDofi5OKxy4';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Renamed variable to avoid conflict with window.supabase
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let products = [];
 let cart = [];
@@ -166,18 +166,18 @@ const formatBHD = (amount) => {
 
 // --- FETCH PRODUCTS FROM SUPABASE ---
 async function fetchProducts() {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
         .from('products')
-        .select('*')
-        .eq('available_for_sale', true);
+        .select('*');
 
     if (error) {
         console.error('Error fetching products:', error);
-        alert('Failed to load products from database');
+        alert('Failed to load products from database: ' + error.message);
         return;
     }
 
-    products = data;
+    console.log('Fetched products successfully:', data);
+    products = data || [];
     renderProducts(products);
 }
 
@@ -186,22 +186,22 @@ function renderProducts(list = products) {
     const grid = document.getElementById('product-grid');
     grid.innerHTML = '';
 
-    if (list.length === 0) {
+    if (!list || list.length === 0) {
         grid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-10">No products found.</p>';
         return;
     }
     
     list.forEach(p => {
-        let stock = p.stock_quantity;
-        let price = p.retail_price;
-        let badgeColor = stock > p.low_stock_threshold ? 'bg-emerald-100 text-emerald-800' : stock > 0 ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800';
-        let badgeText = stock > p.low_stock_threshold ? `${stock} in stock` : stock > 0 ? `Low: ${stock} left` : 'Out of Stock';
+        let stock = p.stock_quantity || 0;
+        let price = p.retail_price || 0;
+        let badgeColor = stock > (p.low_stock_threshold || 5) ? 'bg-emerald-100 text-emerald-800' : stock > 0 ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800';
+        let badgeText = stock > (p.low_stock_threshold || 5) ? `${stock} in stock` : stock > 0 ? `Low: ${stock} left` : 'Out of Stock';
 
         grid.innerHTML += `
             <div onclick="addToCart('${p.id}')" class="bg-white border border-gray-200 rounded-xl p-2.5 flex flex-col justify-between shadow-sm hover:shadow-md transition cursor-pointer relative overflow-hidden">
                 <div>
-                    <h4 class="font-bold text-gray-800 text-xs line-clamp-1">${p.name}</h4>
-                    <p class="text-[10px] text-gray-400">SKU: ${p.sku}</p>
+                    <h4 class="font-bold text-gray-800 text-xs line-clamp-1">${p.name || 'Unnamed Item'}</h4>
+                    <p class="text-[10px] text-gray-400">SKU: ${p.sku || 'N/A'}</p>
                     <p class="font-extrabold text-emerald-700 text-sm mt-1">${formatBHD(price)}</p>
                 </div>
                 <span class="mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full inline-block text-center ${badgeColor}">
@@ -215,11 +215,11 @@ function renderProducts(list = products) {
 // --- CART ENGINE ---
 function addToCart(productId) {
     const product = products.find(p => p.id === productId);
-    if (!product || product.stock_quantity <= 0) return alert('Item out of stock!');
+    if (!product) return alert('Item not found!');
 
     const cartItem = cart.find(item => item.id === productId);
     if (cartItem) {
-        if (cartItem.qty < product.stock_quantity) cartItem.qty++;
+        cartItem.qty++;
     } else {
         cart.push({ ...product, qty: 1 });
     }
@@ -248,7 +248,7 @@ function updateCartUI() {
     
     let subtotal = 0;
     cart.forEach(item => {
-        const itemTotal = item.retail_price * item.qty;
+        const itemTotal = (item.retail_price || 0) * item.qty;
         subtotal += itemTotal;
         cartContainer.innerHTML += `
             <div class="flex items-center justify-between pt-2">
@@ -284,7 +284,7 @@ function filterProducts() {
         (p.barcode && p.barcode.toLowerCase().includes(query))
     );
     
-    if (filtered.length === 1 && (filtered[0].sku === query || filtered[0].barcode === query)) {
+    if (filtered.length === 1 && ((filtered[0].sku && filtered[0].sku.toLowerCase() === query) || (filtered[0].barcode && filtered[0].barcode.toLowerCase() === query))) {
         addToCart(filtered[0].id);
         document.getElementById('search-input').value = '';
         renderProducts(products);
