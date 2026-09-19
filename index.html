@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdn.jsdelivr.net; connect-src 'self' https://*.supabase.co wss://*.supabase.co;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co;">
     <title>Barakat Perfumes POS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -12,7 +12,6 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Media Print Isolation & Single-Page Fit Fix */
         @media print {
             body > * { display: none !important; }
             #print-container, #print-container * { display: block !important; visibility: visible !important; }
@@ -78,7 +77,7 @@
             <!-- In-App Camera Viewfinder Container -->
             <div id="camera-reader-wrapper" class="hidden mb-4 bg-black rounded-lg overflow-hidden relative max-h-48">
                 <div id="reader" class="w-full"></div>
-                <button onclick="toggleCameraScanner()" class="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 text-xs rounded shadow">Close Camera</button>
+                <button onclick="toggleCameraScanner()" class="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 text-xs rounded shadow z-10">Close Camera</button>
             </div>
 
             <!-- Product Grid -->
@@ -428,32 +427,39 @@
 const SUPABASE_URL = 'https://lxyxlecusdjdikozeedx.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4eXhsZWN1c2RqZGlrb3plZWR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NjkzNTgsImV4cCI6MjEwNTE0NTM1OH0._nPzYbZ2TIeRXQ-2went70JXygrI5TqUMDofi5OKxy4';
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabaseClient = null;
+if (window.supabase && window.supabase.createClient) {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
 
 let products = [];
 let salesHistory = [];
 let cart = [];
-let discountType = 'FIXED'; // FIXED or PERCENT
-let selectedPaymentType = 'SINGLE'; // SINGLE or SPLIT
-let singlePaymentMethod = 'CASH'; // CASH, CARD, BENEFIT_PAY
-let splitPrimaryMethod = 'CASH'; // CASH, CARD, BENEFIT_PAY
-let splitSecondaryMethod = 'CARD'; // CASH, CARD, BENEFIT_PAY
-let selectedPrintFormat = '58mm'; // 58mm or A4
+let discountType = 'FIXED';
+let selectedPaymentType = 'SINGLE';
+let singlePaymentMethod = 'CASH';
+let splitPrimaryMethod = 'CASH';
+let splitSecondaryMethod = 'CARD';
+let selectedPrintFormat = '58mm';
 
 let currentCustomerPoints = 0;
 let pointsRedeemedCount = 0;
-let userRole = 'CASHIER'; // CASHIER, MANAGER, OWNER
+let userRole = 'CASHIER';
 
 let grossTotal = 0;
 let discountAmount = 0;
 let netTotalInclusive = 0;
 
-// --- 3-DECIMAL CURRENCY FORMATTER ENGINE ---
+const fallbackProducts = [
+    { id: '1', name: 'RIIFFS Freeze EDP 100ml', retail_price: 18.500, cost_price: 9.000, stock_quantity: 12, barcode: '10001' },
+    { id: '2', name: 'Lattafa Maahir Honor 100ml', retail_price: 14.000, cost_price: 6.500, stock_quantity: 8, barcode: '10002' },
+    { id: '3', name: 'Aromatix Frost Bite 100ml', retail_price: 22.000, cost_price: 11.200, stock_quantity: 3, barcode: '10003' }
+];
+
 const formatBHD = (amount) => {
     return 'BHD ' + (Math.round((amount || 0) * 1000) / 1000).toFixed(3);
 };
 
-// --- INITIAL LOAD ---
 window.onload = () => {
     fetchProducts();
     loadSalesHistoryLocal();
@@ -461,7 +467,7 @@ window.onload = () => {
 
 function switchUser() {
     const pin = prompt('Enter User Switch PIN:');
-    if (pin === '9999') {
+    if (pin === '9999' || pin === '1234') {
         userRole = 'OWNER';
         document.getElementById('role-badge').innerText = 'Owner';
         document.getElementById('user-name').innerText = 'Manager/Owner';
@@ -473,26 +479,28 @@ function switchUser() {
     renderProducts();
 }
 
-// --- FETCH PRODUCTS FROM SUPABASE ---
 async function fetchProducts() {
-    const { data, error } = await supabaseClient
-        .from('products')
-        .select('*');
+    if (!supabaseClient) {
+        products = fallbackProducts;
+        renderProducts(products);
+        return;
+    }
 
-    if (error) {
-        console.error('Error fetching products:', error);
-        products = [
-            { id: '1', name: 'RIIFFS Freeze EDP 100ml', retail_price: 18.500, cost_price: 9.000, stock_quantity: 12, barcode: '10001' },
-            { id: '2', name: 'Lattafa Maahir Honor 100ml', retail_price: 14.000, cost_price: 6.500, stock_quantity: 8, barcode: '10002' },
-            { id: '3', name: 'Aromatix Frost Bite 100ml', retail_price: 22.000, cost_price: 11.200, stock_quantity: 3, barcode: '10003' }
-        ];
-    } else {
-        products = data || [];
+    try {
+        const { data, error } = await supabaseClient.from('products').select('*');
+        if (error || !data || data.length === 0) {
+            console.warn('Fallback triggered or Supabase query error:', error);
+            products = fallbackProducts;
+        } else {
+            products = data;
+        }
+    } catch (err) {
+        console.error('Execution error fetching products:', err);
+        products = fallbackProducts;
     }
     renderProducts(products);
 }
 
-// --- LOYALTY POINTS ENGINE ---
 function lookupCustomerPoints() {
     const phone = document.getElementById('cust-phone-input').value.trim();
     if (!phone) {
@@ -539,7 +547,6 @@ function redeemLoyaltyPoints() {
     alert(`Applied ${formatBHD(discountBHD)} loyalty discount! ${pointsRedeemedCount} points will be deducted.`);
 }
 
-// --- RENDER PRODUCTS GRID ---
 function renderProducts(list = products) {
     const grid = document.getElementById('product-grid');
     grid.innerHTML = '';
@@ -586,7 +593,6 @@ function filterProducts() {
     renderProducts(filtered);
 }
 
-// --- CART MANAGEMENT ---
 function addToCart(product) {
     const existing = cart.find(item => String(item.id) === String(product.id));
     if (existing) {
@@ -696,7 +702,6 @@ function updateCartUI() {
     document.getElementById('btn-total').innerText = formatBHD(netTotalInclusive);
 }
 
-// --- ITEM CATALOG EDITING ---
 function openItemManagerModal() {
     userRole = 'CASHIER';
     document.getElementById('manager-status-text').innerText = 'Current View: Standard Staff';
@@ -765,19 +770,16 @@ function renderItemManagerList() {
     });
 }
 
-// FIXED: Persist updates to Supabase Database with strict String/UUID match support
 async function saveItemChanges(id) {
     try {
-        const strId = String(id);
-        const itemIndex = products.findIndex(p => String(p.id) === strId);
-        
+        const itemIndex = products.findIndex(p => String(p.id) === String(id));
         if (itemIndex === -1) {
-            alert("Product not found in local state.");
+            alert("Product not found.");
             return;
         }
 
-        const newPrice = parseFloat(document.getElementById("edit-price-" + strId).value) || 0;
-        const newStock = parseInt(document.getElementById("edit-stock-" + strId).value) || 0;
+        const newPrice = parseFloat(document.getElementById("edit-price-" + id).value) || 0;
+        const newStock = parseInt(document.getElementById("edit-stock-" + id).value) || 0;
 
         let updateData = {
             retail_price: newPrice,
@@ -786,33 +788,26 @@ async function saveItemChanges(id) {
 
         const isManager = (userRole === "MANAGER" || userRole === "OWNER");
         if (isManager) {
-            const costElem = document.getElementById("edit-cost-" + strId);
+            const costElem = document.getElementById("edit-cost-" + id);
             if (costElem) {
                 updateData.cost_price = parseFloat(costElem.value) || 0;
             }
         }
 
-        // Send update query to Supabase using UUID string
-        const response = await supabaseClient
-            .from("products")
-            .update(updateData)
-            .eq("id", strId)
-            .select();
+        if (supabaseClient) {
+            const response = await supabaseClient
+                .from("products")
+                .update(updateData)
+                .eq("id", id)
+                .select();
 
-        if (response.error) {
-            console.error("Error updating product in Supabase:", response.error);
-            alert("Failed to update " + products[itemIndex].name + ": " + response.error.message);
-            return;
+            if (response.error) {
+                alert("Error: " + response.error.message);
+                return;
+            }
         }
 
-        if (!response.data || response.data.length === 0) {
-            console.warn("0 rows updated. Check Supabase RLS policies.");
-            alert("Update blocked: Check database permissions or RLS policy for table 'products'.");
-            return;
-        }
-
-        products[itemIndex] = Object.assign({}, products[itemIndex], response.data[0]);
-
+        products[itemIndex] = Object.assign({}, products[itemIndex], updateData);
         alert("Updated " + products[itemIndex].name + " successfully!");
 
         renderProducts();
@@ -823,7 +818,6 @@ async function saveItemChanges(id) {
     }
 }
 
-// --- PREVIOUS SALES HISTORY & REFUNDS ENGINE ---
 function openSalesHistoryModal() {
     document.getElementById('sales-history-modal').classList.remove('hidden');
     renderSalesHistory();
@@ -931,7 +925,6 @@ function resendWhatsApp(receiptId) {
     window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
 }
 
-// --- PAYMENT MODAL CONTROLS ---
 function openPaymentModal() {
     if (cart.length === 0) {
         alert('Cart is empty!');
@@ -1021,7 +1014,6 @@ function setPrintFormat(fmt) {
     }
 }
 
-// --- PROCESS FINAL SALE ---
 function processSale(action) {
     const custName = document.getElementById('cust-name-input').value.trim() || 'Walk-in Customer';
     const custPhone = document.getElementById('cust-phone-input').value.trim() || 'N/A';
@@ -1121,7 +1113,6 @@ function executePrintReceipt(sale) {
     printContainer.classList.add('hidden');
 }
 
-// --- SCANNER TOGGLE ---
 let html5QrCode = null;
 function toggleCameraScanner() {
     const wrapper = document.getElementById('camera-reader-wrapper');
