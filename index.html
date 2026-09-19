@@ -773,59 +773,64 @@ function renderItemManagerList() {
 
 // Persist updates to Supabase Database
 async function saveItemChanges(id) {
-    const targetId = isNaN(id) ? id : Number(id);
-    const itemIndex = products.findIndex(p => String(p.id) === String(id));
-    
-    if (itemIndex === -1) {
-        alert("Product not found in local state.");
-        return;
-    }
-
-    const newPrice = parseFloat(document.getElementById(`edit-price-${id}`).value) || 0;
-    const newStock = parseInt(document.getElementById(`edit-stock-${id}`).value) || 0;
-
-    let updateData = {
-        retail_price: newPrice,
-        stock_quantity: newStock
-    };
-
-    const isManager = (userRole === 'MANAGER' || userRole === 'OWNER');
-    if (isManager) {
-        const costElem = document.getElementById(`edit-cost-${id}`);
-        if (costElem) {
-            updateData.cost_price = parseFloat(costElem.value) || 0;
+    try {
+        const targetId = isNaN(id) ? id : Number(id);
+        const itemIndex = products.findIndex(p => String(p.id) === String(id));
+        
+        if (itemIndex === -1) {
+            alert("Product not found in local state.");
+            return;
         }
+
+        const newPrice = parseFloat(document.getElementById("edit-price-" + id).value) || 0;
+        const newStock = parseInt(document.getElementById("edit-stock-" + id).value) || 0;
+
+        var updateData = {
+            retail_price: newPrice,
+            stock_quantity: newStock
+        };
+
+        const isManager = (userRole === "MANAGER" || userRole === "OWNER");
+        if (isManager) {
+            const costElem = document.getElementById("edit-cost-" + id);
+            if (costElem) {
+                updateData.cost_price = parseFloat(costElem.value) || 0;
+            }
+        }
+
+        // Send update to Supabase
+        const response = await supabaseClient
+            .from("products")
+            .update(updateData)
+            .eq("id", targetId)
+            .select();
+
+        if (response.error) {
+            console.error("Error updating product in Supabase:", response.error);
+            alert("Failed to update " + products[itemIndex].name + ": " + response.error.message);
+            return;
+        }
+
+        // Handle Row Level Security (RLS) blocks
+        if (!response.data || response.data.length === 0) {
+            console.warn("0 rows updated. Check Supabase RLS policies.");
+            alert("Update blocked: Row Level Security (RLS) prevented saving item ID " + id);
+            return;
+        }
+
+        // Update local memory and re-render UI
+        products[itemIndex] = Object.assign({}, products[itemIndex], response.data[0]);
+
+        alert("Updated " + products[itemIndex].name + " successfully!");
+
+        renderProducts();
+        renderItemManagerList();
+    } catch (err) {
+        console.error("Save execution error:", err);
+        alert("An error occurred while saving: " + err.message);
     }
-
-    // Send update query to Supabase and request returned data via .select()
-    const { data, error } = await supabaseClient
-        .from('products')
-        .update(updateData)
-        .eq('id', targetId)
-        .select();
-
-    if (error) {
-        console.error('Error updating product in Supabase:', error);
-        alert(`Failed to update ${products[itemIndex].name}: ${error.message}`);
-        return;
-    }
-
-    // Catch silent block caused by Supabase Row Level Security (RLS)
-    if (!data || data.length === 0) {
-        console.warn('0 rows updated. Verify Supabase RLS policies for update permissions.');
-        alert(`Update blocked: Row Level Security (RLS) prevented writing changes for item ID ${id}.`);
-        return;
-    }
-
-    // Update local products array with fresh values returned from Supabase
-    products[itemIndex] = { ...products[itemIndex], ...data[0] };
-
-    alert(`Updated ${products[itemIndex].name} successfully!`);
-
-    // Refresh UI
-    renderProducts();
-    renderItemManagerList();
 }
+
 // --- PREVIOUS SALES HISTORY & REFUNDS ENGINE ---
 function openSalesHistoryModal() {
     document.getElementById('sales-history-modal').classList.remove('hidden');
