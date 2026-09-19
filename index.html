@@ -12,6 +12,7 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* Media Print Isolation & Single-Page Fit Fix */
         @media print {
             body > * { display: none !important; }
             #print-container, #print-container * { display: block !important; visibility: visible !important; }
@@ -102,6 +103,7 @@
                     <input type="text" id="cust-phone-input" oninput="lookupCustomerPoints()" placeholder="Phone Number" class="border border-gray-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
                 </div>
                 
+                <!-- Loyalty Points Widget -->
                 <div id="loyalty-widget" class="bg-white p-2 rounded border border-emerald-200 flex justify-between items-center text-xs">
                     <div>
                         <span class="text-gray-500">Points Balance:</span>
@@ -121,6 +123,7 @@
             <!-- Pricing Summary & Discount Controls Footer -->
             <div class="p-4 bg-gray-50 border-t border-gray-200 space-y-2">
                 
+                <!-- Discount Control Panel -->
                 <div class="bg-white p-2 rounded-lg border border-gray-200 space-y-1.5 shadow-sm">
                     <div class="flex justify-between items-center">
                         <label class="text-[11px] font-bold text-gray-700 uppercase">Apply Discount</label>
@@ -156,6 +159,7 @@
                     <span id="summary-total" class="text-emerald-700">BHD 0.000</span>
                 </div>
 
+                <!-- Charge / Checkout Button -->
                 <button onclick="openPaymentModal()" class="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow-md transition text-center flex justify-between px-4">
                     <span>PAY NOW</span>
                     <span id="btn-total">BHD 0.000</span>
@@ -193,9 +197,6 @@
                 <button onclick="closeItemManagerModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
             </div>
 
-            <!-- Dynamic Feedback Toast Notification Container -->
-            <div id="item-manager-toast" class="hidden p-3 rounded-lg text-xs font-bold transition-all"></div>
-
             <div class="flex justify-between items-center bg-gray-50 p-2 rounded border border-gray-200">
                 <span id="manager-status-text" class="text-xs font-semibold text-gray-600">Current View: Standard Staff</span>
                 <button id="btn-unlock-manager" onclick="authenticateManagerRole()" class="bg-emerald-600 text-white text-xs px-3 py-1 rounded font-bold hover:bg-emerald-700">Manager Unlock PIN</button>
@@ -217,6 +218,7 @@
                 <p id="modal-total" class="text-2xl font-black text-emerald-700">BHD 0.000</p>
             </div>
 
+            <!-- Payment Type Selection -->
             <div>
                 <label class="text-xs font-semibold text-gray-600 uppercase">Payment Option</label>
                 <div class="grid grid-cols-2 gap-2 mt-1">
@@ -225,6 +227,7 @@
                 </div>
             </div>
 
+            <!-- Single Payment Mode Container -->
             <div id="single-payment-container" class="space-y-3">
                 <div>
                     <label class="text-xs font-semibold text-gray-600 uppercase">Method</label>
@@ -245,6 +248,7 @@
                 </div>
             </div>
 
+            <!-- Split Payment Mode Container -->
             <div id="split-payment-container" class="hidden space-y-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
                 <div>
                     <label class="text-xs font-semibold text-gray-600 uppercase">1. Select Primary Payment Method</label>
@@ -275,6 +279,7 @@
                 </div>
             </div>
 
+            <!-- Receipt Print Format Selector -->
             <div>
                 <label class="text-xs font-semibold text-gray-600 uppercase">Print Format</label>
                 <div class="grid grid-cols-2 gap-2 mt-1">
@@ -283,6 +288,7 @@
                 </div>
             </div>
 
+            <!-- Multi-Channel Receipt Action Buttons -->
             <div class="space-y-2 pt-2 border-t border-gray-200">
                 <button onclick="processSale('PRINT')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-sm shadow flex items-center justify-center space-x-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
@@ -427,29 +433,30 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 let products = [];
 let salesHistory = [];
 let cart = [];
-let discountType = 'FIXED';
-let selectedPaymentType = 'SINGLE';
-let singlePaymentMethod = 'CASH';
-let splitPrimaryMethod = 'CASH';
-let splitSecondaryMethod = 'CARD';
-let selectedPrintFormat = '58mm';
+let discountType = 'FIXED'; // FIXED or PERCENT
+let selectedPaymentType = 'SINGLE'; // SINGLE or SPLIT
+let singlePaymentMethod = 'CASH'; // CASH, CARD, BENEFIT_PAY
+let splitPrimaryMethod = 'CASH'; // CASH, CARD, BENEFIT_PAY
+let splitSecondaryMethod = 'CARD'; // CASH, CARD, BENEFIT_PAY
+let selectedPrintFormat = '58mm'; // 58mm or A4
 
 let currentCustomerPoints = 0;
 let pointsRedeemedCount = 0;
-let userRole = 'CASHIER';
+let userRole = 'CASHIER'; // CASHIER, MANAGER, OWNER
 
 let grossTotal = 0;
 let discountAmount = 0;
 let netTotalInclusive = 0;
 
+// --- 3-DECIMAL CURRENCY FORMATTER ENGINE ---
 const formatBHD = (amount) => {
     return 'BHD ' + (Math.round((amount || 0) * 1000) / 1000).toFixed(3);
 };
 
+// --- INITIAL LOAD ---
 window.onload = () => {
     fetchProducts();
     loadSalesHistoryLocal();
-    setupItemManagerEvents();
 };
 
 function switchUser() {
@@ -466,6 +473,7 @@ function switchUser() {
     renderProducts();
 }
 
+// --- FETCH PRODUCTS FROM SUPABASE ---
 async function fetchProducts() {
     const { data, error } = await supabaseClient
         .from('products')
@@ -473,19 +481,19 @@ async function fetchProducts() {
 
     if (error) {
         console.error('Error fetching products:', error);
-        if (products.length === 0) {
-            products = [
-                { id: 1, name: 'RIIFFS Freeze EDP 100ml', retail_price: 18.500, cost_price: 9.000, stock_quantity: 12, barcode: '10001' },
-                { id: 2, name: 'Lattafa Maahir Honor 100ml', retail_price: 14.000, cost_price: 6.500, stock_quantity: 8, barcode: '10002' },
-                { id: 3, name: 'Aromatix Frost Bite 100ml', retail_price: 22.000, cost_price: 11.200, stock_quantity: 3, barcode: '10003' }
-            ];
-        }
+        // Fallback demo dataset if table doesn't exist yet
+        products = [
+            { id: 1, name: 'RIIFFS Freeze EDP 100ml', retail_price: 18.500, cost_price: 9.000, stock_quantity: 12, barcode: '10001' },
+            { id: 2, name: 'Lattafa Maahir Honor 100ml', retail_price: 14.000, cost_price: 6.500, stock_quantity: 8, barcode: '10002' },
+            { id: 3, name: 'Aromatix Frost Bite 100ml', retail_price: 22.000, cost_price: 11.200, stock_quantity: 3, barcode: '10003' }
+        ];
     } else {
         products = data || [];
     }
     renderProducts(products);
 }
 
+// --- LOYALTY POINTS ENGINE ---
 function lookupCustomerPoints() {
     const phone = document.getElementById('cust-phone-input').value.trim();
     if (!phone) {
@@ -493,6 +501,7 @@ function lookupCustomerPoints() {
         updateLoyaltyUI();
         return;
     }
+    // Saved customer points lookup simulation
     const savedPts = localStorage.getItem('pts_' + phone);
     currentCustomerPoints = savedPts ? parseInt(savedPts) : (phone.length * 25) % 350;
     updateLoyaltyUI();
@@ -532,6 +541,7 @@ function redeemLoyaltyPoints() {
     alert(`Applied ${formatBHD(discountBHD)} loyalty discount! ${pointsRedeemedCount} points will be deducted.`);
 }
 
+// --- RENDER PRODUCTS GRID ---
 function renderProducts(list = products) {
     const grid = document.getElementById('product-grid');
     grid.innerHTML = '';
@@ -578,6 +588,7 @@ function filterProducts() {
     renderProducts(filtered);
 }
 
+// --- CART MANAGEMENT ---
 function addToCart(product) {
     const existing = cart.find(item => item.id === product.id);
     if (existing) {
@@ -658,6 +669,7 @@ function updateCartUI() {
         });
     }
 
+    // Calculate Discount
     const discValRaw = parseFloat(document.getElementById('discount-val').value) || 0;
     if (discountType === 'FIXED') {
         discountAmount = discValRaw;
@@ -670,6 +682,7 @@ function updateCartUI() {
     const vatAmount = netTotalInclusive - (netTotalInclusive / 1.10);
     const netExclVat = netTotalInclusive - vatAmount;
 
+    // Update Totals Display
     document.getElementById('summary-gross').innerText = formatBHD(grossTotal);
     const discRow = document.getElementById('row-discount');
     if (discountAmount > 0) {
@@ -687,18 +700,19 @@ function updateCartUI() {
     document.getElementById('btn-total').innerText = formatBHD(netTotalInclusive);
 }
 
-// --- ITEM CATALOG EDITING & REAL-TIME SUPABASE PERSISTENCE ---
+// --- ITEM CATALOG EDITING (POS ACCESS) ---
 function openItemManagerModal() {
+    // Reset state to Cashier view upon every modal opening
     userRole = 'CASHIER';
     document.getElementById('manager-status-text').innerText = 'Current View: Standard Staff';
     document.getElementById('btn-unlock-manager').classList.remove('hidden');
-    document.getElementById('item-manager-toast').classList.add('hidden');
     
     document.getElementById('item-manager-modal').classList.remove('hidden');
     renderItemManagerList();
 }
 
 function closeItemManagerModal() {
+    // Lock manager access back to CASHIER whenever popup is closed
     userRole = 'CASHIER';
     document.getElementById('item-manager-modal').classList.add('hidden');
 }
@@ -750,56 +764,25 @@ function renderItemManagerList() {
                     <label class="text-[9px] uppercase font-bold text-gray-500 block">Stock Qty</label>
                     <input type="number" id="edit-stock-${p.id}" value="${p.stock_quantity ?? 0}" class="w-16 border border-gray-300 rounded px-2 py-1 font-bold text-center outline-none focus:ring-1 focus:ring-emerald-500">
                 </div>
-                <button type="button" class="btn-save-item mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1 rounded" data-id="${p.id}">Save</button>
+                <button onclick="saveItemChanges(${p.id})" class="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1 rounded">Save</button>
             </div>
         `;
         listContainer.appendChild(row);
     });
 }
 
-function setupItemManagerEvents() {
-    const listContainer = document.getElementById('item-manager-list');
-    listContainer.addEventListener('click', function(event) {
-        const btn = event.target.closest('.btn-save-item');
-        if (btn) {
-            const id = btn.getAttribute('data-id');
-            if (id) {
-                saveItemChanges(id);
-            }
-        }
-    });
-}
-
-function showItemManagerToast(message, isError = false) {
-    const toast = document.getElementById('item-manager-toast');
-    toast.innerText = message;
-    toast.className = isError 
-        ? 'p-3 rounded-lg text-xs font-bold bg-red-100 text-red-800 border border-red-200 block' 
-        : 'p-3 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 block';
-    
-    setTimeout(() => {
-        toast.classList.add('hidden');
-    }, 4000);
-}
-
 // Persist updates to Supabase Database
 async function saveItemChanges(id) {
-    const saveBtn = document.querySelector(`.btn-save-item[data-id="${id}"]`);
-    if (!saveBtn) return;
+    const targetId = isNaN(id) ? id : Number(id);
+    const itemIndex = products.findIndex(p => String(p.id) === String(id));
     
-    const originalText = saveBtn.innerText;
-    saveBtn.innerText = 'Saving...';
-    saveBtn.disabled = true;
+    if (itemIndex === -1) {
+        alert("Product not found in local state.");
+        return;
+    }
 
     const newPrice = parseFloat(document.getElementById(`edit-price-${id}`).value) || 0;
     const newStock = parseInt(document.getElementById(`edit-stock-${id}`).value) || 0;
-
-    const item = products.find(p => String(p.id) === String(id));
-    if (!item) {
-        saveBtn.innerText = originalText;
-        saveBtn.disabled = false;
-        return;
-    }
 
     let updateData = {
         retail_price: newPrice,
@@ -814,26 +797,36 @@ async function saveItemChanges(id) {
         }
     }
 
-    // Execute UPDATE Query on Supabase
+    // Send update query to Supabase and request returned data via .select()
     const { data, error } = await supabaseClient
         .from('products')
         .update(updateData)
-        .eq('id', id);
-
-    saveBtn.innerText = originalText;
-    saveBtn.disabled = false;
+        .eq('id', targetId)
+        .select();
 
     if (error) {
         console.error('Error updating product in Supabase:', error);
-        showItemManagerToast(`Failed to update ${item.name} in database: ${error.message}`, true);
-    } else {
-        showItemManagerToast(`Product "${item.name}" updated successfully in main database!`);
-        // Refresh product list directly from Supabase
-        await fetchProducts();
-        renderItemManagerList();
+        alert(`Failed to update ${products[itemIndex].name}: ${error.message}`);
+        return;
     }
-}
 
+    // Catch silent block caused by Supabase Row Level Security (RLS)
+    if (!data || data.length === 0) {
+        console.warn('0 rows updated. Verify Supabase RLS policies for update permissions.');
+        alert(`Update blocked: Row Level Security (RLS) prevented writing changes for item ID ${id}.`);
+        return;
+    }
+
+    // Update local products array with fresh values returned from Supabase
+    products[itemIndex] = { ...products[itemIndex], ...data[0] };
+
+    alert(`Updated ${products[itemIndex].name} successfully!`);
+
+    // Refresh UI
+    renderProducts();
+    renderItemManagerList();
+}
+// --- PREVIOUS SALES HISTORY & REFUNDS ENGINE ---
 function openSalesHistoryModal() {
     document.getElementById('sales-history-modal').classList.remove('hidden');
     renderSalesHistory();
@@ -905,8 +898,10 @@ function processRefund(receiptId) {
 
     if (!confirm(`Are you sure you want to refund Receipt #${receiptId} for ${formatBHD(sale.netTotal)}?`)) return;
 
+    // Mark Sale as Refunded
     sale.status = 'REFUNDED';
 
+    // Deduct loyalty points earned on this receipt from customer's balance
     if (sale.custPhone && sale.custPhone !== 'N/A' && sale.pointsEarned > 0) {
         let currentPts = parseInt(localStorage.getItem('pts_' + sale.custPhone) || '0');
         currentPts = Math.max(0, currentPts - sale.pointsEarned);
@@ -941,6 +936,7 @@ function resendWhatsApp(receiptId) {
     window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
 }
 
+// --- PAYMENT MODAL CONTROLS ---
 function openPaymentModal() {
     if (cart.length === 0) {
         alert('Cart is empty!');
@@ -1030,12 +1026,15 @@ function setPrintFormat(fmt) {
     }
 }
 
-async function processSale(action) {
+// --- PROCESS FINAL SALE ---
+function processSale(action) {
     const custName = document.getElementById('cust-name-input').value.trim() || 'Walk-in Customer';
     const custPhone = document.getElementById('cust-phone-input').value.trim() || 'N/A';
 
+    // Calculate Loyalty Earned (1 point per 1 BHD spent)
     const pointsEarned = Math.floor(netTotalInclusive);
     
+    // Update Customer's Saved Points
     if (custPhone !== 'N/A') {
         let updatedBalance = currentCustomerPoints - pointsRedeemedCount + pointsEarned;
         localStorage.setItem('pts_' + custPhone, updatedBalance.toString());
@@ -1057,18 +1056,6 @@ async function processSale(action) {
         status: 'COMPLETED'
     };
 
-    // Deduct quantity from database upon completing sale
-    for (const item of cart) {
-        const prod = products.find(p => p.id === item.id);
-        if (prod) {
-            const updatedStock = Math.max(0, (prod.stock_quantity || 0) - item.qty);
-            await supabaseClient
-                .from('products')
-                .update({ stock_quantity: updatedStock })
-                .eq('id', item.id);
-        }
-    }
-
     salesHistory.unshift(saleRecord);
     saveSalesHistoryLocal();
 
@@ -1082,7 +1069,6 @@ async function processSale(action) {
 
     closePaymentModal();
     clearCart();
-    await fetchProducts();
     lookupCustomerPoints();
 }
 
@@ -1113,6 +1099,7 @@ function executePrintReceipt(sale) {
     temp.querySelector('.t-total').innerText = formatBHD(sale.netTotal);
     temp.querySelector('.t-timestamp').innerText = sale.timestamp;
 
+    // Render Items
     if (selectedPrintFormat === '58mm') {
         const itemsList = temp.querySelector('.t-items-list');
         sale.items.forEach(i => {
@@ -1142,6 +1129,7 @@ function executePrintReceipt(sale) {
     printContainer.classList.add('hidden');
 }
 
+// --- SCANNER TOGGLE ---
 let html5QrCode = null;
 function toggleCameraScanner() {
     const wrapper = document.getElementById('camera-reader-wrapper');
