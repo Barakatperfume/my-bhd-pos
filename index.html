@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdn.jsdelivr.net; connect-src 'self' https://*.supabase.co wss://*.supabase.co;">
     <title>Barakat Perfumes POS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -481,11 +481,10 @@ async function fetchProducts() {
 
     if (error) {
         console.error('Error fetching products:', error);
-        // Fallback demo dataset if table doesn't exist yet
         products = [
-            { id: 1, name: 'RIIFFS Freeze EDP 100ml', retail_price: 18.500, cost_price: 9.000, stock_quantity: 12, barcode: '10001' },
-            { id: 2, name: 'Lattafa Maahir Honor 100ml', retail_price: 14.000, cost_price: 6.500, stock_quantity: 8, barcode: '10002' },
-            { id: 3, name: 'Aromatix Frost Bite 100ml', retail_price: 22.000, cost_price: 11.200, stock_quantity: 3, barcode: '10003' }
+            { id: '1', name: 'RIIFFS Freeze EDP 100ml', retail_price: 18.500, cost_price: 9.000, stock_quantity: 12, barcode: '10001' },
+            { id: '2', name: 'Lattafa Maahir Honor 100ml', retail_price: 14.000, cost_price: 6.500, stock_quantity: 8, barcode: '10002' },
+            { id: '3', name: 'Aromatix Frost Bite 100ml', retail_price: 22.000, cost_price: 11.200, stock_quantity: 3, barcode: '10003' }
         ];
     } else {
         products = data || [];
@@ -501,7 +500,6 @@ function lookupCustomerPoints() {
         updateLoyaltyUI();
         return;
     }
-    // Saved customer points lookup simulation
     const savedPts = localStorage.getItem('pts_' + phone);
     currentCustomerPoints = savedPts ? parseInt(savedPts) : (phone.length * 25) % 350;
     updateLoyaltyUI();
@@ -590,7 +588,7 @@ function filterProducts() {
 
 // --- CART MANAGEMENT ---
 function addToCart(product) {
-    const existing = cart.find(item => item.id === product.id);
+    const existing = cart.find(item => String(item.id) === String(product.id));
     if (existing) {
         existing.qty += 1;
     } else {
@@ -669,7 +667,6 @@ function updateCartUI() {
         });
     }
 
-    // Calculate Discount
     const discValRaw = parseFloat(document.getElementById('discount-val').value) || 0;
     if (discountType === 'FIXED') {
         discountAmount = discValRaw;
@@ -682,7 +679,6 @@ function updateCartUI() {
     const vatAmount = netTotalInclusive - (netTotalInclusive / 1.10);
     const netExclVat = netTotalInclusive - vatAmount;
 
-    // Update Totals Display
     document.getElementById('summary-gross').innerText = formatBHD(grossTotal);
     const discRow = document.getElementById('row-discount');
     if (discountAmount > 0) {
@@ -700,9 +696,8 @@ function updateCartUI() {
     document.getElementById('btn-total').innerText = formatBHD(netTotalInclusive);
 }
 
-// --- ITEM CATALOG EDITING (POS ACCESS) ---
+// --- ITEM CATALOG EDITING ---
 function openItemManagerModal() {
-    // Reset state to Cashier view upon every modal opening
     userRole = 'CASHIER';
     document.getElementById('manager-status-text').innerText = 'Current View: Standard Staff';
     document.getElementById('btn-unlock-manager').classList.remove('hidden');
@@ -712,7 +707,6 @@ function openItemManagerModal() {
 }
 
 function closeItemManagerModal() {
-    // Lock manager access back to CASHIER whenever popup is closed
     userRole = 'CASHIER';
     document.getElementById('item-manager-modal').classList.add('hidden');
 }
@@ -771,38 +765,38 @@ function renderItemManagerList() {
     });
 }
 
-// Persist updates to Supabase Database
+// FIXED: Persist updates to Supabase Database with strict String/UUID match support
 async function saveItemChanges(id) {
     try {
-        const targetId = isNaN(id) ? id : Number(id);
-        const itemIndex = products.findIndex(p => String(p.id) === String(id));
+        const strId = String(id);
+        const itemIndex = products.findIndex(p => String(p.id) === strId);
         
         if (itemIndex === -1) {
             alert("Product not found in local state.");
             return;
         }
 
-        const newPrice = parseFloat(document.getElementById("edit-price-" + id).value) || 0;
-        const newStock = parseInt(document.getElementById("edit-stock-" + id).value) || 0;
+        const newPrice = parseFloat(document.getElementById("edit-price-" + strId).value) || 0;
+        const newStock = parseInt(document.getElementById("edit-stock-" + strId).value) || 0;
 
-        var updateData = {
+        let updateData = {
             retail_price: newPrice,
             stock_quantity: newStock
         };
 
         const isManager = (userRole === "MANAGER" || userRole === "OWNER");
         if (isManager) {
-            const costElem = document.getElementById("edit-cost-" + id);
+            const costElem = document.getElementById("edit-cost-" + strId);
             if (costElem) {
                 updateData.cost_price = parseFloat(costElem.value) || 0;
             }
         }
 
-        // Send update to Supabase
+        // Send update query to Supabase using UUID string
         const response = await supabaseClient
             .from("products")
             .update(updateData)
-            .eq("id", targetId)
+            .eq("id", strId)
             .select();
 
         if (response.error) {
@@ -811,14 +805,12 @@ async function saveItemChanges(id) {
             return;
         }
 
-        // Handle Row Level Security (RLS) blocks
         if (!response.data || response.data.length === 0) {
             console.warn("0 rows updated. Check Supabase RLS policies.");
-            alert("Update blocked: Row Level Security (RLS) prevented saving item ID " + id);
+            alert("Update blocked: Check database permissions or RLS policy for table 'products'.");
             return;
         }
 
-        // Update local memory and re-render UI
         products[itemIndex] = Object.assign({}, products[itemIndex], response.data[0]);
 
         alert("Updated " + products[itemIndex].name + " successfully!");
@@ -903,10 +895,8 @@ function processRefund(receiptId) {
 
     if (!confirm(`Are you sure you want to refund Receipt #${receiptId} for ${formatBHD(sale.netTotal)}?`)) return;
 
-    // Mark Sale as Refunded
     sale.status = 'REFUNDED';
 
-    // Deduct loyalty points earned on this receipt from customer's balance
     if (sale.custPhone && sale.custPhone !== 'N/A' && sale.pointsEarned > 0) {
         let currentPts = parseInt(localStorage.getItem('pts_' + sale.custPhone) || '0');
         currentPts = Math.max(0, currentPts - sale.pointsEarned);
@@ -1036,10 +1026,8 @@ function processSale(action) {
     const custName = document.getElementById('cust-name-input').value.trim() || 'Walk-in Customer';
     const custPhone = document.getElementById('cust-phone-input').value.trim() || 'N/A';
 
-    // Calculate Loyalty Earned (1 point per 1 BHD spent)
     const pointsEarned = Math.floor(netTotalInclusive);
     
-    // Update Customer's Saved Points
     if (custPhone !== 'N/A') {
         let updatedBalance = currentCustomerPoints - pointsRedeemedCount + pointsEarned;
         localStorage.setItem('pts_' + custPhone, updatedBalance.toString());
@@ -1104,7 +1092,6 @@ function executePrintReceipt(sale) {
     temp.querySelector('.t-total').innerText = formatBHD(sale.netTotal);
     temp.querySelector('.t-timestamp').innerText = sale.timestamp;
 
-    // Render Items
     if (selectedPrintFormat === '58mm') {
         const itemsList = temp.querySelector('.t-items-list');
         sale.items.forEach(i => {
