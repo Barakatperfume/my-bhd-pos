@@ -536,7 +536,6 @@ async function switchUser() {
         }
     }
 
-    // Fallback logic for offline / unseeded states
     if (pin === '1234' || pin === '9999') {
         userRole = 'ADMIN';
         currentUser = { id: null, name: 'Owner', role: 'ADMIN' };
@@ -575,7 +574,6 @@ async function fetchProducts() {
     renderProducts(products);
 }
 
-// --- CUSTOMER MANAGEMENT & MODAL ---
 async function fetchCustomers() {
     if (!supabaseClient) return;
     try {
@@ -1231,15 +1229,6 @@ async function processSale(action) {
     const pointsEarned = Math.floor(netTotalInclusive);
     let updatedBalance = (currentCustomerPoints - pointsRedeemedCount + pointsEarned);
 
-    // Sync Customer Points with Supabase
-    if (selectedCustomer && selectedCustomer.id && supabaseClient) {
-        await supabaseClient.from('contacts').update({
-            loyalty_points: updatedBalance,
-            last_visit: new Date().toISOString()
-        }).eq('id', selectedCustomer.id);
-        fetchCustomers();
-    }
-
     const receiptId = 'BP-' + Math.floor(100000 + Math.random() * 900000);
     
     // Payment Breakdown construction
@@ -1254,6 +1243,42 @@ async function processSale(action) {
             primary: { method: splitPrimaryMethod, amount: priAmt },
             secondary: { method: splitSecondaryMethod, amount: secAmt }
         };
+    }
+
+    const vatAmt = netTotalInclusive - (netTotalInclusive / 1.10);
+
+    // Call Supabase RPC Function to execute stock decrement, customer metric updates, and order logging
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient.rpc('process_pos_sale', {
+                p_cashier_id: currentUser ? currentUser.id : null,
+                p_customer_id: selectedCustomer ? selectedCustomer.id : null,
+                p_customer_name: custName,
+                p_customer_phone: custPhone,
+                p_subtotal: netTotalInclusive - vatAmt,
+                p_vat_amount: vatAmt,
+                p_total_amount: netTotalInclusive,
+                p_gross_total: grossTotal,
+                p_discount_amount: discountAmount,
+                p_payment_method: selectedPaymentType === 'SINGLE' ? singlePaymentMethod : 'SPLIT',
+                p_payment_details: paymentDetails,
+                p_points_earned: pointsEarned,
+                p_points_redeemed: pointsRedeemedCount,
+                p_items: cart
+            });
+
+            if (error) {
+                console.error("Error executing RPC sale process:", error);
+                alert("Database transaction error: " + error.message);
+                return;
+            }
+
+            // Refresh catalog and contacts to update UI stock indicators & point balances
+            await fetchProducts();
+            await fetchCustomers();
+        } catch(e) {
+            console.error("Error pushing order to database:", e);
+        }
     }
 
     const saleRecord = {
@@ -1272,31 +1297,6 @@ async function processSale(action) {
         cashierId: currentUser ? currentUser.id : null,
         status: 'COMPLETED'
     };
-
-    // Push order to Supabase
-    if (supabaseClient) {
-        try {
-            const vatAmt = netTotalInclusive - (netTotalInclusive / 1.10);
-            await supabaseClient.from('sales_orders').insert([{
-                cashier_id: currentUser ? currentUser.id : null,
-                customer_id: selectedCustomer ? selectedCustomer.id : null,
-                customer_name: custName,
-                customer_phone: custPhone,
-                subtotal: netTotalInclusive - vatAmt,
-                vat_amount: vatAmt,
-                total_amount: netTotalInclusive,
-                gross_total: grossTotal,
-                discount_amount: discountAmount,
-                payment_method: selectedPaymentType === 'SINGLE' ? singlePaymentMethod : 'SPLIT',
-                payment_details: paymentDetails,
-                points_earned: pointsEarned,
-                points_redeemed: pointsRedeemedCount,
-                status: 'COMPLETED'
-            }]);
-        } catch(e) {
-            console.error("Error pushing order to database:", e);
-        }
-    }
 
     salesHistory.unshift(saleRecord);
     saveSalesHistoryLocal();
