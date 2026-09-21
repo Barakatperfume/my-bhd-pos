@@ -330,8 +330,8 @@
             <div class="t-items-list" style="display: flex; flex-direction: column; gap: 4px;"></div>
             <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
             <div>
-                <div><span>Points Earned:</span><span class="t-pts-earned float-right">0</span></div>
-                <div style="font-weight: bold;"><span>Points Balance:</span><span class="t-pts-balance float-right">0</span></div>
+                <div><span>Points Earned:</span><span class="t-pts-earned" style="float: right;">0</span></div>
+                <div style="font-weight: bold;"><span>Points Balance:</span><span class="t-pts-balance" style="float: right;">0</span></div>
             </div>
             <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
             <div style="display: flex; flex-direction: column; gap: 2px;">
@@ -564,7 +564,7 @@ function lookupCustomerPoints() {
         return;
     }
     const savedPts = localStorage.getItem('pts_' + phone);
-    currentCustomerPoints = savedPts ? parseInt(savedPts) : (phone.length * 25) % 350;
+    currentCustomerPoints = savedPts ? parseInt(savedPts) : 0;
     updateLoyaltyUI();
 }
 
@@ -614,7 +614,7 @@ function renderProducts(list = products) {
     list.forEach(p => {
         let stock = p.stock_quantity ?? 0;
         let price = p.retail_price ?? 0;
-        let lowThreshold = p.low_stock_threshold ?? 5;
+        let lowThreshold = p.low_stock_threshold ?? 2;
         
         let badgeColor = stock > lowThreshold ? 'bg-emerald-100 text-emerald-800' : stock > 0 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800';
         
@@ -861,7 +861,7 @@ async function saveItemChanges(id) {
                 .select();
 
             if (response.error) {
-                alert("Error: " + response.error.message);
+                alert("Error updating Supabase: " + response.error.message);
                 return;
             }
         }
@@ -1080,7 +1080,7 @@ async function processSale(action) {
     const pointsEarned = Math.floor(netTotalInclusive);
     let updatedBalance = (currentCustomerPoints - pointsRedeemedCount + pointsEarned);
 
-    // Sync Customer Points with Supabase if database is available
+    // Sync Customer Points with Supabase
     if (custPhone !== 'N/A') {
         localStorage.setItem('pts_' + custPhone, updatedBalance.toString());
         
@@ -1103,6 +1103,21 @@ async function processSale(action) {
     }
 
     const receiptId = 'BP-' + Math.floor(100000 + Math.random() * 900000);
+    
+    // Payment Breakdown construction
+    let paymentDetails = {};
+    if (selectedPaymentType === 'SINGLE') {
+        paymentDetails = { type: 'SINGLE', method: singlePaymentMethod, total: netTotalInclusive };
+    } else {
+        const priAmt = parseFloat(document.getElementById('split-pri-amount').value) || 0;
+        const secAmt = Math.max(0, netTotalInclusive - priAmt);
+        paymentDetails = { 
+            type: 'SPLIT', 
+            primary: { method: splitPrimaryMethod, amount: priAmt },
+            secondary: { method: splitSecondaryMethod, amount: secAmt }
+        };
+    }
+
     const saleRecord = {
         receiptId: receiptId,
         timestamp: new Date().toLocaleString(),
@@ -1115,8 +1130,33 @@ async function processSale(action) {
         pointsEarned: pointsEarned,
         pointsBalance: updatedBalance,
         paymentType: selectedPaymentType,
+        paymentDetails: paymentDetails,
         status: 'COMPLETED'
     };
+
+    // Push to Supabase if connected
+    if (supabaseClient) {
+        try {
+            const vatAmt = netTotalInclusive - (netTotalInclusive / 1.10);
+            await supabaseClient.from('sales_orders').insert([{
+                customer_id: selectedCustomerId,
+                customer_name: custName,
+                customer_phone: custPhone,
+                subtotal: netTotalInclusive - vatAmt,
+                vat_amount: vatAmt,
+                total_amount: netTotalInclusive,
+                gross_total: grossTotal,
+                discount_amount: discountAmount,
+                payment_method: selectedPaymentType === 'SINGLE' ? singlePaymentMethod : 'SPLIT',
+                payment_details: paymentDetails,
+                points_earned: pointsEarned,
+                points_redeemed: pointsRedeemedCount,
+                status: 'COMPLETED'
+            }]);
+        } catch(e) {
+            console.error("Error pushing order to database:", e);
+        }
+    }
 
     salesHistory.unshift(saleRecord);
     saveSalesHistoryLocal();
@@ -1159,6 +1199,19 @@ function executePrintReceipt(sale) {
     temp.querySelector('.t-vat').innerText = formatBHD(vatAmount);
     temp.querySelector('.t-total').innerText = formatBHD(sale.netTotal);
     temp.querySelector('.t-timestamp').innerText = sale.timestamp;
+
+    // Payment breakdown formatting
+    const payContainer = temp.querySelector('.t-payments-breakdown');
+    payContainer.innerHTML = '';
+    if (sale.paymentDetails && sale.paymentDetails.type === 'SPLIT') {
+        payContainer.innerHTML = `
+            <div style="display: flex; justify-content: space-between;"><span>${sale.paymentDetails.primary.method}:</span><span>${formatBHD(sale.paymentDetails.primary.amount)}</span></div>
+            <div style="display: flex; justify-content: space-between;"><span>${sale.paymentDetails.secondary.method}:</span><span>${formatBHD(sale.paymentDetails.secondary.amount)}</span></div>
+        `;
+    } else {
+        const methodStr = sale.paymentDetails ? sale.paymentDetails.method : 'CASH';
+        payContainer.innerHTML = `<div style="display: flex; justify-content: space-between;"><span>${methodStr}:</span><span>${formatBHD(sale.netTotal)}</span></div>`;
+    }
 
     if (selectedPrintFormat === '58mm') {
         const itemsList = temp.querySelector('.t-items-list');
