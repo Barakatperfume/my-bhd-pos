@@ -3,105 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co;">
     <title>Barakat Perfumes POS</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        @media print {
-            body > * { display: none !important; }
-            #print-container, #print-container * { display: block !important; visibility: visible !important; }
-            #print-container {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                margin: 0;
-                padding: 0;
-            }
-            @page {
-                size: A4 portrait;
-                margin: 8mm;
-            }
-        }
-    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 font-sans h-screen flex flex-col overflow-hidden">
+<body class="bg-gray-100 h-screen font-sans flex flex-col justify-between overflow-hidden">
 
-    <!-- Isolated Container for Printing -->
-    <div id="print-container" class="hidden"></div>
-
-    <!-- Top Navigation Bar -->
-    <header class="bg-emerald-700 text-white p-3 flex justify-between items-center shadow-md">
+    <!-- Top Navigation Header -->
+    <header class="bg-emerald-900 text-white p-3 flex justify-between items-center shadow-md">
         <div class="flex items-center space-x-3">
-            <span class="font-bold text-xl tracking-wide">Barakat Perfumes POS</span>
-            <span id="role-badge" class="bg-emerald-900 text-emerald-200 text-xs px-2 py-1 rounded-full uppercase tracking-wider font-semibold">Cashier</span>
+            <i class="fas fa-spray-can text-amber-400 text-xl"></i>
+            <h1 class="font-bold text-lg tracking-wide">BARAKAT PERFUMES <span class="text-xs font-normal text-emerald-200">| Point of Sale</span></h1>
         </div>
-        <div class="flex items-center space-x-2">
-            <button onclick="openSalesHistoryModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition flex items-center space-x-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                <span>View Sales</span>
+        <div class="flex items-center space-x-3 text-xs">
+            <span id="connection-status" class="bg-emerald-800 text-emerald-200 px-2 py-1 rounded flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Online
+            </span>
+            <button onclick="toggleSalesHistoryModal()" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-3 py-1 rounded shadow transition">
+                <i class="fas fa-history mr-1"></i> Sales History
             </button>
-            <button onclick="openItemManagerModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition flex items-center space-x-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                <span>Items Manager</span>
-            </button>
-            <span id="user-name" class="text-sm font-medium hidden sm:inline ml-2">Cashier 1</span>
-            <button onclick="switchUser()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition">Switch PIN</button>
         </div>
     </header>
 
-    <!-- Main POS Interface Split View -->
-    <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
-        
-        <!-- Left Panel: Product Search, Scanner & Catalog -->
-        <div class="w-full md:w-3/5 lg:w-2/3 p-4 flex flex-col h-full overflow-hidden">
-            
-            <!-- Universal Search & Camera Scan Bar -->
-            <div class="flex space-x-2 mb-4">
-                <div class="relative flex-1">
-                    <input type="text" id="search-input" onkeyup="filterProducts()" placeholder="Search name or scan barcode..." 
-                           class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm shadow-sm">
-                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </div>
-                <button onclick="toggleCameraScanner()" class="bg-gray-800 hover:bg-black text-white px-4 py-2.5 rounded-lg flex items-center space-x-1 shadow text-sm">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h0.93a2 2 0 001.664-.89l0.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l0.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    <span class="hidden sm:inline">Scan</span>
-                </button>
-            </div>
+    <!-- Main Application Body -->
+    <div class="flex flex-1 overflow-hidden">
 
-            <!-- In-App Camera Viewfinder Container -->
-            <div id="camera-reader-wrapper" class="hidden mb-4 bg-black rounded-lg overflow-hidden relative max-h-48">
-                <div id="reader" class="w-full"></div>
-                <button onclick="toggleCameraScanner()" class="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 text-xs rounded shadow z-10">Close Camera</button>
+        <!-- Left Column: Products & Quick Search -->
+        <div class="w-7/12 p-4 flex flex-col border-r border-gray-200 bg-white">
+            <div class="mb-3 flex gap-2">
+                <div class="relative flex-1">
+                    <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                    <input type="text" id="product-search" onkeyup="filterProducts()" placeholder="Search products by name or barcode..." class="w-full pl-9 pr-3 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-emerald-600 outline-none">
+                </div>
             </div>
 
             <!-- Product Grid -->
-            <div id="product-grid" class="flex-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 overflow-y-auto no-scrollbar pr-1">
-                <!-- Product Cards dynamically rendered here -->
+            <div id="product-grid" class="grid grid-cols-3 gap-3 overflow-y-auto flex-1 pr-1">
+                <!-- Products dynamically rendered here -->
             </div>
         </div>
 
-        <!-- Right Panel: Cart Register & Checkout -->
-        <div class="w-full md:w-2/5 lg:w-1/3 bg-white border-l border-gray-200 flex flex-col h-full shadow-lg">
-            
-            <div class="p-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
-                <h2 class="font-bold text-gray-700">Current Order</h2>
-                <button onclick="clearCart()" class="text-xs text-red-600 hover:text-red-800 font-medium">Clear All</button>
-            </div>
+        <!-- Right Column: Customer Profile & Shopping Cart -->
+        <div class="w-5/12 bg-gray-50 flex flex-col justify-between">
 
-            <!-- Customer Selection & Loyalty Points Panel -->
-            <div class="p-3 border-b border-gray-200 bg-emerald-50/50 space-y-2">
+            <!-- Customer & Loyalty Panel -->
+            <div class="p-3 border-b border-gray-200 bg-emerald-50/50 space-y-2 relative">
                 <label class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Customer & Loyalty Profile</label>
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="cust-name-input" placeholder="Customer Name" class="border border-gray-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
-                    <input type="text" id="cust-phone-input" oninput="lookupCustomerPoints()" placeholder="Phone Number" class="border border-gray-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
+                    <input type="text" id="cust-name-input" list="customers-list" oninput="handleCustomerInput('name')" placeholder="Customer Name" class="border border-gray-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
+                    <input type="text" id="cust-phone-input" list="customers-list" oninput="handleCustomerInput('phone')" placeholder="Phone Number" class="border border-gray-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
                 </div>
                 
+                <!-- Dynamic Datalist Options -->
+                <datalist id="customers-list"></datalist>
+
                 <!-- Loyalty Points Widget -->
                 <div id="loyalty-widget" class="bg-white p-2 rounded border border-emerald-200 flex justify-between items-center text-xs">
                     <div>
@@ -115,1030 +71,454 @@
             </div>
 
             <!-- Cart Items List -->
-            <div id="cart-items" class="flex-1 overflow-y-auto p-3 space-y-3 no-scrollbar divide-y divide-gray-100">
-                <!-- Cart items dynamically rendered here -->
+            <div class="p-3 flex-1 overflow-y-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="border-b text-gray-400 font-semibold uppercase text-[10px]">
+                            <th class="pb-2">Item</th>
+                            <th class="pb-2 text-center">Qty</th>
+                            <th class="pb-2 text-right">Total</th>
+                            <th class="pb-2 text-center"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="cart-table-body">
+                        <!-- Cart items dynamically rendered here -->
+                    </tbody>
+                </table>
             </div>
 
-            <!-- Pricing Summary & Discount Controls Footer -->
-            <div class="p-4 bg-gray-50 border-t border-gray-200 space-y-2">
-                
-                <!-- Discount Control Panel -->
-                <div class="bg-white p-2 rounded-lg border border-gray-200 space-y-1.5 shadow-sm">
-                    <div class="flex justify-between items-center">
-                        <label class="text-[11px] font-bold text-gray-700 uppercase">Apply Discount</label>
-                        <div class="flex space-x-1">
-                            <button id="disc-type-bhd" onclick="setDiscountType('FIXED')" class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-600 text-white">BHD</button>
-                            <button id="disc-type-pct" onclick="setDiscountType('PERCENT')" class="px-2 py-0.5 text-[10px] font-bold rounded bg-gray-200 text-gray-700">%</button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="text" id="discount-title" placeholder="Title (e.g. Promo)" class="border border-gray-300 rounded px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
-                        <input type="number" id="discount-val" step="0.001" oninput="updateCartUI()" placeholder="Amount / %" class="border border-gray-300 rounded px-2 py-1 text-xs text-right font-bold outline-none focus:ring-1 focus:ring-emerald-500">
-                    </div>
-                </div>
-
-                <div class="flex justify-between text-xs text-gray-600">
-                    <span>Gross Total</span>
-                    <span id="summary-gross" class="font-semibold">BHD 0.000</span>
-                </div>
-                <div id="row-discount" class="flex justify-between text-xs text-red-600 hidden">
-                    <span id="label-discount-title">Discount</span>
-                    <span id="summary-discount" class="font-semibold">-BHD 0.000</span>
-                </div>
+            <!-- Cart Summary & Actions -->
+            <div class="p-4 bg-white border-t border-gray-200 space-y-2 shadow-inner">
                 <div class="flex justify-between text-xs text-gray-600">
                     <span>Subtotal (Excl. VAT)</span>
-                    <span id="summary-subtotal" class="font-semibold">BHD 0.000</span>
+                    <span id="cart-subtotal">0.000 BHD</span>
                 </div>
                 <div class="flex justify-between text-xs text-gray-600">
-                    <span>VAT (10% Incl.)</span>
-                    <span id="summary-vat" class="font-semibold">BHD 0.000</span>
+                    <span>VAT (10%)</span>
+                    <span id="cart-vat">0.000 BHD</span>
                 </div>
-                <div class="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-200">
-                    <span>Total Amount</span>
-                    <span id="summary-total" class="text-emerald-700">BHD 0.000</span>
+                <div class="flex justify-between text-xs text-red-600" id="discount-row" style="display: none;">
+                    <span>Discount / Points Red.</span>
+                    <span id="cart-discount">-0.000 BHD</span>
+                </div>
+                <div class="flex justify-between text-sm font-bold text-gray-800 pt-1 border-t">
+                    <span>Net Total</span>
+                    <span id="cart-net-total" class="text-emerald-800 text-base">0.000 BHD</span>
                 </div>
 
-                <!-- Charge / Checkout Button -->
-                <button onclick="openPaymentModal()" class="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow-md transition text-center flex justify-between px-4">
-                    <span>PAY NOW</span>
-                    <span id="btn-total">BHD 0.000</span>
+                <div class="grid grid-cols-2 gap-2 pt-2">
+                    <button onclick="clearCart()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs py-2 rounded font-semibold transition">
+                        Clear Cart
+                    </button>
+                    <button onclick="openPaymentModal()" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs py-2 rounded font-semibold shadow transition">
+                        Pay Now
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="payment-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg w-1/3 p-5 space-y-4 shadow-xl">
+            <h2 class="text-base font-bold text-gray-800 border-b pb-2 flex justify-between items-center">
+                <span>Complete Transaction</span>
+                <button onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-600 text-sm">&times;</button>
+            </h2>
+
+            <div class="space-y-2">
+                <label class="text-xs font-semibold text-gray-600">Select Payment Method</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="setPaymentType('CASH')" id="pay-btn-cash" class="pay-option border border-emerald-600 text-emerald-800 font-bold p-2 text-xs rounded text-center">Cash</button>
+                    <button onclick="setPaymentType('BENEFIT')" id="pay-btn-benefit" class="pay-option border border-gray-300 text-gray-700 p-2 text-xs rounded text-center">BenefitPay</button>
+                    <button onclick="setPaymentType('CARD')" id="pay-btn-card" class="pay-option border border-gray-300 text-gray-700 p-2 text-xs rounded text-center">Card</button>
+                </div>
+            </div>
+
+            <div class="space-y-1 text-xs pt-2">
+                <div class="flex justify-between text-gray-600">
+                    <span>Total Due:</span>
+                    <strong id="modal-total-due" class="text-gray-800">0.000 BHD</strong>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-3">
+                <button onclick="processSale('PRINT')" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs py-2 rounded font-semibold">
+                    <i class="fas fa-print mr-1"></i> Pay & Print
+                </button>
+                <button onclick="processSale('WHATSAPP')" class="bg-green-600 hover:bg-green-700 text-white text-xs py-2 rounded font-semibold">
+                    <i class="fab fa-whatsapp mr-1"></i> Pay & WhatsApp
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Sales History & Refunds Modal -->
-    <div id="sales-history-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full p-5 space-y-4 my-auto max-h-[90vh] flex flex-col">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-lg font-bold text-gray-800">Previous Sales Receipts & Refunds</h3>
-                <button onclick="closeSalesHistoryModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
-            </div>
-            
-            <div class="flex space-x-2">
-                <input type="text" id="sales-search-input" onkeyup="renderSalesHistory()" placeholder="Search by Receipt ID, Customer, or Phone..." class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
-            </div>
+    <!-- Sales History Modal -->
+    <div id="history-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg w-2/3 p-5 space-y-4 shadow-xl max-h-[80vh] flex flex-col">
+            <h2 class="text-base font-bold text-gray-800 border-b pb-2 flex justify-between items-center">
+                <span>Recent Transactions</span>
+                <button onclick="toggleSalesHistoryModal()" class="text-gray-400 hover:text-gray-600 text-sm">&times;</button>
+            </h2>
 
-            <div class="flex-1 overflow-y-auto divide-y divide-gray-200 border rounded-lg p-2 max-h-96" id="sales-history-list">
-                <!-- Dynamic Sales Log -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Item Manager & Price Edit Modal -->
-    <div id="item-manager-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-5 space-y-4 my-auto max-h-[90vh] flex flex-col">
-            <div class="flex justify-between items-center border-b pb-3">
-                <div>
-                    <h3 class="text-lg font-bold text-gray-800">Item Catalog Manager</h3>
-                    <p class="text-xs text-gray-500">Staff can change retail prices. Costs are locked to Manager/Owner PIN.</p>
-                </div>
-                <button onclick="closeItemManagerModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
-            </div>
-
-            <div class="flex justify-between items-center bg-gray-50 p-2 rounded border border-gray-200">
-                <span id="manager-status-text" class="text-xs font-semibold text-gray-600">Current View: Standard Staff</span>
-                <button id="btn-unlock-manager" onclick="authenticateManagerRole()" class="bg-emerald-600 text-white text-xs px-3 py-1 rounded font-bold hover:bg-emerald-700">Manager Unlock PIN</button>
-            </div>
-
-            <div class="flex-1 overflow-y-auto border rounded-lg p-2 max-h-96 divide-y divide-gray-100" id="item-manager-list">
-                <!-- Dynamic Item List -->
+            <div class="overflow-y-auto flex-1">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-gray-50 border-b sticky top-0">
+                        <tr>
+                            <th class="p-2">Receipt ID</th>
+                            <th class="p-2">Date/Time</th>
+                            <th class="p-2">Customer</th>
+                            <th class="p-2">Total</th>
+                            <th class="p-2">Payment</th>
+                            <th class="p-2 text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body">
+                        <!-- Dynamic History Rows -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <!-- Payment & Receipt Modal -->
-    <div id="payment-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-5 space-y-4 my-auto">
-            <h3 class="text-lg font-bold text-gray-800 border-b pb-2">Complete Payment</h3>
-            
-            <div class="text-center py-2 bg-emerald-50 rounded-lg">
-                <p class="text-xs text-emerald-800 uppercase font-semibold tracking-wider">Total Amount Due</p>
-                <p id="modal-total" class="text-2xl font-black text-emerald-700">BHD 0.000</p>
-            </div>
-
-            <!-- Payment Type Selection -->
-            <div>
-                <label class="text-xs font-semibold text-gray-600 uppercase">Payment Option</label>
-                <div class="grid grid-cols-2 gap-2 mt-1">
-                    <button id="mode-single-btn" onclick="setPaymentType('SINGLE')" class="border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">Single Method</button>
-                    <button id="mode-split-btn" onclick="setPaymentType('SPLIT')" class="border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">Split Payment</button>
-                </div>
-            </div>
-
-            <!-- Single Payment Mode Container -->
-            <div id="single-payment-container" class="space-y-3">
-                <div>
-                    <label class="text-xs font-semibold text-gray-600 uppercase">Method</label>
-                    <div class="grid grid-cols-3 gap-2 mt-1">
-                        <button id="btn-single-cash" onclick="setSingleMethod('CASH')" class="pay-method-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">CASH</button>
-                        <button id="btn-single-card" onclick="setSingleMethod('CARD')" class="pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">CARD</button>
-                        <button id="btn-single-benefit" onclick="setSingleMethod('BENEFIT_PAY')" class="pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">BENEFIT</button>
-                    </div>
-                </div>
-
-                <div id="single-cash-wrapper">
-                    <label class="text-xs font-semibold text-gray-600 uppercase">Cash Tendered (BHD)</label>
-                    <input type="number" id="cash-tendered" step="0.001" oninput="calculateSingleChange()" placeholder="0.000" class="w-full mt-1 border border-gray-300 rounded-lg p-2 text-right font-bold text-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    <div class="flex justify-between text-sm mt-2 text-gray-700">
-                        <span>Change Due:</span>
-                        <span id="change-due" class="font-bold text-blue-600">BHD 0.000</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Split Payment Mode Container -->
-            <div id="split-payment-container" class="hidden space-y-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
-                <div>
-                    <label class="text-xs font-semibold text-gray-600 uppercase">1. Select Primary Payment Method</label>
-                    <div class="grid grid-cols-3 gap-2 mt-1">
-                        <button id="btn-split-pri-cash" onclick="setSplitPrimaryMethod('CASH')" class="split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center">CASH</button>
-                        <button id="btn-split-pri-card" onclick="setSplitPrimaryMethod('CARD')" class="split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">CARD</button>
-                        <button id="btn-split-pri-benefit" onclick="setSplitPrimaryMethod('BENEFIT_PAY')" class="split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">BENEFIT</button>
-                    </div>
-                </div>
-
-                <div>
-                    <label id="label-split-pri-amount" class="text-xs font-semibold text-gray-600 uppercase">Primary Paid Amount (BHD)</label>
-                    <input type="number" id="split-pri-amount" step="0.001" oninput="calculateSplitBalance()" placeholder="0.000" class="w-full mt-1 border border-gray-300 rounded-lg p-2 text-right font-bold text-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
-
-                <div class="p-2.5 bg-blue-50 border border-blue-200 rounded-lg flex justify-between items-center text-sm font-bold text-blue-900">
-                    <span>Remaining Balance:</span>
-                    <span id="split-remaining-balance" class="text-base text-blue-700">BHD 0.000</span>
-                </div>
-
-                <div>
-                    <label class="text-xs font-semibold text-gray-600 uppercase">2. Pay Balance Using</label>
-                    <div class="grid grid-cols-3 gap-2 mt-1">
-                        <button id="btn-split-sec-cash" onclick="setSplitSecondaryMethod('CASH')" class="split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">CASH</button>
-                        <button id="btn-split-sec-card" onclick="setSplitSecondaryMethod('CARD')" class="split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center">CARD</button>
-                        <button id="btn-split-sec-benefit" onclick="setSplitSecondaryMethod('BENEFIT_PAY')" class="split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">BENEFIT</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Receipt Print Format Selector -->
-            <div>
-                <label class="text-xs font-semibold text-gray-600 uppercase">Print Format</label>
-                <div class="grid grid-cols-2 gap-2 mt-1">
-                    <button id="btn-print-58mm" onclick="setPrintFormat('58mm')" class="print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">58mm Thermal</button>
-                    <button id="btn-print-a4" onclick="setPrintFormat('A4')" class="print-fmt-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">A4 Invoice</button>
-                </div>
-            </div>
-
-            <!-- Multi-Channel Receipt Action Buttons -->
-            <div class="space-y-2 pt-2 border-t border-gray-200">
-                <button onclick="processSale('PRINT')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-sm shadow flex items-center justify-center space-x-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                    <span>Print Receipt</span>
-                </button>
-                
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="processSale('WHATSAPP')" class="bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold text-xs flex items-center justify-center space-x-1">
-                        <span>Send WhatsApp</span>
-                    </button>
-                    <button onclick="processSale('EMAIL')" class="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold text-xs flex items-center justify-center space-x-1">
-                        <span>Send Email</span>
-                    </button>
-                </div>
-
-                <button onclick="closePaymentModal()" class="w-full border border-gray-300 text-gray-700 py-2 rounded-lg font-semibold text-xs hover:bg-gray-50">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Hidden Template: Thermal Printable Receipt (58mm) -->
-    <template id="template-receipt-58mm">
-        <div style="width: 58mm; padding: 4px; font-family: monospace; font-size: 10px; color: black; line-height: 1.2;">
-            <div style="text-align: center;">
-                <img src="PCBH_LOGO-BG.png" alt="Logo" style="height: 48px; margin: 0 auto 4px auto; display: block; object-fit: contain;">
-                <div style="font-weight: bold; font-size: 12px; text-transform: uppercase;">BARAKAT PERFUMES</div>
-                <div>District 1, Janabiya</div>
-                <div>CR: 13812-04</div>
-                <div>Tel: 36051011</div>
-            </div>
-            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
-            <div>
-                <div><strong>Receipt #:</strong> <span class="t-receipt-id">--</span></div>
-                <div><strong>Customer:</strong> <span class="t-cust-name">Walk-in Customer</span></div>
-                <div><strong>Phone:</strong> <span class="t-cust-phone">N/A</span></div>
-            </div>
-            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
-            <div class="t-items-list" style="display: flex; flex-direction: column; gap: 4px;"></div>
-            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
-            <div>
-                <div><span>Points Earned:</span><span class="t-pts-earned float-right">0</span></div>
-                <div style="font-weight: bold;"><span>Points Balance:</span><span class="t-pts-balance float-right">0</span></div>
-            </div>
-            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
-            <div style="display: flex; flex-direction: column; gap: 2px;">
-                <div style="display: flex; justify-content: space-between;"><span>Gross Total:</span><span class="t-gross"></span></div>
-                <div class="t-disc-row" style="display: flex; justify-content: space-between; color: black;"><span>Discount:</span><span class="t-disc-val"></span></div>
-                <div style="display: flex; justify-content: space-between;"><span>Subtotal (Excl. VAT):</span><span class="t-subtotal"></span></div>
-                <div style="display: flex; justify-content: space-between;"><span>VAT (10% Incl.):</span><span class="t-vat"></span></div>
-                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 11px; border-top: 1px solid black; padding-top: 2px;"><span>TOTAL BILL:</span><span class="t-total"></span></div>
-            </div>
-            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
-            <div>
-                <div style="font-weight: bold; margin-bottom: 2px;">Payment Method(s):</div>
-                <div class="t-payments-breakdown" style="display: flex; flex-direction: column; gap: 2px;"></div>
-            </div>
-            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
-            <div style="text-align: center; display: flex; flex-direction: column; gap: 3px;">
-                <div style="font-weight: bold;">Thank you for shopping!</div>
-                <div>Follow us:</div>
-                <div>Instagram: @perfume_club.bh</div>
-                <div>www.theperfumesclub.com</div>
-                <div>WhatsApp: 36051011</div>
-                <div style="font-size: 8px; margin-top: 4px;">Return Policy: Returns accepted within 3 days with unopened box and original receipt. No returns or exchanges on discounted items.</div>
-                <div style="font-size: 8px; font-weight: bold; margin-top: 4px;" class="t-timestamp"></div>
-            </div>
-        </div>
-    </template>
-
-    <!-- Hidden Template: Single-Page A4 Tax Invoice -->
-    <template id="template-receipt-a4">
-        <div style="width: 100%; max-width: 800px; margin: 0 auto; padding: 12px; font-family: sans-serif; font-size: 11px; color: #111827; background: white; box-sizing: border-box;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #047857; padding-bottom: 8px;">
-                <div>
-                    <h1 style="font-size: 18px; font-weight: 900; color: #065f46; margin: 0;">BARAKAT PERFUMES</h1>
-                    <p style="margin: 1px 0; color: #4b5563; font-size: 10px;">Branch: District 1, Janabiya | CR: 13812-04 | Tel: 36051011</p>
-                </div>
-                <div style="text-align: right;">
-                    <img src="PCBH_LOGO-BG.png" alt="Logo" style="height: 40px; margin-left: auto; object-fit: contain;">
-                    <p style="font-weight: bold; margin: 0; color: #1f2937; font-size: 11px;">TAX INVOICE</p>
-                </div>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; margin: 8px 0; padding: 8px; background: #f9fafb; border-radius: 6px; font-size: 10px;">
-                <div>
-                    <span style="font-weight: bold; color: #374151;">Receipt #: </span><span class="t-receipt-id">--</span><br>
-                    <span style="font-weight: bold; color: #374151;">Customer: </span><strong class="t-cust-name" style="color: #111827;">Walk-in Customer</strong>
-                    <span style="margin-left: 12px; color: #4b5563;">Phone: <span class="t-cust-phone">N/A</span></span>
-                </div>
-                <div style="text-align: right;">
-                    <span style="font-weight: bold; color: #374151;">Date: </span>
-                    <span class="t-timestamp" style="color: #4b5563;"></span>
-                </div>
-            </div>
-
-            <table style="width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 10px;">
-                <thead>
-                    <tr style="background: #047857; color: white; text-align: left;">
-                        <th style="padding: 6px;">Item Description</th>
-                        <th style="padding: 6px; text-align: center;">Qty</th>
-                        <th style="padding: 6px; text-align: right;">Unit Price</th>
-                        <th style="padding: 6px; text-align: right;">Total (BHD)</th>
-                    </tr>
-                </thead>
-                <tbody class="t-items-table-body" style="border-bottom: 1px solid #e5e7eb;"></tbody>
-            </table>
-
-            <div style="margin: 6px 0; padding: 6px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 4px; display: flex; justify-content: space-between; font-size: 10px;">
-                <span>Loyalty Points Earned: <strong class="t-pts-earned">0</strong></span>
-                <span>Total Points Balance: <strong class="t-pts-balance">0</strong></span>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; padding-top: 6px; border-top: 1px solid #d1d5db; font-size: 10px;">
-                <div>
-                    <p style="font-weight: bold; color: #374151; margin: 0 0 4px 0;">Payment Method(s):</p>
-                    <div class="t-payments-breakdown" style="background: #f9fafb; padding: 6px; border-radius: 4px;"></div>
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 2px; text-align: right;">
-                    <div style="display: flex; justify-content: space-between;"><span>Gross Total:</span><span class="t-gross font-mono"></span></div>
-                    <div class="t-disc-row" style="display: flex; justify-content: space-between; color: #dc2626;"><span>Discount:</span><span class="t-disc-val font-mono"></span></div>
-                    <div style="display: flex; justify-content: space-between;"><span>Subtotal (Excl. VAT):</span><span class="t-subtotal font-mono"></span></div>
-                    <div style="display: flex; justify-content: space-between;"><span>VAT (10% Incl.):</span><span class="t-vat font-mono"></span></div>
-                    <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: 12px; border-top: 1px solid #9ca3af; padding-top: 2px; color: #065f46;"><span>Total Bill:</span><span class="t-total font-mono"></span></div>
-                </div>
-            </div>
-
-            <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e7eb; text-align: center; color: #4b5563; font-size: 9px;">
-                <p style="font-weight: bold; color: #111827; margin: 0;">Thank you for shopping with us!</p>
-                <p style="margin: 2px 0;">Instagram: <strong>@perfume_club.bh</strong> | Web: <strong>www.theperfumesclub.com</strong> | WhatsApp: <strong>36051011</strong></p>
-                <p style="font-size: 8px; color: #6b7280; margin: 2px 0;">Return Policy: Returns accepted within 3 days with unopened box and original receipt.</p>
-            </div>
-        </div>
-    </template>
-
+    <!-- JavaScript Application Logic -->
     <script>
-// --- SUPABASE CONFIGURATION ---
-const SUPABASE_URL = 'https://lxyxlecusdjdikozeedx.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4eXhsZWN1c2RqZGlrb3plZWR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NjkzNTgsImV4cCI6MjEwNTE0NTM1OH0._nPzYbZ2TIeRXQ-2went70JXygrI5TqUMDofi5OKxy4';
+        // --- Supabase Config ---
+        const SUPABASE_URL = "https://YOUR_SUPABASE_PROJECT_URL.supabase.co"; 
+        const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY"; 
+        let supabaseClient = null;
 
-let supabaseClient = null;
-if (window.supabase && window.supabase.createClient) {
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-}
-
-let products = [];
-let salesHistory = [];
-let cart = [];
-let discountType = 'FIXED';
-let selectedPaymentType = 'SINGLE';
-let singlePaymentMethod = 'CASH';
-let splitPrimaryMethod = 'CASH';
-let splitSecondaryMethod = 'CARD';
-let selectedPrintFormat = '58mm';
-
-let currentCustomerPoints = 0;
-let pointsRedeemedCount = 0;
-let userRole = 'CASHIER';
-
-let grossTotal = 0;
-let discountAmount = 0;
-let netTotalInclusive = 0;
-
-const fallbackProducts = [
-    { id: '1', name: 'RIIFFS Freeze EDP 100ml', retail_price: 18.500, cost_price: 9.000, stock_quantity: 12, barcode: '10001' },
-    { id: '2', name: 'Lattafa Maahir Honor 100ml', retail_price: 14.000, cost_price: 6.500, stock_quantity: 8, barcode: '10002' },
-    { id: '3', name: 'Aromatix Frost Bite 100ml', retail_price: 22.000, cost_price: 11.200, stock_quantity: 3, barcode: '10003' }
-];
-
-const formatBHD = (amount) => {
-    return 'BHD ' + (Math.round((amount || 0) * 1000) / 1000).toFixed(3);
-};
-
-window.onload = () => {
-    fetchProducts();
-    loadSalesHistoryLocal();
-};
-
-function switchUser() {
-    const pin = prompt('Enter User Switch PIN:');
-    if (pin === '9999' || pin === '1234') {
-        userRole = 'OWNER';
-        document.getElementById('role-badge').innerText = 'Owner';
-        document.getElementById('user-name').innerText = 'Manager/Owner';
-    } else {
-        userRole = 'CASHIER';
-        document.getElementById('role-badge').innerText = 'Cashier';
-        document.getElementById('user-name').innerText = 'Cashier 1';
-    }
-    renderProducts();
-}
-
-async function fetchProducts() {
-    if (!supabaseClient) {
-        products = fallbackProducts;
-        renderProducts(products);
-        return;
-    }
-
-    try {
-        const { data, error } = await supabaseClient.from('products').select('*');
-        if (error || !data || data.length === 0) {
-            console.warn('Fallback triggered or Supabase query error:', error);
-            products = fallbackProducts;
-        } else {
-            products = data;
-        }
-    } catch (err) {
-        console.error('Execution error fetching products:', err);
-        products = fallbackProducts;
-    }
-    renderProducts(products);
-}
-
-function lookupCustomerPoints() {
-    const phone = document.getElementById('cust-phone-input').value.trim();
-    if (!phone) {
-        currentCustomerPoints = 0;
-        updateLoyaltyUI();
-        return;
-    }
-    const savedPts = localStorage.getItem('pts_' + phone);
-    currentCustomerPoints = savedPts ? parseInt(savedPts) : (phone.length * 25) % 350;
-    updateLoyaltyUI();
-}
-
-function updateLoyaltyUI() {
-    const ptsBalanceElem = document.getElementById('cust-pts-balance');
-    const redeemBtn = document.getElementById('btn-redeem-pts');
-    
-    ptsBalanceElem.innerText = `${currentCustomerPoints} Pts`;
-
-    if (currentCustomerPoints >= 100) {
-        const maxRedeemablePts = Math.floor(currentCustomerPoints / 100) * 100;
-        const potentialDiscount = maxRedeemablePts / 100;
-        
-        redeemBtn.disabled = false;
-        redeemBtn.className = 'bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold px-2 py-1 rounded shadow cursor-pointer';
-        redeemBtn.innerText = `Redeem ${maxRedeemablePts} Pts (-${formatBHD(potentialDiscount)})`;
-    } else {
-        redeemBtn.disabled = true;
-        redeemBtn.className = 'bg-gray-300 text-gray-500 text-[10px] font-bold px-2 py-1 rounded cursor-not-allowed';
-        redeemBtn.innerText = 'Redeem (Min 100 pts)';
-    }
-}
-
-function redeemLoyaltyPoints() {
-    if (currentCustomerPoints < 100) return;
-
-    pointsRedeemedCount = Math.floor(currentCustomerPoints / 100) * 100;
-    const discountBHD = pointsRedeemedCount / 100;
-
-    setDiscountType('FIXED');
-    document.getElementById('discount-title').value = `Loyalty (${pointsRedeemedCount} pts)`;
-    document.getElementById('discount-val').value = discountBHD.toFixed(3);
-    
-    updateCartUI();
-    alert(`Applied ${formatBHD(discountBHD)} loyalty discount! ${pointsRedeemedCount} points will be deducted.`);
-}
-
-function renderProducts(list = products) {
-    const grid = document.getElementById('product-grid');
-    grid.innerHTML = '';
-
-    if (!list || list.length === 0) {
-        grid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-10">No products found.</p>';
-        return;
-    }
-    
-    list.forEach(p => {
-        let stock = p.stock_quantity ?? 0;
-        let price = p.retail_price ?? 0;
-        let lowThreshold = p.low_stock_threshold ?? 5;
-        
-        let badgeColor = stock > lowThreshold ? 'bg-emerald-100 text-emerald-800' : stock > 0 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800';
-        
-        const card = document.createElement('div');
-        card.className = 'bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition flex flex-col justify-between cursor-pointer select-none';
-        card.onclick = () => addToCart(p);
-        card.innerHTML = `
-            <div>
-                <div class="flex justify-between items-start mb-1">
-                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${badgeColor}">Qty: ${stock}</span>
-                </div>
-                <h4 class="font-bold text-xs text-gray-800 line-clamp-2">${p.name}</h4>
-            </div>
-            <div class="mt-2 pt-2 border-t border-gray-100 flex justify-between items-center">
-                <span class="text-xs font-black text-emerald-700">${formatBHD(price)}</span>
-                <span class="bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white p-1 rounded transition">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                </span>
-            </div>
-        `;
-        grid.appendChild(card);
-    });
-}
-
-function filterProducts() {
-    const term = document.getElementById('search-input').value.toLowerCase().trim();
-    const filtered = products.filter(p => 
-        (p.name && p.name.toLowerCase().includes(term)) || 
-        (p.barcode && p.barcode.toLowerCase().includes(term))
-    );
-    renderProducts(filtered);
-}
-
-function addToCart(product) {
-    const existing = cart.find(item => String(item.id) === String(product.id));
-    if (existing) {
-        existing.qty += 1;
-    } else {
-        cart.push({
-            id: product.id,
-            name: product.name,
-            price: product.retail_price,
-            qty: 1
-        });
-    }
-    updateCartUI();
-}
-
-function updateCartQty(id, delta) {
-    const item = cart.find(i => String(i.id) === String(id));
-    if (!item) return;
-    item.qty += delta;
-    if (item.qty <= 0) {
-        cart = cart.filter(i => String(i.id) !== String(id));
-    }
-    updateCartUI();
-}
-
-function clearCart() {
-    cart = [];
-    pointsRedeemedCount = 0;
-    document.getElementById('discount-val').value = '';
-    document.getElementById('discount-title').value = '';
-    updateCartUI();
-}
-
-function setDiscountType(type) {
-    discountType = type;
-    const bhdBtn = document.getElementById('disc-type-bhd');
-    const pctBtn = document.getElementById('disc-type-pct');
-    if (type === 'FIXED') {
-        bhdBtn.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-600 text-white';
-        pctBtn.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-gray-200 text-gray-700';
-    } else {
-        pctBtn.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-600 text-white';
-        bhdBtn.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-gray-200 text-gray-700';
-    }
-    updateCartUI();
-}
-
-function updateCartUI() {
-    const cartContainer = document.getElementById('cart-items');
-    cartContainer.innerHTML = '';
-
-    grossTotal = 0;
-
-    if (cart.length === 0) {
-        cartContainer.innerHTML = '<p class="text-center text-gray-400 py-10 text-xs">Cart is empty.</p>';
-    } else {
-        cart.forEach(item => {
-            const itemTotal = item.price * item.qty;
-            grossTotal += itemTotal;
-
-            const row = document.createElement('div');
-            row.className = 'pt-2 flex justify-between items-center text-xs';
-            row.innerHTML = `
-                <div class="flex-1 pr-2">
-                    <p class="font-semibold text-gray-800 line-clamp-1">${item.name}</p>
-                    <p class="text-gray-400 text-[10px]">${formatBHD(item.price)} each</p>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <div class="flex items-center border rounded">
-                        <button onclick="updateCartQty('${item.id}', -1)" class="px-1.5 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-700">-</button>
-                        <span class="px-2 font-bold">${item.qty}</span>
-                        <button onclick="updateCartQty('${item.id}', 1)" class="px-1.5 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-700">+</button>
-                    </div>
-                    <span class="font-bold text-gray-800 w-16 text-right">${formatBHD(itemTotal)}</span>
-                </div>
-            `;
-            cartContainer.appendChild(row);
-        });
-    }
-
-    const discValRaw = parseFloat(document.getElementById('discount-val').value) || 0;
-    if (discountType === 'FIXED') {
-        discountAmount = discValRaw;
-    } else {
-        discountAmount = (grossTotal * discValRaw) / 100;
-    }
-    if (discountAmount > grossTotal) discountAmount = grossTotal;
-
-    netTotalInclusive = grossTotal - discountAmount;
-    const vatAmount = netTotalInclusive - (netTotalInclusive / 1.10);
-    const netExclVat = netTotalInclusive - vatAmount;
-
-    document.getElementById('summary-gross').innerText = formatBHD(grossTotal);
-    const discRow = document.getElementById('row-discount');
-    if (discountAmount > 0) {
-        discRow.classList.remove('hidden');
-        const title = document.getElementById('discount-title').value.trim() || 'Discount';
-        document.getElementById('label-discount-title').innerText = title;
-        document.getElementById('summary-discount').innerText = '-' + formatBHD(discountAmount);
-    } else {
-        discRow.classList.add('hidden');
-    }
-
-    document.getElementById('summary-subtotal').innerText = formatBHD(netExclVat);
-    document.getElementById('summary-vat').innerText = formatBHD(vatAmount);
-    document.getElementById('summary-total').innerText = formatBHD(netTotalInclusive);
-    document.getElementById('btn-total').innerText = formatBHD(netTotalInclusive);
-}
-
-function openItemManagerModal() {
-    userRole = 'CASHIER';
-    document.getElementById('manager-status-text').innerText = 'Current View: Standard Staff';
-    document.getElementById('btn-unlock-manager').classList.remove('hidden');
-    
-    document.getElementById('item-manager-modal').classList.remove('hidden');
-    renderItemManagerList();
-}
-
-function closeItemManagerModal() {
-    userRole = 'CASHIER';
-    document.getElementById('item-manager-modal').classList.add('hidden');
-}
-
-function authenticateManagerRole() {
-    const pin = prompt('Enter Manager/Owner PIN to view and edit Cost Prices:');
-    if (pin === '1234' || pin === '9999') {
-        userRole = 'MANAGER';
-        document.getElementById('manager-status-text').innerText = 'Current View: Manager Access';
-        document.getElementById('btn-unlock-manager').classList.add('hidden');
-        renderItemManagerList();
-    } else {
-        alert('Invalid Manager PIN!');
-    }
-}
-
-function renderItemManagerList() {
-    const listContainer = document.getElementById('item-manager-list');
-    listContainer.innerHTML = '';
-
-    products.forEach(p => {
-        const row = document.createElement('div');
-        row.className = 'py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0 text-xs border-b border-gray-100 last:border-0';
-        
-        const isManager = (userRole === 'MANAGER' || userRole === 'OWNER');
-        
-        const costInputHtml = isManager 
-            ? `<div>
-                <label class="text-[9px] uppercase font-bold text-blue-600 block">Cost Price (BHD)</label>
-                <input type="number" id="edit-cost-${p.id}" step="0.001" value="${p.cost_price ?? 0}" class="w-24 border border-blue-300 rounded px-2 py-1 font-bold text-right outline-none focus:ring-1 focus:ring-blue-500 bg-blue-50/30">
-               </div>`
-            : `<div>
-                <label class="text-[9px] uppercase font-bold text-gray-400 block">Cost Price</label>
-                <input type="text" disabled value="*** BHD" class="w-24 border border-gray-200 bg-gray-100 rounded px-2 py-1 font-bold text-center text-gray-400 cursor-not-allowed">
-               </div>`;
-
-        row.innerHTML = `
-            <div class="flex-1 pr-3">
-                <p class="font-bold text-gray-800 text-sm">${p.name}</p>
-                <p class="text-gray-400">Barcode: ${p.barcode || 'N/A'}</p>
-            </div>
-            <div class="flex items-center space-x-2">
-                ${costInputHtml}
-                <div>
-                    <label class="text-[9px] uppercase font-bold text-gray-500 block">Retail Price (BHD)</label>
-                    <input type="number" id="edit-price-${p.id}" step="0.001" value="${p.retail_price}" class="w-24 border border-gray-300 rounded px-2 py-1 font-bold text-right outline-none focus:ring-1 focus:ring-emerald-500">
-                </div>
-                <div>
-                    <label class="text-[9px] uppercase font-bold text-gray-500 block">Stock Qty</label>
-                    <input type="number" id="edit-stock-${p.id}" value="${p.stock_quantity ?? 0}" class="w-16 border border-gray-300 rounded px-2 py-1 font-bold text-center outline-none focus:ring-1 focus:ring-emerald-500">
-                </div>
-                <button onclick="saveItemChanges('${p.id}')" class="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1 rounded">Save</button>
-            </div>
-        `;
-        listContainer.appendChild(row);
-    });
-}
-
-async function saveItemChanges(id) {
-    try {
-        const itemIndex = products.findIndex(p => String(p.id) === String(id));
-        if (itemIndex === -1) {
-            alert("Product not found.");
-            return;
+        if (typeof supabase !== 'undefined' && SUPABASE_URL && !SUPABASE_URL.includes("YOUR_SUPABASE_PROJECT_URL")) {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         }
 
-        const newPrice = parseFloat(document.getElementById("edit-price-" + id).value) || 0;
-        const newStock = parseInt(document.getElementById("edit-stock-" + id).value) || 0;
+        // --- Application State ---
+        let products = [
+            { id: 1, name: 'RIIFFS Freeze EDP 100ml', price: 12.500, barcode: '6291001', category: 'Perfume' },
+            { id: 2, name: 'Lattafa Maahir Honor 100ml', price: 10.000, barcode: '6291002', category: 'Perfume' },
+            { id: 3, name: 'Aromatix Frost Bite EDP', price: 15.000, barcode: '6291003', category: 'Perfume' },
+            { id: 4, name: 'Giorgio Armani Aqua Di Gio', price: 42.000, barcode: '6291004', category: 'Perfume' }
+        ];
 
-        let updateData = {
-            retail_price: newPrice,
-            stock_quantity: newStock
+        let customers = [];
+        let selectedCustomerId = null;
+        let cart = [];
+        let salesHistory = JSON.parse(localStorage.getItem('pos_sales_history') || '[]');
+        let currentCustomerPoints = 0;
+        let pointsRedeemedCount = 0;
+        let discountAmount = 0;
+        let selectedPaymentType = 'CASH';
+
+        // --- Init Lifecycle ---
+        window.onload = () => {
+            renderProducts(products);
+            renderCart();
+            fetchCustomers();
         };
 
-        const isManager = (userRole === "MANAGER" || userRole === "OWNER");
-        if (isManager) {
-            const costElem = document.getElementById("edit-cost-" + id);
-            if (costElem) {
-                updateData.cost_price = parseFloat(costElem.value) || 0;
+        // --- Customer Logic & Dropdown ---
+        async function fetchCustomers() {
+            if (!supabaseClient) return;
+            try {
+                const { data, error } = await supabaseClient.from('contacts').select('*');
+                if (!error && data) {
+                    customers = data;
+                    populateCustomerDatalist();
+                }
+            } catch (err) {
+                console.error('Error fetching contacts:', err);
             }
         }
 
-        if (supabaseClient) {
-            const response = await supabaseClient
-                .from("products")
-                .update(updateData)
-                .eq("id", id)
-                .select();
+        function populateCustomerDatalist() {
+            const datalist = document.getElementById('customers-list');
+            if (!datalist) return;
+            datalist.innerHTML = '';
 
-            if (response.error) {
-                alert("Error: " + response.error.message);
-                return;
-            }
-        }
-
-        products[itemIndex] = Object.assign({}, products[itemIndex], updateData);
-        alert("Updated " + products[itemIndex].name + " successfully!");
-
-        renderProducts();
-        renderItemManagerList();
-    } catch (err) {
-        console.error("Save execution error:", err);
-        alert("An error occurred while saving: " + err.message);
-    }
-}
-
-function openSalesHistoryModal() {
-    document.getElementById('sales-history-modal').classList.remove('hidden');
-    renderSalesHistory();
-}
-
-function closeSalesHistoryModal() {
-    document.getElementById('sales-history-modal').classList.add('hidden');
-}
-
-function loadSalesHistoryLocal() {
-    const saved = localStorage.getItem('pos_sales_history');
-    if (saved) {
-        try { salesHistory = JSON.parse(saved); } catch(e) { salesHistory = []; }
-    }
-}
-
-function saveSalesHistoryLocal() {
-    localStorage.setItem('pos_sales_history', JSON.stringify(salesHistory));
-}
-
-function renderSalesHistory() {
-    const container = document.getElementById('sales-history-list');
-    const term = document.getElementById('sales-search-input').value.toLowerCase().trim();
-    container.innerHTML = '';
-
-    const filtered = salesHistory.filter(s => 
-        s.receiptId.toLowerCase().includes(term) ||
-        s.custName.toLowerCase().includes(term) ||
-        s.custPhone.toLowerCase().includes(term)
-    );
-
-    if (filtered.length === 0) {
-        container.innerHTML = '<p class="text-center text-gray-400 py-6 text-xs">No previous sales transactions found.</p>';
-        return;
-    }
-
-    filtered.forEach(s => {
-        const row = document.createElement('div');
-        row.className = 'py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0 text-xs';
-        
-        const isRefunded = s.status === 'REFUNDED';
-        const statusBadge = isRefunded 
-            ? '<span class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-0.5 rounded">REFUNDED</span>' 
-            : '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">COMPLETED</span>';
-
-        row.innerHTML = `
-            <div>
-                <div class="flex items-center space-x-2">
-                    <strong class="text-emerald-800">${s.receiptId}</strong>
-                    ${statusBadge}
-                </div>
-                <p class="text-gray-600 font-medium mt-0.5">${s.custName} (${s.custPhone}) - ${s.timestamp}</p>
-                <p class="text-gray-400 text-[10px]">${s.items.map(i => `${i.qty}x${i.name}`).join(', ')}</p>
-            </div>
-            <div class="flex items-center space-x-2">
-                <span class="font-bold text-gray-900 mr-2 text-sm">${formatBHD(s.netTotal)}</span>
-                <button onclick="reprintReceipt('${s.receiptId}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded font-bold text-[10px]">Print</button>
-                <button onclick="resendWhatsApp('${s.receiptId}')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-bold text-[10px]">WhatsApp</button>
-                ${!isRefunded ? `<button onclick="processRefund('${s.receiptId}')" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded font-bold text-[10px]">Refund</button>` : ''}
-            </div>
-        `;
-        container.appendChild(row);
-    });
-}
-
-function processRefund(receiptId) {
-    const sale = salesHistory.find(s => s.receiptId === receiptId);
-    if (!sale) return;
-
-    if (!confirm(`Are you sure you want to refund Receipt #${receiptId} for ${formatBHD(sale.netTotal)}?`)) return;
-
-    sale.status = 'REFUNDED';
-
-    if (sale.custPhone && sale.custPhone !== 'N/A' && sale.pointsEarned > 0) {
-        let currentPts = parseInt(localStorage.getItem('pts_' + sale.custPhone) || '0');
-        currentPts = Math.max(0, currentPts - sale.pointsEarned);
-        localStorage.setItem('pts_' + sale.custPhone, currentPts.toString());
-        alert(`Refund Processed! Deducted ${sale.pointsEarned} loyalty points from customer ${sale.custPhone}. New Balance: ${currentPts} Pts.`);
-    } else {
-        alert(`Refund Processed successfully for Receipt #${receiptId}!`);
-    }
-
-    saveSalesHistoryLocal();
-    renderSalesHistory();
-    lookupCustomerPoints();
-}
-
-function reprintReceipt(receiptId) {
-    const sale = salesHistory.find(s => s.receiptId === receiptId);
-    if (!sale) return;
-    executePrintReceipt(sale);
-}
-
-function resendWhatsApp(receiptId) {
-    const sale = salesHistory.find(s => s.receiptId === receiptId);
-    if (!sale) return;
-
-    let phone = sale.custPhone;
-    if (!phone || phone === 'N/A') {
-        phone = prompt('Enter WhatsApp Phone Number (with country code, e.g. 973...):');
-    }
-    if (!phone) return;
-
-    const message = `*BARAKAT PERFUMES RECEIPT*\nReceipt: ${sale.receiptId}\nCustomer: ${sale.custName}\nTotal: ${formatBHD(sale.netTotal)}\nThank you for shopping with us!`;
-    window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
-}
-
-function openPaymentModal() {
-    if (cart.length === 0) {
-        alert('Cart is empty!');
-        return;
-    }
-    document.getElementById('modal-total').innerText = formatBHD(netTotalInclusive);
-    document.getElementById('payment-modal').classList.remove('hidden');
-    calculateSingleChange();
-}
-
-function closePaymentModal() {
-    document.getElementById('payment-modal').classList.add('hidden');
-}
-
-function setPaymentType(type) {
-    selectedPaymentType = type;
-    const singleContainer = document.getElementById('single-payment-container');
-    const splitContainer = document.getElementById('split-payment-container');
-    
-    if (type === 'SINGLE') {
-        singleContainer.classList.remove('hidden');
-        splitContainer.classList.add('hidden');
-        document.getElementById('mode-single-btn').className = 'border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
-        document.getElementById('mode-split-btn').className = 'border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center';
-    } else {
-        singleContainer.classList.add('hidden');
-        splitContainer.classList.remove('hidden');
-        document.getElementById('mode-split-btn').className = 'border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
-        document.getElementById('mode-single-btn').className = 'border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center';
-        calculateSplitBalance();
-    }
-}
-
-function setSingleMethod(method) {
-    singlePaymentMethod = method;
-    document.querySelectorAll('.pay-method-btn').forEach(btn => {
-        btn.className = 'pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center';
-    });
-    const cashWrapper = document.getElementById('single-cash-wrapper');
-    if (method === 'CASH') {
-        document.getElementById('btn-single-cash').className = 'pay-method-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
-        cashWrapper.classList.remove('hidden');
-    } else if (method === 'CARD') {
-        document.getElementById('btn-single-card').className = 'pay-method-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
-        cashWrapper.classList.add('hidden');
-    } else {
-        document.getElementById('btn-single-benefit').className = 'pay-method-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
-        cashWrapper.classList.add('hidden');
-    }
-}
-
-function calculateSingleChange() {
-    const tendered = parseFloat(document.getElementById('cash-tendered').value) || 0;
-    const change = tendered - netTotalInclusive;
-    document.getElementById('change-due').innerText = formatBHD(change > 0 ? change : 0);
-}
-
-function setSplitPrimaryMethod(method) {
-    splitPrimaryMethod = method;
-    document.querySelectorAll('.split-pri-btn').forEach(b => b.className = 'split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center');
-    if (method === 'CASH') document.getElementById('btn-split-pri-cash').className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
-    if (method === 'CARD') document.getElementById('btn-split-pri-card').className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
-    if (method === 'BENEFIT_PAY') document.getElementById('btn-split-pri-benefit').className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
-}
-
-function setSplitSecondaryMethod(method) {
-    splitSecondaryMethod = method;
-    document.querySelectorAll('.split-sec-btn').forEach(b => b.className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center');
-    if (method === 'CASH') document.getElementById('btn-split-sec-cash').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
-    if (method === 'CARD') document.getElementById('btn-split-sec-card').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
-    if (method === 'BENEFIT_PAY') document.getElementById('btn-split-sec-benefit').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
-}
-
-function calculateSplitBalance() {
-    const priPaid = parseFloat(document.getElementById('split-pri-amount').value) || 0;
-    const remaining = netTotalInclusive - priPaid;
-    document.getElementById('split-remaining-balance').innerText = formatBHD(remaining > 0 ? remaining : 0);
-}
-
-function setPrintFormat(fmt) {
-    selectedPrintFormat = fmt;
-    document.querySelectorAll('.print-fmt-btn').forEach(b => b.className = 'print-fmt-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center');
-    if (fmt === '58mm') {
-        document.getElementById('btn-print-58mm').className = 'print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
-    } else {
-        document.getElementById('btn-print-a4').className = 'print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
-    }
-}
-
-function processSale(action) {
-    const custName = document.getElementById('cust-name-input').value.trim() || 'Walk-in Customer';
-    const custPhone = document.getElementById('cust-phone-input').value.trim() || 'N/A';
-
-    const pointsEarned = Math.floor(netTotalInclusive);
-    
-    if (custPhone !== 'N/A') {
-        let updatedBalance = currentCustomerPoints - pointsRedeemedCount + pointsEarned;
-        localStorage.setItem('pts_' + custPhone, updatedBalance.toString());
-    }
-
-    const receiptId = 'BP-' + Math.floor(100000 + Math.random() * 900000);
-    const saleRecord = {
-        receiptId: receiptId,
-        timestamp: new Date().toLocaleString(),
-        custName: custName,
-        custPhone: custPhone,
-        items: [...cart],
-        grossTotal: grossTotal,
-        discountAmount: discountAmount,
-        netTotal: netTotalInclusive,
-        pointsEarned: pointsEarned,
-        pointsBalance: (currentCustomerPoints - pointsRedeemedCount + pointsEarned),
-        paymentType: selectedPaymentType,
-        status: 'COMPLETED'
-    };
-
-    salesHistory.unshift(saleRecord);
-    saveSalesHistoryLocal();
-
-    if (action === 'PRINT') {
-        executePrintReceipt(saleRecord);
-    } else if (action === 'WHATSAPP') {
-        resendWhatsApp(receiptId);
-    } else if (action === 'EMAIL') {
-        alert(`Receipt emailed to customer profile!`);
-    }
-
-    closePaymentModal();
-    clearCart();
-    lookupCustomerPoints();
-}
-
-function executePrintReceipt(sale) {
-    const printContainer = document.getElementById('print-container');
-    printContainer.innerHTML = '';
-
-    const templateId = selectedPrintFormat === '58mm' ? 'template-receipt-58mm' : 'template-receipt-a4';
-    const temp = document.getElementById(templateId).content.cloneNode(true);
-
-    temp.querySelector('.t-receipt-id').innerText = sale.receiptId;
-    temp.querySelector('.t-cust-name').innerText = sale.custName;
-    temp.querySelector('.t-cust-phone').innerText = sale.custPhone;
-    temp.querySelector('.t-pts-earned').innerText = sale.pointsEarned;
-    temp.querySelector('.t-pts-balance').innerText = sale.pointsBalance;
-    temp.querySelector('.t-gross').innerText = formatBHD(sale.grossTotal);
-    
-    if (sale.discountAmount > 0) {
-        temp.querySelector('.t-disc-val').innerText = '-' + formatBHD(sale.discountAmount);
-    } else {
-        const discRow = temp.querySelector('.t-disc-row');
-        if (discRow) discRow.style.display = 'none';
-    }
-
-    const vatAmount = sale.netTotal - (sale.netTotal / 1.10);
-    temp.querySelector('.t-subtotal').innerText = formatBHD(sale.netTotal - vatAmount);
-    temp.querySelector('.t-vat').innerText = formatBHD(vatAmount);
-    temp.querySelector('.t-total').innerText = formatBHD(sale.netTotal);
-    temp.querySelector('.t-timestamp').innerText = sale.timestamp;
-
-    if (selectedPrintFormat === '58mm') {
-        const itemsList = temp.querySelector('.t-items-list');
-        sale.items.forEach(i => {
-            const div = document.createElement('div');
-            div.style.display = 'flex';
-            div.style.justifyContent = 'space-between';
-            div.innerHTML = `<span>${i.qty}x ${i.name}</span><span>${formatBHD(i.price * i.qty)}</span>`;
-            itemsList.appendChild(div);
-        });
-    } else {
-        const tbody = temp.querySelector('.t-items-table-body');
-        sale.items.forEach(i => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="padding: 6px;">${i.name}</td>
-                <td style="padding: 6px; text-align: center;">${i.qty}</td>
-                <td style="padding: 6px; text-align: right;">${formatBHD(i.price)}</td>
-                <td style="padding: 6px; text-align: right;">${formatBHD(i.price * i.qty)}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    printContainer.appendChild(temp);
-    printContainer.classList.remove('hidden');
-    window.print();
-    printContainer.classList.add('hidden');
-}
-
-let html5QrCode = null;
-function toggleCameraScanner() {
-    const wrapper = document.getElementById('camera-reader-wrapper');
-    if (wrapper.classList.contains('hidden')) {
-        wrapper.classList.remove('hidden');
-        html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: { width: 250, height: 150 } },
-            (decodedText) => {
-                document.getElementById('search-input').value = decodedText;
-                filterProducts();
-                toggleCameraScanner();
-            },
-            () => {}
-        );
-    } else {
-        if (html5QrCode) {
-            html5QrCode.stop().then(() => {
-                wrapper.classList.add('hidden');
+            customers.forEach(c => {
+                const option = document.createElement('option');
+                option.value = c.phone;
+                option.label = `${c.name} (${c.phone})`;
+                datalist.appendChild(option);
             });
-        } else {
-            wrapper.classList.add('hidden');
         }
-    }
-}
+
+        function handleCustomerInput(field) {
+            const nameVal = document.getElementById('cust-name-input').value.trim();
+            const phoneVal = document.getElementById('cust-phone-input').value.trim();
+
+            const match = customers.find(c => 
+                (phoneVal && c.phone === phoneVal) || 
+                (nameVal && c.name.toLowerCase() === nameVal.toLowerCase())
+            );
+
+            if (match) {
+                selectedCustomerId = match.id;
+                document.getElementById('cust-name-input').value = match.name;
+                document.getElementById('cust-phone-input').value = match.phone;
+                currentCustomerPoints = match.loyalty_points || 0;
+            } else {
+                selectedCustomerId = null;
+                currentCustomerPoints = 0;
+            }
+            updateLoyaltyUI();
+        }
+
+        function updateLoyaltyUI() {
+            document.getElementById('cust-pts-balance').innerText = `${currentCustomerPoints} Pts`;
+            const redeemBtn = document.getElementById('btn-redeem-pts');
+            if (currentCustomerPoints >= 100) {
+                redeemBtn.disabled = false;
+                redeemBtn.className = "bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-bold px-2 py-1 rounded cursor-pointer shadow";
+            } else {
+                redeemBtn.disabled = true;
+                redeemBtn.className = "bg-gray-300 text-gray-500 text-[10px] font-bold px-2 py-1 rounded cursor-not-allowed";
+            }
+        }
+
+        function redeemLoyaltyPoints() {
+            if (currentCustomerPoints < 100) return;
+            pointsRedeemedCount += 100;
+            currentCustomerPoints -= 100;
+            discountAmount += 1.000; // 100 pts = 1 BHD
+            updateLoyaltyUI();
+            renderCart();
+        }
+
+        // --- Product Grid Logic ---
+        function renderProducts(items) {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '';
+            items.forEach(p => {
+                grid.innerHTML += `
+                    <div onclick="addToCart(${p.id})" class="border rounded-md p-3 hover:shadow-md cursor-pointer bg-emerald-50/20 border-emerald-100 flex flex-col justify-between h-28">
+                        <div>
+                            <span class="text-[10px] text-emerald-600 font-semibold uppercase">${p.category}</span>
+                            <h3 class="text-xs font-bold text-gray-800 line-clamp-2">${p.name}</h3>
+                        </div>
+                        <div class="flex justify-between items-center text-xs font-bold text-emerald-900">
+                            <span>${p.price.toFixed(3)} BHD</span>
+                            <i class="fas fa-plus-circle text-emerald-600"></i>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function filterProducts() {
+            const query = document.getElementById('product-search').value.toLowerCase();
+            const filtered = products.filter(p => p.name.toLowerCase().includes(query) || p.barcode.includes(query));
+            renderProducts(filtered);
+        }
+
+        // --- Cart Functions ---
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const existing = cart.find(item => item.id === productId);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ ...product, qty: 1 });
+            }
+            renderCart();
+        }
+
+        function updateQty(id, delta) {
+            const item = cart.find(i => i.id === id);
+            if (item) {
+                item.qty += delta;
+                if (item.qty <= 0) {
+                    cart = cart.filter(i => i.id !== id);
+                }
+            }
+            renderCart();
+        }
+
+        function clearCart() {
+            cart = [];
+            pointsRedeemedCount = 0;
+            discountAmount = 0;
+            selectedCustomerId = null;
+            document.getElementById('cust-name-input').value = '';
+            document.getElementById('cust-phone-input').value = '';
+            currentCustomerPoints = 0;
+            updateLoyaltyUI();
+            renderCart();
+        }
+
+        function renderCart() {
+            const tbody = document.getElementById('cart-table-body');
+            tbody.innerHTML = '';
+
+            let grossTotal = 0;
+            cart.forEach(item => {
+                const itemTotal = item.price * item.qty;
+                grossTotal += itemTotal;
+                tbody.innerHTML += `
+                    <tr class="border-b">
+                        <td class="py-2 text-gray-800 font-medium">${item.name}</td>
+                        <td class="py-2 text-center">
+                            <button onclick="updateQty(${item.id}, -1)" class="px-1.5 py-0.5 bg-gray-200 rounded text-[10px] font-bold">-</button>
+                            <span class="px-1">${item.qty}</span>
+                            <button onclick="updateQty(${item.id}, 1)" class="px-1.5 py-0.5 bg-gray-200 rounded text-[10px] font-bold">+</button>
+                        </td>
+                        <td class="py-2 text-right font-semibold">${itemTotal.toFixed(3)} BHD</td>
+                        <td class="py-2 text-center">
+                            <button onclick="updateQty(${item.id}, -${item.qty})" class="text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            const subtotal = Math.max(0, grossTotal - discountAmount) / 1.10;
+            const vat = Math.max(0, grossTotal - discountAmount) - subtotal;
+            const netTotal = Math.max(0, grossTotal - discountAmount);
+
+            document.getElementById('cart-subtotal').innerText = subtotal.toFixed(3) + ' BHD';
+            document.getElementById('cart-vat').innerText = vat.toFixed(3) + ' BHD';
+            document.getElementById('cart-net-total').innerText = netTotal.toFixed(3) + ' BHD';
+
+            const discountRow = document.getElementById('discount-row');
+            if (discountAmount > 0) {
+                discountRow.style.display = 'flex';
+                document.getElementById('cart-discount').innerText = `-${discountAmount.toFixed(3)} BHD`;
+            } else {
+                discountRow.style.display = 'none';
+            }
+        }
+
+        // --- Payment Modal & Sales Execution ---
+        function openPaymentModal() {
+            if (cart.length === 0) return alert('Cart is empty!');
+            const grossTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const netTotal = Math.max(0, grossTotal - discountAmount);
+            document.getElementById('modal-total-due').innerText = netTotal.toFixed(3) + ' BHD';
+            document.getElementById('payment-modal').classList.remove('hidden');
+            document.getElementById('payment-modal').classList.add('flex');
+        }
+
+        function closePaymentModal() {
+            document.getElementById('payment-modal').classList.add('hidden');
+            document.getElementById('payment-modal').classList.remove('flex');
+        }
+
+        function setPaymentType(type) {
+            selectedPaymentType = type;
+            document.querySelectorAll('.pay-option').forEach(btn => {
+                btn.className = 'pay-option border border-gray-300 text-gray-700 p-2 text-xs rounded text-center';
+            });
+            const selectedBtn = document.getElementById(`pay-btn-${type.toLowerCase()}`);
+            if (selectedBtn) {
+                selectedBtn.className = 'pay-option border border-emerald-600 text-emerald-800 font-bold p-2 text-xs rounded text-center';
+            }
+        }
+
+        async function processSale(action) {
+            const custName = document.getElementById('cust-name-input').value.trim() || 'Walk-in Customer';
+            const custPhone = document.getElementById('cust-phone-input').value.trim() || 'N/A';
+
+            const grossTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const netTotalInclusive = Math.max(0, grossTotal - discountAmount);
+            const pointsEarned = Math.floor(netTotalInclusive);
+            let updatedBalance = currentCustomerPoints - pointsRedeemedCount + pointsEarned;
+
+            // 1. Sync Customer with Supabase
+            if (custPhone !== 'N/A' && supabaseClient) {
+                if (selectedCustomerId) {
+                    await supabaseClient.from('contacts').update({
+                        loyalty_points: updatedBalance,
+                        last_visit: new Date().toISOString()
+                    }).eq('id', selectedCustomerId);
+                } else if (custName !== 'Walk-in Customer') {
+                    const { data } = await supabaseClient.from('contacts').insert([{
+                        name: custName,
+                        phone: custPhone,
+                        loyalty_points: updatedBalance
+                    }]).select();
+                    if (data && data.length > 0) selectedCustomerId = data[0].id;
+                }
+                fetchCustomers();
+            }
+
+            // 2. Save Sales Order in Supabase
+            const receiptId = 'BP-' + Math.floor(100000 + Math.random() * 900000);
+            if (supabaseClient) {
+                await supabaseClient.from('sales_orders').insert([{
+                    customer_id: selectedCustomerId,
+                    customer_name: custName,
+                    customer_phone: custPhone,
+                    subtotal: netTotalInclusive / 1.10,
+                    vat_amount: netTotalInclusive - (netTotalInclusive / 1.10),
+                    total_amount: netTotalInclusive,
+                    gross_total: grossTotal,
+                    discount_amount: discountAmount,
+                    payment_method: selectedPaymentType,
+                    points_earned: pointsEarned,
+                    points_redeemed: pointsRedeemedCount,
+                    status: 'COMPLETED'
+                }]);
+            }
+
+            const saleRecord = {
+                receiptId: receiptId,
+                timestamp: new Date().toLocaleString(),
+                custName: custName,
+                custPhone: custPhone,
+                items: [...cart],
+                grossTotal: grossTotal,
+                discountAmount: discountAmount,
+                netTotal: netTotalInclusive,
+                pointsEarned: pointsEarned,
+                pointsBalance: updatedBalance,
+                paymentType: selectedPaymentType,
+                status: 'COMPLETED'
+            };
+
+            salesHistory.unshift(saleRecord);
+            localStorage.setItem('pos_sales_history', JSON.stringify(salesHistory));
+
+            if (action === 'PRINT') {
+                window.print();
+            } else if (action === 'WHATSAPP') {
+                alert(`Receipt link created for ${custPhone}`);
+            }
+
+            closePaymentModal();
+            clearCart();
+        }
+
+        // --- Sales History Modal ---
+        function toggleSalesHistoryModal() {
+            const modal = document.getElementById('history-modal');
+            if (modal.classList.contains('hidden')) {
+                renderHistoryTable();
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function renderHistoryTable() {
+            const tbody = document.getElementById('history-table-body');
+            tbody.innerHTML = '';
+            salesHistory.forEach(s => {
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-2 font-bold text-emerald-800">${s.receiptId}</td>
+                        <td class="p-2 text-gray-500">${s.timestamp}</td>
+                        <td class="p-2 font-medium">${s.custName} (${s.custPhone})</td>
+                        <td class="p-2 font-bold">${s.netTotal.toFixed(3)} BHD</td>
+                        <td class="p-2"><span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-[10px] font-semibold">${s.paymentType}</span></td>
+                        <td class="p-2 text-center">
+                            <button onclick="alert('Reprinting receipt ${s.receiptId}')" class="text-xs text-emerald-700 hover:underline"><i class="fas fa-print"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
     </script>
 </body>
 </html>
