@@ -94,15 +94,24 @@
                 <button onclick="clearCart()" class="text-xs text-red-600 hover:text-red-800 font-medium">Clear All</button>
             </div>
 
-            <!-- Customer Selection & Loyalty Points Panel -->
+            <!-- Selected Customer & Loyalty Widget -->
             <div class="p-3 border-b border-gray-200 bg-emerald-50/50 space-y-2">
-                <label class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Customer & Loyalty Profile</label>
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="cust-name-input" list="customers-list" oninput="handleCustomerInput('name')" placeholder="Customer Name" class="border border-gray-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
-                    <input type="text" id="cust-phone-input" list="customers-list" oninput="handleCustomerInput('phone')" placeholder="Phone Number" class="border border-gray-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
+                <div class="flex justify-between items-center">
+                    <label class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Customer Profile</label>
+                    <button onclick="openCustomerModal()" class="text-xs text-emerald-700 font-bold hover:underline flex items-center space-x-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <span>Search / Add Customer</span>
+                    </button>
                 </div>
-                
-                <datalist id="customers-list"></datalist>
+
+                <!-- Active Selected Customer Box -->
+                <div id="active-customer-box" class="bg-white p-2.5 rounded-lg border border-emerald-200 flex justify-between items-center shadow-sm">
+                    <div>
+                        <p id="disp-cust-name" class="font-bold text-xs text-gray-800">Walk-in Customer</p>
+                        <p id="disp-cust-phone" class="text-[10px] text-gray-500">No phone attached</p>
+                    </div>
+                    <button onclick="clearSelectedCustomer()" id="btn-clear-cust" class="hidden text-xs text-red-500 font-bold hover:text-red-700">Remove</button>
+                </div>
 
                 <!-- Loyalty Points Widget -->
                 <div id="loyalty-widget" class="bg-white p-2 rounded border border-emerald-200 flex justify-between items-center text-xs">
@@ -164,6 +173,40 @@
                 <button onclick="openPaymentModal()" class="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow-md transition text-center flex justify-between px-4">
                     <span>PAY NOW</span>
                     <span id="btn-total">BHD 0.000</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOMER SEARCH & CREATION MODAL -->
+    <div id="customer-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-5 space-y-4 my-auto max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-gray-800">Select or Add Customer</h3>
+                <button onclick="closeCustomerModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+            </div>
+
+            <!-- Search Input Bar -->
+            <div>
+                <input type="text" id="cust-modal-search" onkeyup="renderCustomerSearchResults()" placeholder="Search by name or phone..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+
+            <!-- Customer Search Results List -->
+            <div id="cust-modal-results" class="flex-1 overflow-y-auto border rounded-lg divide-y divide-gray-100 max-h-48 p-2 bg-gray-50/50">
+                <!-- Search results rendered dynamically -->
+            </div>
+
+            <!-- Add New Customer Section -->
+            <div class="border-t pt-3 space-y-2 bg-emerald-50/30 p-3 rounded-lg border border-emerald-100">
+                <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider">Create New Customer</h4>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="new-cust-name" placeholder="Full Name *" class="border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
+                    <input type="text" id="new-cust-phone" placeholder="Phone Number *" class="border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
+                </div>
+                <input type="email" id="new-cust-email" placeholder="Email Address (Optional)" class="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
+                
+                <button onclick="addNewCustomerToDatabase()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs transition shadow">
+                    Save & Select Customer
                 </button>
             </div>
         </div>
@@ -437,7 +480,7 @@ if (window.supabase && window.supabase.createClient) {
 let products = [];
 let salesHistory = [];
 let customers = [];
-let selectedCustomerId = null;
+let selectedCustomer = null; // Object holding { id, name, phone, loyalty_points }
 let cart = [];
 let discountType = 'FIXED';
 let selectedPaymentType = 'SINGLE';
@@ -506,66 +549,128 @@ async function fetchProducts() {
     renderProducts(products);
 }
 
-// --- Customer Lookup & Datalist Dropdown ---
+// --- CUSTOMER MANAGEMENT & MODAL ---
 async function fetchCustomers() {
     if (!supabaseClient) return;
     try {
-        const { data, error } = await supabaseClient.from('contacts').select('*');
+        const { data, error } = await supabaseClient.from('contacts').select('*').order('created_at', { ascending: false });
         if (!error && data) {
             customers = data;
-            populateCustomerDatalist();
         }
     } catch (err) {
         console.error('Error fetching contacts:', err);
     }
 }
 
-function populateCustomerDatalist() {
-    const datalist = document.getElementById('customers-list');
-    if (!datalist) return;
-    datalist.innerHTML = '';
+function openCustomerModal() {
+    document.getElementById('customer-modal').classList.remove('hidden');
+    document.getElementById('cust-modal-search').value = '';
+    renderCustomerSearchResults();
+}
 
-    customers.forEach(c => {
-        const option = document.createElement('option');
-        option.value = c.phone;
-        option.label = `${c.name} (${c.phone})`;
-        datalist.appendChild(option);
+function closeCustomerModal() {
+    document.getElementById('customer-modal').classList.add('hidden');
+}
+
+function renderCustomerSearchResults() {
+    const term = document.getElementById('cust-modal-search').value.toLowerCase().trim();
+    const container = document.getElementById('cust-modal-results');
+    container.innerHTML = '';
+
+    const filtered = customers.filter(c => 
+        (c.name && c.name.toLowerCase().includes(term)) ||
+        (c.phone && c.phone.toLowerCase().includes(term))
+    );
+
+    if (filtered.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-400 py-3 text-xs">No matching customers found.</p>';
+        return;
+    }
+
+    filtered.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'p-2 hover:bg-emerald-50 cursor-pointer rounded flex justify-between items-center transition';
+        item.onclick = () => selectCustomer(c);
+        item.innerHTML = `
+            <div>
+                <p class="font-bold text-xs text-gray-800">${c.name}</p>
+                <p class="text-[10px] text-gray-500">${c.phone}</p>
+            </div>
+            <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">${c.loyalty_points || 0} Pts</span>
+        `;
+        container.appendChild(item);
     });
 }
 
-function handleCustomerInput(field) {
-    const nameInput = document.getElementById('cust-name-input');
-    const phoneInput = document.getElementById('cust-phone-input');
-    const nameVal = nameInput.value.trim();
-    const phoneVal = phoneInput.value.trim();
+function selectCustomer(cust) {
+    selectedCustomer = cust;
+    currentCustomerPoints = cust.loyalty_points || 0;
 
-    const match = customers.find(c => 
-        (phoneVal && c.phone === phoneVal) || 
-        (nameVal && c.name.toLowerCase() === nameVal.toLowerCase())
-    );
+    document.getElementById('disp-cust-name').innerText = cust.name;
+    document.getElementById('disp-cust-phone').innerText = cust.phone;
+    document.getElementById('btn-clear-cust').classList.remove('hidden');
 
-    if (match) {
-        selectedCustomerId = match.id;
-        nameInput.value = match.name;
-        phoneInput.value = match.phone;
-        currentCustomerPoints = match.loyalty_points || 0;
-    } else {
-        selectedCustomerId = null;
-        lookupCustomerPoints();
-    }
+    updateLoyaltyUI();
+    closeCustomerModal();
+}
+
+function clearSelectedCustomer() {
+    selectedCustomer = null;
+    currentCustomerPoints = 0;
+    pointsRedeemedCount = 0;
+
+    document.getElementById('disp-cust-name').innerText = 'Walk-in Customer';
+    document.getElementById('disp-cust-phone').innerText = 'No phone attached';
+    document.getElementById('btn-clear-cust').classList.add('hidden');
+
     updateLoyaltyUI();
 }
 
-function lookupCustomerPoints() {
-    const phone = document.getElementById('cust-phone-input').value.trim();
-    if (!phone) {
-        currentCustomerPoints = 0;
-        updateLoyaltyUI();
+async function addNewCustomerToDatabase() {
+    const name = document.getElementById('new-cust-name').value.trim();
+    const phone = document.getElementById('new-cust-phone').value.trim();
+    const email = document.getElementById('new-cust-email').value.trim();
+
+    if (!name || !phone) {
+        alert('Please provide both Name and Phone number!');
         return;
     }
-    const savedPts = localStorage.getItem('pts_' + phone);
-    currentCustomerPoints = savedPts ? parseInt(savedPts) : 0;
-    updateLoyaltyUI();
+
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient.from('contacts').insert([{
+                name: name,
+                phone: phone,
+                email: email || null,
+                loyalty_points: 0
+            }]).select();
+
+            if (error) {
+                alert('Database Error adding customer: ' + error.message);
+                return;
+            }
+
+            if (data && data.length > 0) {
+                const newCust = data[0];
+                customers.unshift(newCust);
+                selectCustomer(newCust);
+                
+                document.getElementById('new-cust-name').value = '';
+                document.getElementById('new-cust-phone').value = '';
+                document.getElementById('new-cust-email').value = '';
+                
+                alert(`Customer ${newCust.name} added successfully!`);
+            }
+        } catch(err) {
+            console.error('Error inserting customer:', err);
+            alert('An unexpected error occurred while adding customer.');
+        }
+    } else {
+        const offlineCust = { id: 'temp_' + Date.now(), name: name, phone: phone, loyalty_points: 0 };
+        customers.unshift(offlineCust);
+        selectCustomer(offlineCust);
+        closeCustomerModal();
+    }
 }
 
 function updateLoyaltyUI() {
@@ -676,12 +781,9 @@ function updateCartQty(id, delta) {
 function clearCart() {
     cart = [];
     pointsRedeemedCount = 0;
-    selectedCustomerId = null;
-    document.getElementById('cust-name-input').value = '';
-    document.getElementById('cust-phone-input').value = '';
+    clearSelectedCustomer();
     document.getElementById('discount-val').value = '';
     document.getElementById('discount-title').value = '';
-    lookupCustomerPoints();
     updateCartUI();
 }
 
@@ -961,7 +1063,6 @@ function processRefund(receiptId) {
 
     saveSalesHistoryLocal();
     renderSalesHistory();
-    lookupCustomerPoints();
 }
 
 function reprintReceipt(receiptId) {
@@ -1074,32 +1175,19 @@ function setPrintFormat(fmt) {
 }
 
 async function processSale(action) {
-    const custName = document.getElementById('cust-name-input').value.trim() || 'Walk-in Customer';
-    const custPhone = document.getElementById('cust-phone-input').value.trim() || 'N/A';
+    const custName = selectedCustomer ? selectedCustomer.name : 'Walk-in Customer';
+    const custPhone = selectedCustomer ? selectedCustomer.phone : 'N/A';
 
     const pointsEarned = Math.floor(netTotalInclusive);
     let updatedBalance = (currentCustomerPoints - pointsRedeemedCount + pointsEarned);
 
     // Sync Customer Points with Supabase
-    if (custPhone !== 'N/A') {
-        localStorage.setItem('pts_' + custPhone, updatedBalance.toString());
-        
-        if (supabaseClient) {
-            if (selectedCustomerId) {
-                await supabaseClient.from('contacts').update({
-                    loyalty_points: updatedBalance,
-                    last_visit: new Date().toISOString()
-                }).eq('id', selectedCustomerId);
-            } else if (custName !== 'Walk-in Customer') {
-                const { data } = await supabaseClient.from('contacts').insert([{
-                    name: custName,
-                    phone: custPhone,
-                    loyalty_points: updatedBalance
-                }]).select();
-                if (data && data.length > 0) selectedCustomerId = data[0].id;
-            }
-            fetchCustomers();
-        }
+    if (selectedCustomer && selectedCustomer.id && supabaseClient) {
+        await supabaseClient.from('contacts').update({
+            loyalty_points: updatedBalance,
+            last_visit: new Date().toISOString()
+        }).eq('id', selectedCustomer.id);
+        fetchCustomers();
     }
 
     const receiptId = 'BP-' + Math.floor(100000 + Math.random() * 900000);
@@ -1134,12 +1222,12 @@ async function processSale(action) {
         status: 'COMPLETED'
     };
 
-    // Push to Supabase if connected
+    // Push order to Supabase
     if (supabaseClient) {
         try {
             const vatAmt = netTotalInclusive - (netTotalInclusive / 1.10);
             await supabaseClient.from('sales_orders').insert([{
-                customer_id: selectedCustomerId,
+                customer_id: selectedCustomer ? selectedCustomer.id : null,
                 customer_name: custName,
                 customer_phone: custPhone,
                 subtotal: netTotalInclusive - vatAmt,
