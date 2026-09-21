@@ -494,6 +494,10 @@ let pointsRedeemedCount = 0;
 let userRole = 'CASHIER';
 let currentUser = { id: null, name: 'Cashier 1', role: 'CASHIER' };
 
+let grossTotal = 0;
+let discountAmount = 0;
+let netTotalInclusive = 0;
+
 const fallbackProducts = [
     { id: '1', name: 'RIIFFS Freeze EDP 100ml', retail_price: 18.500, cost_price: 9.000, stock_quantity: 12, barcode: '10001' },
     { id: '2', name: 'Lattafa Maahir Honor 100ml', retail_price: 14.000, cost_price: 6.500, stock_quantity: 8, barcode: '10002' },
