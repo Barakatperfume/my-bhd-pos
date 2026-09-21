@@ -480,7 +480,7 @@ if (window.supabase && window.supabase.createClient) {
 let products = [];
 let salesHistory = [];
 let customers = [];
-let selectedCustomer = null; // Object holding { id, name, phone, loyalty_points }
+let selectedCustomer = null; 
 let cart = [];
 let discountType = 'FIXED';
 let selectedPaymentType = 'SINGLE';
@@ -502,6 +502,11 @@ const fallbackProducts = [
 
 const formatBHD = (amount) => {
     return 'BHD ' + (Math.round((amount || 0) * 1000) / 1000).toFixed(3);
+};
+
+// Validates if string is a valid PostgreSQL UUID
+const isValidUUID = (id) => {
+    return typeof id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 };
 
 window.onload = () => {
@@ -1003,7 +1008,7 @@ async function saveItemChanges(id) {
             }
         }
 
-        if (supabaseClient) {
+        if (supabaseClient && isValidUUID(id)) {
             const response = await supabaseClient
                 .from("products")
                 .update(updateData)
@@ -1247,12 +1252,15 @@ async function processSale(action) {
 
     const vatAmt = netTotalInclusive - (netTotalInclusive / 1.10);
 
-    // Call Supabase RPC Function to execute stock decrement, customer metric updates, and order logging
+    // Ensure IDs passed to Supabase RPC are valid UUIDs, or null
+    const validCashierId = (currentUser && isValidUUID(currentUser.id)) ? currentUser.id : null;
+    const validCustomerId = (selectedCustomer && isValidUUID(selectedCustomer.id)) ? selectedCustomer.id : null;
+
     if (supabaseClient) {
         try {
             const { data, error } = await supabaseClient.rpc('process_pos_sale', {
-                p_cashier_id: currentUser ? currentUser.id : null,
-                p_customer_id: selectedCustomer ? selectedCustomer.id : null,
+                p_cashier_id: validCashierId,
+                p_customer_id: validCustomerId,
                 p_customer_name: custName,
                 p_customer_phone: custPhone,
                 p_subtotal: netTotalInclusive - vatAmt,
@@ -1294,7 +1302,7 @@ async function processSale(action) {
         pointsBalance: updatedBalance,
         paymentType: selectedPaymentType,
         paymentDetails: paymentDetails,
-        cashierId: currentUser ? currentUser.id : null,
+        cashierId: validCashierId,
         status: 'COMPLETED'
     };
 
