@@ -492,10 +492,7 @@ let selectedPrintFormat = '58mm';
 let currentCustomerPoints = 0;
 let pointsRedeemedCount = 0;
 let userRole = 'CASHIER';
-
-let grossTotal = 0;
-let discountAmount = 0;
-let netTotalInclusive = 0;
+let currentUser = { id: null, name: 'Cashier 1', role: 'CASHIER' };
 
 const fallbackProducts = [
     { id: '1', name: 'RIIFFS Freeze EDP 100ml', retail_price: 18.500, cost_price: 9.000, stock_quantity: 12, barcode: '10001' },
@@ -513,16 +510,45 @@ window.onload = () => {
     loadSalesHistoryLocal();
 };
 
-function switchUser() {
-    const pin = prompt('Enter User Switch PIN:');
-    if (pin === '9999' || pin === '1234') {
-        userRole = 'OWNER';
-        document.getElementById('role-badge').innerText = 'Owner';
-        document.getElementById('user-name').innerText = 'Manager/Owner';
-    } else {
+async function switchUser() {
+    const pin = prompt('Enter User PIN:');
+    if (!pin) return;
+
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('pos_users')
+                .select('*')
+                .eq('pin_code', pin.trim())
+                .single();
+
+            if (data && !error) {
+                currentUser = data;
+                userRole = data.role.toUpperCase();
+
+                document.getElementById('role-badge').innerText = userRole;
+                document.getElementById('user-name').innerText = data.name;
+                renderProducts();
+                return;
+            }
+        } catch (err) {
+            console.warn('Database user query failed, checking fallbacks:', err);
+        }
+    }
+
+    // Fallback logic for offline / unseeded states
+    if (pin === '1234' || pin === '9999') {
+        userRole = 'ADMIN';
+        currentUser = { id: null, name: 'Owner', role: 'ADMIN' };
+        document.getElementById('role-badge').innerText = 'Admin';
+        document.getElementById('user-name').innerText = 'Owner';
+    } else if (pin === '0000') {
         userRole = 'CASHIER';
+        currentUser = { id: null, name: 'Cashier 1', role: 'CASHIER' };
         document.getElementById('role-badge').innerText = 'Cashier';
         document.getElementById('user-name').innerText = 'Cashier 1';
+    } else {
+        alert('Invalid User PIN code!');
     }
     renderProducts();
 }
@@ -864,28 +890,52 @@ function updateCartUI() {
 }
 
 function openItemManagerModal() {
-    userRole = 'CASHIER';
-    document.getElementById('manager-status-text').innerText = 'Current View: Standard Staff';
-    document.getElementById('btn-unlock-manager').classList.remove('hidden');
+    document.getElementById('manager-status-text').innerText = `Current View: ${userRole}`;
+    if (userRole === 'ADMIN' || userRole === 'MANAGER') {
+        document.getElementById('btn-unlock-manager').classList.add('hidden');
+    } else {
+        document.getElementById('btn-unlock-manager').classList.remove('hidden');
+    }
     
     document.getElementById('item-manager-modal').classList.remove('hidden');
     renderItemManagerList();
 }
 
 function closeItemManagerModal() {
-    userRole = 'CASHIER';
     document.getElementById('item-manager-modal').classList.add('hidden');
 }
 
-function authenticateManagerRole() {
+async function authenticateManagerRole() {
     const pin = prompt('Enter Manager/Owner PIN to view and edit Cost Prices:');
+    if (!pin) return;
+
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('pos_users')
+                .select('*')
+                .eq('pin_code', pin.trim())
+                .single();
+
+            if (data && !error && (data.role === 'ADMIN' || data.role === 'MANAGER')) {
+                userRole = data.role;
+                document.getElementById('manager-status-text').innerText = `Current View: ${data.role} Access`;
+                document.getElementById('btn-unlock-manager').classList.add('hidden');
+                renderItemManagerList();
+                return;
+            }
+        } catch (err) {
+            console.warn('Supabase manager authentication query failed:', err);
+        }
+    }
+
     if (pin === '1234' || pin === '9999') {
         userRole = 'MANAGER';
         document.getElementById('manager-status-text').innerText = 'Current View: Manager Access';
         document.getElementById('btn-unlock-manager').classList.add('hidden');
         renderItemManagerList();
     } else {
-        alert('Invalid Manager PIN!');
+        alert('Invalid Manager PIN or insufficient privileges!');
     }
 }
 
@@ -897,7 +947,7 @@ function renderItemManagerList() {
         const row = document.createElement('div');
         row.className = 'py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0 text-xs border-b border-gray-100 last:border-0';
         
-        const isManager = (userRole === 'MANAGER' || userRole === 'OWNER');
+        const isManager = (userRole === 'MANAGER' || userRole === 'ADMIN' || userRole === 'OWNER');
         
         const costInputHtml = isManager 
             ? `<div>
@@ -947,7 +997,7 @@ async function saveItemChanges(id) {
             stock_quantity: newStock
         };
 
-        const isManager = (userRole === "MANAGER" || userRole === "OWNER");
+        const isManager = (userRole === "MANAGER" || userRole === "ADMIN" || userRole === "OWNER");
         if (isManager) {
             const costElem = document.getElementById("edit-cost-" + id);
             if (costElem) {
@@ -1153,7 +1203,7 @@ function setSplitPrimaryMethod(method) {
 function setSplitSecondaryMethod(method) {
     splitSecondaryMethod = method;
     document.querySelectorAll('.split-sec-btn').forEach(b => b.className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center');
-    if (method === 'CASH') document.getElementById('btn-split-sec-cash').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+    if (method === 'CASH') document.getElementById('btn-split-sec-cash').className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center';
     if (method === 'CARD') document.getElementById('btn-split-sec-card').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
     if (method === 'BENEFIT_PAY') document.getElementById('btn-split-sec-benefit').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
 }
@@ -1219,6 +1269,7 @@ async function processSale(action) {
         pointsBalance: updatedBalance,
         paymentType: selectedPaymentType,
         paymentDetails: paymentDetails,
+        cashierId: currentUser ? currentUser.id : null,
         status: 'COMPLETED'
     };
 
@@ -1227,6 +1278,7 @@ async function processSale(action) {
         try {
             const vatAmt = netTotalInclusive - (netTotalInclusive / 1.10);
             await supabaseClient.from('sales_orders').insert([{
+                cashier_id: currentUser ? currentUser.id : null,
                 customer_id: selectedCustomer ? selectedCustomer.id : null,
                 customer_name: custName,
                 customer_phone: custPhone,
