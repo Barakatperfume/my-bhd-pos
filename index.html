@@ -504,15 +504,14 @@ const formatBHD = (amount) => {
     return 'BHD ' + (Math.round((amount || 0) * 1000) / 1000).toFixed(3);
 };
 
-// Validates if string is a valid PostgreSQL UUID
 const isValidUUID = (id) => {
     return typeof id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 };
 
-window.onload = () => {
-    fetchProducts();
-    fetchCustomers();
-    loadSalesHistoryLocal();
+window.onload = async () => {
+    await fetchProducts();
+    await fetchCustomers();
+    await fetchSalesHistory();
 };
 
 async function switchUser() {
@@ -565,7 +564,7 @@ async function fetchProducts() {
     }
 
     try {
-        const { data, error } = await supabaseClient.from('products').select('*');
+        const { data, error } = await supabaseClient.from('products').select('*').order('name', { ascending: true });
         if (error || !data || data.length === 0) {
             console.warn('Fallback triggered or Supabase query error:', error);
             products = fallbackProducts;
@@ -585,9 +584,67 @@ async function fetchCustomers() {
         const { data, error } = await supabaseClient.from('contacts').select('*').order('created_at', { ascending: false });
         if (!error && data) {
             customers = data;
+            if (selectedCustomer) {
+                const refreshed = customers.find(c => String(c.id) === String(selectedCustomer.id));
+                if (refreshed) selectCustomer(refreshed);
+            }
         }
     } catch (err) {
         console.error('Error fetching contacts:', err);
+    }
+}
+
+async function fetchSalesHistory() {
+    if (!supabaseClient) {
+        loadSalesHistoryLocal();
+        return;
+    }
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('sales_orders')
+            .select(`
+                *,
+                order_items (
+                    id,
+                    product_id,
+                    unit_price,
+                    quantity,
+                    total_price,
+                    products ( name )
+                )
+            `)
+            .order('created_at', { ascending: false });
+
+        if (!error && data) {
+            salesHistory = data.map(so => ({
+                id: so.id,
+                receiptId: 'BP-' + (so.receipt_number || '000000'),
+                timestamp: new Date(so.created_at).toLocaleString(),
+                custName: so.customer_name || 'Walk-in Customer',
+                custPhone: so.customer_phone || 'N/A',
+                customerId: so.customer_id,
+                items: (so.order_items || []).map(oi => ({
+                    id: oi.product_id,
+                    name: oi.products ? oi.products.name : 'Unknown Product',
+                    qty: oi.quantity,
+                    price: oi.unit_price
+                })),
+                grossTotal: parseFloat(so.gross_total || 0),
+                discountAmount: parseFloat(so.discount_amount || 0),
+                netTotal: parseFloat(so.total_amount || 0),
+                pointsEarned: so.points_earned || 0,
+                pointsRedeemed: so.points_redeemed || 0,
+                status: so.status || 'COMPLETED',
+                paymentDetails: so.payment_details
+            }));
+            saveSalesHistoryLocal();
+        } else {
+            loadSalesHistoryLocal();
+        }
+    } catch (err) {
+        console.error('Error fetching sales history from Supabase:', err);
+        loadSalesHistoryLocal();
     }
 }
 
@@ -1097,25 +1154,53 @@ function renderSalesHistory() {
     });
 }
 
-function processRefund(receiptId) {
+async function processRefund(receiptId) {
     const sale = salesHistory.find(s => s.receiptId === receiptId);
     if (!sale) return;
 
     if (!confirm(`Are you sure you want to refund Receipt #${receiptId} for ${formatBHD(sale.netTotal)}?`)) return;
 
-    sale.status = 'REFUNDED';
+    if (supabaseClient && isValidUUID(sale.id)) {
+        try {
+            const { data, error } = await supabaseClient.rpc('process_pos_refund', {
+                p_order_id: sale.id
+            });
 
-    if (sale.custPhone && sale.custPhone !== 'N/A' && sale.pointsEarned > 0) {
-        let currentPts = parseInt(localStorage.getItem('pts_' + sale.custPhone) || '0');
-        currentPts = Math.max(0, currentPts - sale.pointsEarned);
-        localStorage.setItem('pts_' + sale.custPhone, currentPts.toString());
-        alert(`Refund Processed! Deducted ${sale.pointsEarned} loyalty points from customer ${sale.custPhone}. New Balance: ${currentPts} Pts.`);
+            if (error) {
+                alert('Database Error processing refund: ' + error.message);
+                return;
+            }
+        } catch (err) {
+            console.error('Error executing refund RPC:', err);
+            alert('An error occurred during refund processing.');
+            return;
+        }
     } else {
-        alert(`Refund Processed successfully for Receipt #${receiptId}!`);
+        // Local Fallback processing if running offline
+        sale.items.forEach(item => {
+            const prod = products.find(p => String(p.id) === String(item.id));
+            if (prod) {
+                prod.stock_quantity = (prod.stock_quantity || 0) + item.qty;
+            }
+        });
+
+        if (sale.custPhone && sale.custPhone !== 'N/A') {
+            const cust = customers.find(c => c.phone === sale.custPhone);
+            if (cust) {
+                cust.loyalty_points = Math.max(0, (cust.loyalty_points || 0) - sale.pointsEarned + (sale.pointsRedeemed || 0));
+            }
+        }
     }
 
+    sale.status = 'REFUNDED';
     saveSalesHistoryLocal();
+
+    // Re-fetch products and customer data to sync local UI state
+    await fetchProducts();
+    await fetchCustomers();
+
     renderSalesHistory();
+    alert(`Refund Processed successfully for Receipt #${receiptId}! Stock updated and customer loyalty points adjusted.`);
 }
 
 function reprintReceipt(receiptId) {
@@ -1234,9 +1319,6 @@ async function processSale(action) {
     const pointsEarned = Math.floor(netTotalInclusive);
     let updatedBalance = (currentCustomerPoints - pointsRedeemedCount + pointsEarned);
 
-    const receiptId = 'BP-' + Math.floor(100000 + Math.random() * 900000);
-    
-    // Payment Breakdown construction
     let paymentDetails = {};
     if (selectedPaymentType === 'SINGLE') {
         paymentDetails = { type: 'SINGLE', method: singlePaymentMethod, total: netTotalInclusive };
@@ -1252,9 +1334,10 @@ async function processSale(action) {
 
     const vatAmt = netTotalInclusive - (netTotalInclusive / 1.10);
 
-    // Ensure IDs passed to Supabase RPC are valid UUIDs, or null
     const validCashierId = (currentUser && isValidUUID(currentUser.id)) ? currentUser.id : null;
     const validCustomerId = (selectedCustomer && isValidUUID(selectedCustomer.id)) ? selectedCustomer.id : null;
+
+    let dbOrderId = null;
 
     if (supabaseClient) {
         try {
@@ -1281,15 +1364,20 @@ async function processSale(action) {
                 return;
             }
 
-            // Refresh catalog and contacts to update UI stock indicators & point balances
+            dbOrderId = data;
+
             await fetchProducts();
             await fetchCustomers();
+            await fetchSalesHistory();
         } catch(e) {
             console.error("Error pushing order to database:", e);
         }
     }
 
+    const receiptId = 'BP-' + Math.floor(100000 + Math.random() * 900000);
+
     const saleRecord = {
+        id: dbOrderId || ('temp_' + Date.now()),
         receiptId: receiptId,
         timestamp: new Date().toLocaleString(),
         custName: custName,
@@ -1306,8 +1394,10 @@ async function processSale(action) {
         status: 'COMPLETED'
     };
 
-    salesHistory.unshift(saleRecord);
-    saveSalesHistoryLocal();
+    if (!supabaseClient) {
+        salesHistory.unshift(saleRecord);
+        saveSalesHistoryLocal();
+    }
 
     if (action === 'PRINT') {
         executePrintReceipt(saleRecord);
@@ -1348,7 +1438,6 @@ function executePrintReceipt(sale) {
     temp.querySelector('.t-total').innerText = formatBHD(sale.netTotal);
     temp.querySelector('.t-timestamp').innerText = sale.timestamp;
 
-    // Payment breakdown formatting
     const payContainer = temp.querySelector('.t-payments-breakdown');
     payContainer.innerHTML = '';
     if (sale.paymentDetails && sale.paymentDetails.type === 'SPLIT') {
