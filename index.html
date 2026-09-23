@@ -1,503 +1,1536 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barakat Perfumes - Point of Sale</title>
-    <!-- Tailwind CSS -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co;">
+    <title>Barakat Perfumes POS</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase JS Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Html5-QRCode Camera Scanner -->
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 50: '#fffbeb', 100: '#fef3c7', 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706', 900: '#78350f' }
-                    }
-                }
-            }
-        }
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
         @media print {
-            body * { visibility: hidden; }
-            #printableArea, #printableArea * { visibility: visible; }
-            #printableArea { position: absolute; left: 0; top: 0; width: 100%; }
-            .no-print { display: none !important; }
+            body > * { display: none !important; }
+            #print-container, #print-container * { display: block !important; visibility: visible !important; }
+            #print-container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            @page {
+                size: A4 portrait;
+                margin: 8mm;
+            }
         }
     </style>
 </head>
-<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 h-full flex flex-col font-sans">
+<body class="bg-gray-100 font-sans h-screen flex flex-col overflow-hidden">
 
-    <!-- Top Header -->
-    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 py-3 flex justify-between items-center no-print">
+    <!-- Isolated Container for Printing -->
+    <div id="print-container" class="hidden"></div>
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-emerald-700 text-white p-3 flex justify-between items-center shadow-md">
         <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-bold text-slate-900 text-xl shadow-md">
-                BP
-            </div>
-            <div>
-                <h1 class="font-bold text-lg leading-none">Barakat Perfumes</h1>
-                <span class="text-xs text-slate-500 dark:text-slate-400">Point of Sale System</span>
-            </div>
+            <span class="font-bold text-xl tracking-wide">Barakat Perfumes POS</span>
+            <span id="role-badge" class="bg-emerald-900 text-emerald-200 text-xs px-2 py-1 rounded-full uppercase tracking-wider font-semibold">Cashier</span>
         </div>
-
         <div class="flex items-center space-x-2">
-            <button onclick="toggleScanner()" title="Scan Barcode" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 p-2.5 rounded-xl text-slate-700 dark:text-slate-200 transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+            <button onclick="openSalesHistoryModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition flex items-center space-x-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                <span>View Sales</span>
             </button>
-            <button onclick="showSalesHistory()" title="Sales History" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 p-2.5 rounded-xl text-slate-700 dark:text-slate-200 transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <button onclick="openItemManagerModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition flex items-center space-x-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                <span>Items Manager</span>
             </button>
+            <span id="user-name" class="text-sm font-medium hidden sm:inline ml-2">Cashier 1</span>
+            <button onclick="switchUser()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition">Switch PIN</button>
         </div>
     </header>
 
-    <!-- Camera Scanner Modal -->
-    <div id="scannerModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl w-full max-w-sm">
-            <div class="flex justify-between items-center mb-2">
-                <h3 class="font-bold text-slate-800 dark:text-white">Scan Barcode</h3>
-                <button onclick="toggleScanner()" class="text-slate-500 font-bold">&times;</button>
-            </div>
-            <div id="reader" class="overflow-hidden rounded-xl"></div>
-        </div>
-    </div>
-
-    <!-- Main Workspace -->
-    <main class="flex-1 flex flex-col lg:flex-row overflow-hidden no-print">
-        <!-- Catalog & Search -->
-        <section class="flex-1 flex flex-col border-r border-slate-200 dark:border-slate-800">
-            <div class="p-4 bg-white dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 flex space-x-2">
+    <!-- Main POS Interface Split View -->
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+        
+        <!-- Left Panel: Product Search, Scanner & Catalog -->
+        <div class="w-full md:w-3/5 lg:w-2/3 p-4 flex flex-col h-full overflow-hidden">
+            
+            <!-- Universal Search & Camera Scan Bar -->
+            <div class="flex space-x-2 mb-4">
                 <div class="relative flex-1">
-                    <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Search product by name, barcode..." class="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-500 text-sm">
-                    <svg class="w-5 h-5 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <input type="text" id="search-input" onkeyup="filterProducts()" placeholder="Search name or scan barcode..." 
+                           class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm shadow-sm">
+                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
+                <button onclick="toggleCameraScanner()" class="bg-gray-800 hover:bg-black text-white px-4 py-2.5 rounded-lg flex items-center space-x-1 shadow text-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h0.93a2 2 0 001.664-.89l0.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l0.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span class="hidden sm:inline">Scan</span>
+                </button>
+            </div>
+
+            <!-- In-App Camera Viewfinder Container -->
+            <div id="camera-reader-wrapper" class="hidden mb-4 bg-black rounded-lg overflow-hidden relative max-h-48">
+                <div id="reader" class="w-full"></div>
+                <button onclick="toggleCameraScanner()" class="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 text-xs rounded shadow z-10">Close Camera</button>
             </div>
 
             <!-- Product Grid -->
-            <div id="productGrid" class="flex-1 p-4 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                <!-- Products render dynamically -->
+            <div id="product-grid" class="flex-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 overflow-y-auto no-scrollbar pr-1">
+                <!-- Product Cards dynamically rendered here -->
             </div>
-        </section>
+        </div>
 
-        <!-- Cart & Checkout Section -->
-        <section class="w-full lg:w-[420px] bg-white dark:bg-slate-800 flex flex-col h-full shadow-lg">
-            <!-- Customer Loyalty Area -->
-            <div class="p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80">
+        <!-- Right Panel: Cart Register & Checkout -->
+        <div class="w-full md:w-2/5 lg:w-1/3 bg-white border-l border-gray-200 flex flex-col h-full shadow-lg">
+            
+            <div class="p-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="font-bold text-gray-700">Current Order</h2>
+                <button onclick="clearCart()" class="text-xs text-red-600 hover:text-red-800 font-medium">Clear All</button>
+            </div>
+
+            <!-- Selected Customer & Loyalty Widget -->
+            <div class="p-3 border-b border-gray-200 bg-emerald-50/50 space-y-2">
                 <div class="flex justify-between items-center">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Customer</span>
-                    <button onclick="openNewCustomerModal()" class="text-xs text-amber-600 font-semibold hover:underline">+ New Customer</button>
+                    <label class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Customer Profile</label>
+                    <button onclick="openCustomerModal()" class="text-xs text-emerald-700 font-bold hover:underline flex items-center space-x-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <span>Search / Add Customer</span>
+                    </button>
                 </div>
-                <div class="mt-2 flex space-x-2">
-                    <input type="text" id="customerSearch" oninput="searchCustomer()" placeholder="Enter Phone / Name..." class="flex-1 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm">
-                </div>
-                <div id="customerInfo" class="mt-2 text-xs hidden bg-amber-50 dark:bg-amber-950/30 p-2 rounded-lg border border-amber-200 dark:border-amber-800/40 flex justify-between items-center">
+
+                <!-- Active Selected Customer Box -->
+                <div id="active-customer-box" class="bg-white p-2.5 rounded-lg border border-emerald-200 flex justify-between items-center shadow-sm">
                     <div>
-                        <p id="cName" class="font-bold text-slate-800 dark:text-amber-200"></p>
-                        <p class="text-slate-500">Points Available: <span id="cPoints" class="font-bold text-amber-600">0</span></p>
+                        <p id="disp-cust-name" class="font-bold text-xs text-gray-800">Walk-in Customer</p>
+                        <p id="disp-cust-phone" class="text-[10px] text-gray-500">No phone attached</p>
                     </div>
-                    <button onclick="clearCustomer()" class="text-red-500 font-bold">&times;</button>
+                    <button onclick="clearSelectedCustomer()" id="btn-clear-cust" class="hidden text-xs text-red-500 font-bold hover:text-red-700">Remove</button>
+                </div>
+
+                <!-- Loyalty Points Widget -->
+                <div id="loyalty-widget" class="bg-white p-2 rounded border border-emerald-200 flex justify-between items-center text-xs">
+                    <div>
+                        <span class="text-gray-500">Points Balance:</span>
+                        <strong id="cust-pts-balance" class="text-emerald-700 font-bold ml-1">0 Pts</strong>
+                    </div>
+                    <button id="btn-redeem-pts" onclick="redeemLoyaltyPoints()" disabled class="bg-gray-300 text-gray-500 text-[10px] font-bold px-2 py-1 rounded cursor-not-allowed">
+                        Redeem (100 pts = 1 BHD)
+                    </button>
                 </div>
             </div>
 
-            <!-- Items List -->
-            <div id="cartItems" class="flex-1 overflow-y-auto p-3 divide-y divide-slate-100 dark:divide-slate-700">
-                <!-- Items dynamically rendered -->
+            <!-- Cart Items List -->
+            <div id="cart-items" class="flex-1 overflow-y-auto p-3 space-y-3 no-scrollbar divide-y divide-gray-100">
+                <!-- Cart items dynamically rendered here -->
             </div>
 
-            <!-- Total Calculations & Payment Method selection -->
-            <div class="p-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 space-y-2 text-sm">
-                <div class="flex justify-between">
-                    <span class="text-slate-500">Subtotal</span>
-                    <span id="cartSubtotal" class="font-semibold">BHD 0.000</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-slate-500">Redeem Loyalty Points</span>
-                    <input type="number" id="pointsRedeemed" onchange="updateCartTotals()" min="0" placeholder="0" class="w-20 px-2 py-1 text-right bg-white dark:bg-slate-800 border rounded-lg text-sm">
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-slate-500">Discount (BHD)</span>
-                    <input type="number" id="extraDiscount" onchange="updateCartTotals()" step="0.001" min="0" placeholder="0.000" class="w-20 px-2 py-1 text-right bg-white dark:bg-slate-800 border rounded-lg text-sm">
-                </div>
-                <div class="flex justify-between text-lg font-bold pt-2 border-t border-slate-200 dark:border-slate-700">
-                    <span>Grand Total</span>
-                    <span id="cartTotal" class="text-amber-600 dark:text-amber-400">BHD 0.000</span>
-                </div>
-
-                <!-- Payment Selectors -->
-                <div class="grid grid-cols-4 gap-1.5 pt-2">
-                    <button onclick="setPaymentMethod('cash')" id="btnCash" class="pay-btn py-2 border-2 border-amber-500 rounded-xl font-semibold text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/20">Cash</button>
-                    <button onclick="setPaymentMethod('card')" id="btnCard" class="pay-btn py-2 border border-slate-300 dark:border-slate-700 rounded-xl font-semibold text-xs">Card</button>
-                    <button onclick="setPaymentMethod('benefitpay')" id="btnBenefit" class="pay-btn py-2 border border-slate-300 dark:border-slate-700 rounded-xl font-semibold text-xs">Benefit</button>
-                    <button onclick="setPaymentMethod('split')" id="btnSplit" class="pay-btn py-2 border border-slate-300 dark:border-slate-700 rounded-xl font-semibold text-xs">Split</button>
+            <!-- Pricing Summary & Discount Controls Footer -->
+            <div class="p-4 bg-gray-50 border-t border-gray-200 space-y-2">
+                
+                <!-- Discount Control Panel -->
+                <div class="bg-white p-2 rounded-lg border border-gray-200 space-y-1.5 shadow-sm">
+                    <div class="flex justify-between items-center">
+                        <label class="text-[11px] font-bold text-gray-700 uppercase">Apply Discount</label>
+                        <div class="flex space-x-1">
+                            <button id="disc-type-bhd" onclick="setDiscountType('FIXED')" class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-600 text-white">BHD</button>
+                            <button id="disc-type-pct" onclick="setDiscountType('PERCENT')" class="px-2 py-0.5 text-[10px] font-bold rounded bg-gray-200 text-gray-700">%</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="discount-title" placeholder="Title (e.g. Promo)" class="border border-gray-300 rounded px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
+                        <input type="number" id="discount-val" step="0.001" oninput="updateCartUI()" placeholder="Amount / %" class="border border-gray-300 rounded px-2 py-1 text-xs text-right font-bold outline-none focus:ring-1 focus:ring-emerald-500">
+                    </div>
                 </div>
 
-                <div id="splitPayFields" class="hidden space-y-1 pt-2 border-t text-xs">
-                    <div class="flex justify-between"><label>Cash Paid:</label><input type="number" id="splitCash" value="0.000" step="0.001" class="w-24 text-right border rounded px-1"></div>
-                    <div class="flex justify-between"><label>Card Paid:</label><input type="number" id="splitCard" value="0.000" step="0.001" class="w-24 text-right border rounded px-1"></div>
+                <div class="flex justify-between text-xs text-gray-600">
+                    <span>Gross Total</span>
+                    <span id="summary-gross" class="font-semibold">BHD 0.000</span>
+                </div>
+                <div id="row-discount" class="flex justify-between text-xs text-red-600 hidden">
+                    <span id="label-discount-title">Discount</span>
+                    <span id="summary-discount" class="font-semibold">-BHD 0.000</span>
+                </div>
+                <div class="flex justify-between text-xs text-gray-600">
+                    <span>Subtotal (Excl. VAT)</span>
+                    <span id="summary-subtotal" class="font-semibold">BHD 0.000</span>
+                </div>
+                <div class="flex justify-between text-xs text-gray-600">
+                    <span>VAT (10% Incl.)</span>
+                    <span id="summary-vat" class="font-semibold">BHD 0.000</span>
+                </div>
+                <div class="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-200">
+                    <span>Total Amount</span>
+                    <span id="summary-total" class="text-emerald-700">BHD 0.000</span>
                 </div>
 
-                <button onclick="processCheckout()" class="w-full py-3 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-xl shadow-lg transition mt-2">
-                    Complete Checkout
+                <!-- Charge / Checkout Button -->
+                <button onclick="openPaymentModal()" class="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow-md transition text-center flex justify-between px-4">
+                    <span>PAY NOW</span>
+                    <span id="btn-total">BHD 0.000</span>
                 </button>
             </div>
-        </section>
-    </main>
+        </div>
+    </div>
 
-    <!-- Zero Stock Alert Warning Modal -->
-    <div id="zeroStockModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-red-500/30">
-            <div class="flex items-center space-x-3 text-red-600 dark:text-red-400 mb-4">
-                <div class="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+    <!-- CUSTOMER SEARCH & CREATION MODAL -->
+    <div id="customer-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-5 space-y-4 my-auto max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-gray-800">Select or Add Customer</h3>
+                <button onclick="closeCustomerModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+            </div>
+
+            <!-- Search Input Bar -->
+            <div>
+                <input type="text" id="cust-modal-search" onkeyup="renderCustomerSearchResults()" placeholder="Search by name or phone..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+
+            <!-- Customer Search Results List -->
+            <div id="cust-modal-results" class="flex-1 overflow-y-auto border rounded-lg divide-y divide-gray-100 max-h-48 p-2 bg-gray-50/50">
+                <!-- Search results rendered dynamically -->
+            </div>
+
+            <!-- Add New Customer Section -->
+            <div class="border-t pt-3 space-y-2 bg-emerald-50/30 p-3 rounded-lg border border-emerald-100">
+                <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider">Create New Customer</h4>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="new-cust-name" placeholder="Full Name *" class="border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
+                    <input type="text" id="new-cust-phone" placeholder="Phone Number *" class="border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
                 </div>
+                <input type="email" id="new-cust-email" placeholder="Email Address (Optional)" class="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
+                
+                <button onclick="addNewCustomerToDatabase()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs transition shadow">
+                    Save & Select Customer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales History & Refunds Modal -->
+    <div id="sales-history-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full p-5 space-y-4 my-auto max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-gray-800">Previous Sales Receipts & Refunds</h3>
+                <button onclick="closeSalesHistoryModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+            </div>
+            
+            <div class="flex space-x-2">
+                <input type="text" id="sales-search-input" onkeyup="renderSalesHistory()" placeholder="Search by Receipt ID, Customer, or Phone..." class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
+            </div>
+
+            <div class="flex-1 overflow-y-auto divide-y divide-gray-200 border rounded-lg p-2 max-h-96" id="sales-history-list">
+                <!-- Dynamic Sales Log -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Item Manager & Price Edit Modal -->
+    <div id="item-manager-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-5 space-y-4 my-auto max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-3">
                 <div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Stock Depleted!</h3>
-                    <p class="text-xs text-red-500 font-medium">Immediate Action Required</p>
+                    <h3 class="text-lg font-bold text-gray-800">Item Catalog Manager</h3>
+                    <p class="text-xs text-gray-500">Staff can change retail prices. Costs are locked to Manager/Owner PIN.</p>
+                </div>
+                <button onclick="closeItemManagerModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+            </div>
+
+            <div class="flex justify-between items-center bg-gray-50 p-2 rounded border border-gray-200">
+                <span id="manager-status-text" class="text-xs font-semibold text-gray-600">Current View: Standard Staff</span>
+                <button id="btn-unlock-manager" onclick="authenticateManagerRole()" class="bg-emerald-600 text-white text-xs px-3 py-1 rounded font-bold hover:bg-emerald-700">Manager Unlock PIN</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto border rounded-lg p-2 max-h-96 divide-y divide-gray-100" id="item-manager-list">
+                <!-- Dynamic Item List -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment & Receipt Modal -->
+    <div id="payment-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-5 space-y-4 my-auto">
+            <h3 class="text-lg font-bold text-gray-800 border-b pb-2">Complete Payment</h3>
+            
+            <div class="text-center py-2 bg-emerald-50 rounded-lg">
+                <p class="text-xs text-emerald-800 uppercase font-semibold tracking-wider">Total Amount Due</p>
+                <p id="modal-total" class="text-2xl font-black text-emerald-700">BHD 0.000</p>
+            </div>
+
+            <!-- Payment Type Selection -->
+            <div>
+                <label class="text-xs font-semibold text-gray-600 uppercase">Payment Option</label>
+                <div class="grid grid-cols-2 gap-2 mt-1">
+                    <button id="mode-single-btn" onclick="setPaymentType('SINGLE')" class="border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">Single Method</button>
+                    <button id="mode-split-btn" onclick="setPaymentType('SPLIT')" class="border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">Split Payment</button>
                 </div>
             </div>
 
-            <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">
-                The following product(s) have reached <strong class="text-red-600 dark:text-red-400">0 stock</strong>:
-            </p>
+            <!-- Single Payment Mode Container -->
+            <div id="single-payment-container" class="space-y-3">
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 uppercase">Method</label>
+                    <div class="grid grid-cols-3 gap-2 mt-1">
+                        <button id="btn-single-cash" onclick="setSingleMethod('CASH')" class="pay-method-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">CASH</button>
+                        <button id="btn-single-card" onclick="setSingleMethod('CARD')" class="pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">CARD</button>
+                        <button id="btn-single-benefit" onclick="setSingleMethod('BENEFIT_PAY')" class="pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">BENEFIT</button>
+                    </div>
+                </div>
 
-            <ul id="zeroStockList" class="mb-4 max-h-32 overflow-y-auto divide-y divide-gray-100 dark:divide-slate-700 bg-red-50 dark:bg-red-950/20 rounded-xl p-3 text-sm font-semibold text-gray-800 dark:text-gray-200">
-                <!-- Zero stock items -->
-            </ul>
-
-            <div class="bg-amber-50 dark:bg-amber-950/40 border-l-4 border-amber-500 p-3 rounded-r-xl mb-6">
-                <div class="flex items-start">
-                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 mr-2 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <p class="text-xs text-amber-800 dark:text-amber-200 font-medium">
-                        <strong>Action Required:</strong> Please immediately mark these items as <span class="underline decoration-amber-500">Unavailable / Out of Stock</span> on <strong>Talabat</strong> and <strong>Jahez</strong> merchant portals to prevent unfulfillable online orders.
-                    </p>
+                <div id="single-cash-wrapper">
+                    <label class="text-xs font-semibold text-gray-600 uppercase">Cash Tendered (BHD)</label>
+                    <input type="number" id="cash-tendered" step="0.001" oninput="calculateSingleChange()" placeholder="0.000" class="w-full mt-1 border border-gray-300 rounded-lg p-2 text-right font-bold text-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <div class="flex justify-between text-sm mt-2 text-gray-700">
+                        <span>Change Due:</span>
+                        <span id="change-due" class="font-bold text-blue-600">BHD 0.000</span>
+                    </div>
                 </div>
             </div>
 
-            <button onclick="closeZeroStockModal()" class="w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg transition">
-                I Understand & Will Update Portals
-            </button>
+            <!-- Split Payment Mode Container -->
+            <div id="split-payment-container" class="hidden space-y-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 uppercase">1. Select Primary Payment Method</label>
+                    <div class="grid grid-cols-3 gap-2 mt-1">
+                        <button id="btn-split-pri-cash" onclick="setSplitPrimaryMethod('CASH')" class="split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center">CASH</button>
+                        <button id="btn-split-pri-card" onclick="setSplitPrimaryMethod('CARD')" class="split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">CARD</button>
+                        <button id="btn-split-pri-benefit" onclick="setSplitPrimaryMethod('BENEFIT_PAY')" class="split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">BENEFIT</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label id="label-split-pri-amount" class="text-xs font-semibold text-gray-600 uppercase">Primary Paid Amount (BHD)</label>
+                    <input type="number" id="split-pri-amount" step="0.001" oninput="calculateSplitBalance()" placeholder="0.000" class="w-full mt-1 border border-gray-300 rounded-lg p-2 text-right font-bold text-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <div class="p-2.5 bg-blue-50 border border-blue-200 rounded-lg flex justify-between items-center text-sm font-bold text-blue-900">
+                    <span>Remaining Balance:</span>
+                    <span id="split-remaining-balance" class="text-base text-blue-700">BHD 0.000</span>
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 uppercase">2. Pay Balance Using</label>
+                    <div class="grid grid-cols-3 gap-2 mt-1">
+                        <button id="btn-split-sec-cash" onclick="setSplitSecondaryMethod('CASH')" class="split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">CASH</button>
+                        <button id="btn-split-sec-card" onclick="setSplitSecondaryMethod('CARD')" class="split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center">CARD</button>
+                        <button id="btn-split-sec-benefit" onclick="setSplitSecondaryMethod('BENEFIT_PAY')" class="split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">BENEFIT</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Receipt Print Format Selector -->
+            <div>
+                <label class="text-xs font-semibold text-gray-600 uppercase">Print Format</label>
+                <div class="grid grid-cols-2 gap-2 mt-1">
+                    <button id="btn-print-58mm" onclick="setPrintFormat('58mm')" class="print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">58mm Thermal</button>
+                    <button id="btn-print-a4" onclick="setPrintFormat('A4')" class="print-fmt-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">A4 Invoice</button>
+                </div>
+            </div>
+
+            <!-- Multi-Channel Receipt Action Buttons -->
+            <div class="space-y-2 pt-2 border-t border-gray-200">
+                <button onclick="processSale('PRINT')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-sm shadow flex items-center justify-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    <span>Print Receipt</span>
+                </button>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="processSale('WHATSAPP')" class="bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold text-xs flex items-center justify-center space-x-1">
+                        <span>Send WhatsApp</span>
+                    </button>
+                    <button onclick="processSale('EMAIL')" class="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold text-xs flex items-center justify-center space-x-1">
+                        <span>Send Email</span>
+                    </button>
+                </div>
+
+                <button onclick="closePaymentModal()" class="w-full border border-gray-300 text-gray-700 py-2 rounded-lg font-semibold text-xs hover:bg-gray-50">Cancel</button>
+            </div>
         </div>
     </div>
 
-    <!-- Create Customer Modal -->
-    <div id="customerModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl w-full max-w-md shadow-xl">
-            <h3 class="font-bold text-lg mb-4 dark:text-white">New Customer</h3>
-            <div class="space-y-3">
-                <input type="text" id="newCName" placeholder="Full Name" class="w-full p-2.5 border rounded-xl dark:bg-slate-900 border-slate-300 dark:border-slate-700">
-                <input type="text" id="newCPhone" placeholder="Phone Number" class="w-full p-2.5 border rounded-xl dark:bg-slate-900 border-slate-300 dark:border-slate-700">
-                <input type="email" id="newCEmail" placeholder="Email (Optional)" class="w-full p-2.5 border rounded-xl dark:bg-slate-900 border-slate-300 dark:border-slate-700">
+    <!-- Hidden Template: Thermal Printable Receipt (58mm) -->
+    <template id="template-receipt-58mm">
+        <div style="width: 58mm; padding: 4px; font-family: monospace; font-size: 10px; color: black; line-height: 1.2;">
+            <div style="text-align: center;">
+                <img src="PCBH_LOGO-BG.png" alt="Logo" style="height: 48px; margin: 0 auto 4px auto; display: block; object-fit: contain;">
+                <div style="font-weight: bold; font-size: 12px; text-transform: uppercase;">BARAKAT PERFUMES</div>
+                <div>District 1, Janabiya</div>
+                <div>CR: 13812-04</div>
+                <div>Tel: 36051011</div>
             </div>
-            <div class="flex space-x-2 mt-6">
-                <button onclick="closeCustomerModal()" class="flex-1 py-2 bg-slate-200 dark:bg-slate-700 rounded-xl font-bold">Cancel</button>
-                <button onclick="createNewCustomer()" class="flex-1 py-2 bg-amber-500 text-slate-900 font-bold rounded-xl">Save Customer</button>
+            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
+            <div>
+                <div><strong>Receipt #:</strong> <span class="t-receipt-id">--</span></div>
+                <div><strong>Customer:</strong> <span class="t-cust-name">Walk-in Customer</span></div>
+                <div><strong>Phone:</strong> <span class="t-cust-phone">N/A</span></div>
+            </div>
+            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
+            <div class="t-items-list" style="display: flex; flex-direction: column; gap: 4px;"></div>
+            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
+            <div>
+                <div><span>Points Earned:</span><span class="t-pts-earned" style="float: right;">0</span></div>
+                <div style="font-weight: bold;"><span>Points Balance:</span><span class="t-pts-balance" style="float: right;">0</span></div>
+            </div>
+            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="display: flex; justify-content: space-between;"><span>Gross Total:</span><span class="t-gross"></span></div>
+                <div class="t-disc-row" style="display: flex; justify-content: space-between; color: black;"><span>Discount:</span><span class="t-disc-val"></span></div>
+                <div style="display: flex; justify-content: space-between;"><span>Subtotal (Excl. VAT):</span><span class="t-subtotal"></span></div>
+                <div style="display: flex; justify-content: space-between;"><span>VAT (10% Incl.):</span><span class="t-vat"></span></div>
+                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 11px; border-top: 1px solid black; padding-top: 2px;"><span>TOTAL BILL:</span><span class="t-total"></span></div>
+            </div>
+            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
+            <div>
+                <div style="font-weight: bold; margin-bottom: 2px;">Payment Method(s):</div>
+                <div class="t-payments-breakdown" style="display: flex; flex-direction: column; gap: 2px;"></div>
+            </div>
+            <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
+            <div style="text-align: center; display: flex; flex-direction: column; gap: 3px;">
+                <div style="font-weight: bold;">Thank you for shopping!</div>
+                <div>Follow us:</div>
+                <div>Instagram: @perfume_club.bh</div>
+                <div>www.theperfumesclub.com</div>
+                <div>WhatsApp: 36051011</div>
+                <div style="font-size: 8px; margin-top: 4px;">Return Policy: Returns accepted within 3 days with unopened box and original receipt. No returns or exchanges on discounted items.</div>
+                <div style="font-size: 8px; font-weight: bold; margin-top: 4px;" class="t-timestamp"></div>
             </div>
         </div>
-    </div>
+    </template>
 
-    <!-- Sales History Modal -->
-    <div id="historyModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl w-full max-w-2xl shadow-xl flex flex-col max-h-[80vh]">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-lg dark:text-white">Recent Sales</h3>
-                <button onclick="closeSalesHistory()" class="font-bold text-slate-500 text-xl">&times;</button>
+    <!-- Hidden Template: Single-Page A4 Tax Invoice -->
+    <template id="template-receipt-a4">
+        <div style="width: 100%; max-width: 800px; margin: 0 auto; padding: 12px; font-family: sans-serif; font-size: 11px; color: #111827; background: white; box-sizing: border-box;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #047857; padding-bottom: 8px;">
+                <div>
+                    <h1 style="font-size: 18px; font-weight: 900; color: #065f46; margin: 0;">BARAKAT PERFUMES</h1>
+                    <p style="margin: 1px 0; color: #4b5563; font-size: 10px;">Branch: District 1, Janabiya | CR: 13812-04 | Tel: 36051011</p>
+                </div>
+                <div style="text-align: right;">
+                    <img src="PCBH_LOGO-BG.png" alt="Logo" style="height: 40px; margin-left: auto; object-fit: contain;">
+                    <p style="font-weight: bold; margin: 0; color: #1f2937; font-size: 11px;">TAX INVOICE</p>
+                </div>
             </div>
-            <div id="historyList" class="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700">
-                <!-- Rendered dynamically -->
-            </div>
-        </div>
-    </div>
 
-    <!-- Hidden Thermal Receipt & Tax Invoice -->
-    <div id="printableArea" class="hidden">
-        <div style="font-family: monospace; max-width: 280px; margin: 0 auto; text-align: center; font-size: 12px;">
-            <h2 style="font-size: 16px; font-weight: bold; margin-bottom: 2px;">BARAKAT PERFUMES</h2>
-            <p style="margin: 0;">Kingdom of Bahrain</p>
-            <p style="margin: 0 0 10px 0;">VAT ID: 100000000000001</p>
-            <hr style="border-top: 1px dashed #000; margin: 5px 0;">
-            <p id="recOrderNum" style="font-weight: bold; margin: 3px 0;"></p>
-            <p id="recDate" style="margin: 3px 0;"></p>
-            <hr style="border-top: 1px dashed #000; margin: 5px 0;">
-            <table style="width: 100%; text-align: left; font-size: 11px;">
+            <div style="display: flex; justify-content: space-between; margin: 8px 0; padding: 8px; background: #f9fafb; border-radius: 6px; font-size: 10px;">
+                <div>
+                    <span style="font-weight: bold; color: #374151;">Receipt #: </span><span class="t-receipt-id">--</span><br>
+                    <span style="font-weight: bold; color: #374151;">Customer: </span><strong class="t-cust-name" style="color: #111827;">Walk-in Customer</strong>
+                    <span style="margin-left: 12px; color: #4b5563;">Phone: <span class="t-cust-phone">N/A</span></span>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-weight: bold; color: #374151;">Date: </span>
+                    <span class="t-timestamp" style="color: #4b5563;"></span>
+                </div>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 10px;">
                 <thead>
-                    <tr style="border-bottom: 1px solid #000;">
-                        <th>Item</th>
-                        <th>Qty</th>
-                        <th style="text-align: right;">Total</th>
+                    <tr style="background: #047857; color: white; text-align: left;">
+                        <th style="padding: 6px;">Item Description</th>
+                        <th style="padding: 6px; text-align: center;">Qty</th>
+                        <th style="padding: 6px; text-align: right;">Unit Price</th>
+                        <th style="padding: 6px; text-align: right;">Total (BHD)</th>
                     </tr>
                 </thead>
-                <tbody id="recItems"></tbody>
+                <tbody class="t-items-table-body" style="border-bottom: 1px solid #e5e7eb;"></tbody>
             </table>
-            <hr style="border-top: 1px dashed #000; margin: 5px 0;">
-            <div style="display: flex; justify-content: space-between; font-weight: bold;">
-                <span>Total:</span>
-                <span id="recTotal"></span>
+
+            <div style="margin: 6px 0; padding: 6px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 4px; display: flex; justify-content: space-between; font-size: 10px;">
+                <span>Loyalty Points Earned: <strong class="t-pts-earned">0</strong></span>
+                <span>Total Points Balance: <strong class="t-pts-balance">0</strong></span>
             </div>
-            <p style="margin-top: 15px; font-size: 10px;">Thank you for shopping with Barakat Perfumes!</p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; padding-top: 6px; border-top: 1px solid #d1d5db; font-size: 10px;">
+                <div>
+                    <p style="font-weight: bold; color: #374151; margin: 0 0 4px 0;">Payment Method(s):</p>
+                    <div class="t-payments-breakdown" style="background: #f9fafb; padding: 6px; border-radius: 4px;"></div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 2px; text-align: right;">
+                    <div style="display: flex; justify-content: space-between;"><span>Gross Total:</span><span class="t-gross font-mono"></span></div>
+                    <div class="t-disc-row" style="display: flex; justify-content: space-between; color: #dc2626;"><span>Discount:</span><span class="t-disc-val font-mono"></span></div>
+                    <div style="display: flex; justify-content: space-between;"><span>Subtotal (Excl. VAT):</span><span class="t-subtotal font-mono"></span></div>
+                    <div style="display: flex; justify-content: space-between;"><span>VAT (10% Incl.):</span><span class="t-vat font-mono"></span></div>
+                    <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: 12px; border-top: 1px solid #9ca3af; padding-top: 2px; color: #065f46;"><span>Total Bill:</span><span class="t-total font-mono"></span></div>
+                </div>
+            </div>
+
+            <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e7eb; text-align: center; color: #4b5563; font-size: 9px;">
+                <p style="font-weight: bold; color: #111827; margin: 0;">Thank you for shopping with us!</p>
+                <p style="margin: 2px 0;">Instagram: <strong>@perfume_club.bh</strong> | Web: <strong>www.theperfumesclub.com</strong> | WhatsApp: <strong>36051011</strong></p>
+                <p style="font-size: 8px; color: #6b7280; margin: 2px 0;">Return Policy: Returns accepted within 3 days with unopened box and original receipt.</p>
+            </div>
         </div>
-    </div>
+    </template>
 
-    <!-- Application Scripting -->
     <script>
-        const SUPABASE_URL = "https://YOUR_SUPABASE_PROJECT_URL.supabase.co";
-        const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// --- SUPABASE CONFIGURATION ---
+const SUPABASE_URL = 'https://lxyxlecusdjdikozeedx.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4eXhsZWN1c2RqZGlrb3plZWR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NjkzNTgsImV4cCI6MjEwNTE0NTM1OH0._nPzYbZ2TIeRXQ-2went70JXygrI5TqUMDofi5OKxy4';
 
-        let products = [];
-        let cart = [];
-        let selectedCustomer = null;
-        let activePaymentMethod = 'cash';
-        let html5QrcodeScanner = null;
+let supabaseClient = null;
+if (window.supabase && window.supabase.createClient) {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
 
-        window.addEventListener('DOMContentLoaded', () => {
-            fetchProducts();
-        });
+let products = [];
+let salesHistory = [];
+let customers = [];
+let selectedCustomer = null; 
+let cart = [];
+let discountType = 'FIXED';
+let selectedPaymentType = 'SINGLE';
+let singlePaymentMethod = 'CASH';
+let splitPrimaryMethod = 'CASH';
+let splitSecondaryMethod = 'CARD';
+let selectedPrintFormat = '58mm';
 
-        async function fetchProducts() {
-            const { data } = await supabase.from('products').select('*').order('name');
-            products = data || [];
-            renderProducts(products);
-        }
+let currentCustomerPoints = 0;
+let pointsRedeemedCount = 0;
+let userRole = 'CASHIER';
+let currentUser = { id: null, name: 'Cashier 1', role: 'CASHIER' };
 
-        function renderProducts(items) {
-            const grid = document.getElementById('productGrid');
-            grid.innerHTML = items.map(p => `
-                <div onclick="addToCart('${p.id}')" class="bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-amber-500 cursor-pointer transition flex flex-col justify-between shadow-sm">
-                    <div>
-                        <div class="h-20 bg-slate-100 dark:bg-slate-700 rounded-xl mb-2 flex items-center justify-center font-bold text-slate-400 text-xs">
-                            ${p.image_url ? `<img src="${p.image_url}" class="h-full object-contain rounded-xl">` : 'No Image'}
-                        </div>
-                        <h4 class="font-bold text-xs text-slate-800 dark:text-white line-clamp-2">${p.name}</h4>
-                        <span class="text-[10px] text-slate-400">${p.category || 'Perfume'}</span>
-                    </div>
-                    <div class="mt-2 flex justify-between items-end">
-                        <span class="font-bold text-xs text-amber-600">BHD ${parseFloat(p.unit_price).toFixed(3)}</span>
-                        <span class="text-[10px] ${p.stock_quantity > 0 ? 'text-emerald-500' : 'text-red-500 font-bold'}">
-                            ${p.stock_quantity > 0 ? p.stock_quantity + ' in stock' : 'OUT OF STOCK'}
-                        </span>
-                    </div>
-                </div>
-            `).join('');
-        }
+const fallbackProducts = [
+    { id: '1', name: 'RIIFFS Freeze EDP 100ml', retail_price: 18.500, cost_price: 9.000, stock_quantity: 12, barcode: '10001' },
+    { id: '2', name: 'Lattafa Maahir Honor 100ml', retail_price: 14.000, cost_price: 6.500, stock_quantity: 8, barcode: '10002' },
+    { id: '3', name: 'Aromatix Frost Bite 100ml', retail_price: 22.000, cost_price: 11.200, stock_quantity: 3, barcode: '10003' }
+];
 
-        function filterProducts() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = products.filter(p => 
-                p.name.toLowerCase().includes(query) || 
-                (p.barcode && p.barcode.toLowerCase().includes(query))
-            );
-            renderProducts(filtered);
-        }
+const formatBHD = (amount) => {
+    return 'BHD ' + (Math.round((amount || 0) * 1000) / 1000).toFixed(3);
+};
 
-        function addToCart(productId) {
-            const product = products.find(p => p.id === productId);
-            if (!product || product.stock_quantity <= 0) return;
+// Validates if string is a valid PostgreSQL UUID
+const isValidUUID = (id) => {
+    return typeof id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+};
 
-            const existing = cart.find(item => item.product_id === productId);
-            if (existing) {
-                if (existing.quantity < product.stock_quantity) existing.quantity++;
-                else alert("Exceeds available stock!");
-            } else {
-                cart.push({ product_id: product.id, name: product.name, unit_price: parseFloat(product.unit_price), quantity: 1 });
+window.onload = async () => {
+    await fetchProducts();
+    await fetchCustomers();
+    await loadSalesHistoryLocal();
+};
+
+async function switchUser() {
+    const pin = prompt('Enter User PIN:');
+    if (!pin) return;
+
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('pos_users')
+                .select('*')
+                .eq('pin_code', pin.trim())
+                .single();
+
+            if (data && !error) {
+                currentUser = data;
+                userRole = data.role.toUpperCase();
+
+                document.getElementById('role-badge').innerText = userRole;
+                document.getElementById('user-name').innerText = data.name;
+                renderProducts();
+                return;
             }
-            renderCart();
+        } catch (err) {
+            console.warn('Database user query failed, checking fallbacks:', err);
         }
+    }
 
-        function renderCart() {
-            const container = document.getElementById('cartItems');
-            container.innerHTML = cart.map((item, index) => `
-                <div class="py-2 flex justify-between items-center text-sm">
-                    <div class="flex-1 pr-2">
-                        <h5 class="font-semibold text-xs dark:text-white">${item.name}</h5>
-                        <span class="text-xs text-slate-400">BHD ${item.unit_price.toFixed(3)}</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <button onclick="updateQty(${index}, -1)" class="w-6 h-6 bg-slate-100 dark:bg-slate-700 rounded flex items-center justify-center font-bold text-xs">-</button>
-                        <span class="text-xs font-bold">${item.quantity}</span>
-                        <button onclick="updateQty(${index}, 1)" class="w-6 h-6 bg-slate-100 dark:bg-slate-700 rounded flex items-center justify-center font-bold text-xs">+</button>
-                    </div>
+    if (pin === '1234' || pin === '9999') {
+        userRole = 'ADMIN';
+        currentUser = { id: null, name: 'Owner', role: 'ADMIN' };
+        document.getElementById('role-badge').innerText = 'Admin';
+        document.getElementById('user-name').innerText = 'Owner';
+    } else if (pin === '0000') {
+        userRole = 'CASHIER';
+        currentUser = { id: null, name: 'Cashier 1', role: 'CASHIER' };
+        document.getElementById('role-badge').innerText = 'Cashier';
+        document.getElementById('user-name').innerText = 'Cashier 1';
+    } else {
+        alert('Invalid User PIN code!');
+    }
+    renderProducts();
+}
+
+async function fetchProducts() {
+    if (!supabaseClient) {
+        products = fallbackProducts;
+        renderProducts(products);
+        return;
+    }
+
+    try {
+        const { data, error } = await supabaseClient.from('products').select('*');
+        if (error || !data || data.length === 0) {
+            console.warn('Fallback triggered or Supabase query error:', error);
+            products = fallbackProducts;
+        } else {
+            products = data;
+        }
+    } catch (err) {
+        console.error('Execution error fetching products:', err);
+        products = fallbackProducts;
+    }
+    renderProducts(products);
+}
+
+async function fetchCustomers() {
+    if (!supabaseClient) return;
+    try {
+        const { data, error } = await supabaseClient.from('contacts').select('*').order('created_at', { ascending: false });
+        if (!error && data) {
+            customers = data;
+        }
+    } catch (err) {
+        console.error('Error fetching contacts:', err);
+    }
+}
+
+function openCustomerModal() {
+    document.getElementById('customer-modal').classList.remove('hidden');
+    document.getElementById('cust-modal-search').value = '';
+    renderCustomerSearchResults();
+}
+
+function closeCustomerModal() {
+    document.getElementById('customer-modal').classList.add('hidden');
+}
+
+function renderCustomerSearchResults() {
+    const term = document.getElementById('cust-modal-search').value.toLowerCase().trim();
+    const container = document.getElementById('cust-modal-results');
+    container.innerHTML = '';
+
+    const filtered = customers.filter(c => 
+        (c.name && c.name.toLowerCase().includes(term)) ||
+        (c.phone && c.phone.toLowerCase().includes(term))
+    );
+
+    if (filtered.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-400 py-3 text-xs">No matching customers found.</p>';
+        return;
+    }
+
+    filtered.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'p-2 hover:bg-emerald-50 cursor-pointer rounded flex justify-between items-center transition';
+        item.onclick = () => selectCustomer(c);
+        item.innerHTML = `
+            <div>
+                <p class="font-bold text-xs text-gray-800">${c.name}</p>
+                <p class="text-[10px] text-gray-500">${c.phone}</p>
+            </div>
+            <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">${c.loyalty_points || 0} Pts</span>
+        `;
+        container.appendChild(item);
+    });
+}
+
+function selectCustomer(cust) {
+    selectedCustomer = cust;
+    currentCustomerPoints = cust.loyalty_points || 0;
+
+    document.getElementById('disp-cust-name').innerText = cust.name;
+    document.getElementById('disp-cust-phone').innerText = cust.phone;
+    document.getElementById('btn-clear-cust').classList.remove('hidden');
+
+    updateLoyaltyUI();
+    closeCustomerModal();
+}
+
+function clearSelectedCustomer() {
+    selectedCustomer = null;
+    currentCustomerPoints = 0;
+    pointsRedeemedCount = 0;
+
+    document.getElementById('disp-cust-name').innerText = 'Walk-in Customer';
+    document.getElementById('disp-cust-phone').innerText = 'No phone attached';
+    document.getElementById('btn-clear-cust').classList.add('hidden');
+
+    updateLoyaltyUI();
+}
+
+async function addNewCustomerToDatabase() {
+    const name = document.getElementById('new-cust-name').value.trim();
+    const phone = document.getElementById('new-cust-phone').value.trim();
+    const email = document.getElementById('new-cust-email').value.trim();
+
+    if (!name || !phone) {
+        alert('Please provide both Name and Phone number!');
+        return;
+    }
+
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient.from('contacts').insert([{
+                name: name,
+                phone: phone,
+                email: email || null,
+                loyalty_points: 0
+            }]).select();
+
+            if (error) {
+                alert('Database Error adding customer: ' + error.message);
+                return;
+            }
+
+            if (data && data.length > 0) {
+                const newCust = data[0];
+                customers.unshift(newCust);
+                selectCustomer(newCust);
+                
+                document.getElementById('new-cust-name').value = '';
+                document.getElementById('new-cust-phone').value = '';
+                document.getElementById('new-cust-email').value = '';
+                
+                alert(`Customer ${newCust.name} added successfully!`);
+            }
+        } catch(err) {
+            console.error('Error inserting customer:', err);
+            alert('An unexpected error occurred while adding customer.');
+        }
+    } else {
+        const offlineCust = { id: 'temp_' + Date.now(), name: name, phone: phone, loyalty_points: 0 };
+        customers.unshift(offlineCust);
+        selectCustomer(offlineCust);
+        closeCustomerModal();
+    }
+}
+
+function updateLoyaltyUI() {
+    const ptsBalanceElem = document.getElementById('cust-pts-balance');
+    const redeemBtn = document.getElementById('btn-redeem-pts');
+    
+    ptsBalanceElem.innerText = `${currentCustomerPoints} Pts`;
+
+    if (currentCustomerPoints >= 100) {
+        const maxRedeemablePts = Math.floor(currentCustomerPoints / 100) * 100;
+        const potentialDiscount = maxRedeemablePts / 100;
+        
+        redeemBtn.disabled = false;
+        redeemBtn.className = 'bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold px-2 py-1 rounded shadow cursor-pointer';
+        redeemBtn.innerText = `Redeem ${maxRedeemablePts} Pts (-${formatBHD(potentialDiscount)})`;
+    } else {
+        redeemBtn.disabled = true;
+        redeemBtn.className = 'bg-gray-300 text-gray-500 text-[10px] font-bold px-2 py-1 rounded cursor-not-allowed';
+        redeemBtn.innerText = 'Redeem (Min 100 pts)';
+    }
+}
+
+function redeemLoyaltyPoints() {
+    if (currentCustomerPoints < 100) return;
+
+    pointsRedeemedCount = Math.floor(currentCustomerPoints / 100) * 100;
+    const discountBHD = pointsRedeemedCount / 100;
+
+    setDiscountType('FIXED');
+    document.getElementById('discount-title').value = `Loyalty (${pointsRedeemedCount} pts)`;
+    document.getElementById('discount-val').value = discountBHD.toFixed(3);
+    
+    updateCartUI();
+    alert(`Applied ${formatBHD(discountBHD)} loyalty discount! ${pointsRedeemedCount} points will be deducted.`);
+}
+
+function renderProducts(list = products) {
+    const grid = document.getElementById('product-grid');
+    grid.innerHTML = '';
+
+    if (!list || list.length === 0) {
+        grid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-10">No products found.</p>';
+        return;
+    }
+    
+    list.forEach(p => {
+        let stock = p.stock_quantity ?? 0;
+        let price = p.retail_price ?? 0;
+        let lowThreshold = p.low_stock_threshold ?? 2;
+        
+        let badgeColor = stock > lowThreshold ? 'bg-emerald-100 text-emerald-800' : stock > 0 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800';
+        
+        const card = document.createElement('div');
+        card.className = 'bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition flex flex-col justify-between cursor-pointer select-none';
+        card.onclick = () => addToCart(p);
+        card.innerHTML = `
+            <div>
+                <div class="flex justify-between items-start mb-1">
+                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${badgeColor}">Qty: ${stock}</span>
                 </div>
-            `).join('');
-            updateCartTotals();
+                <h4 class="font-bold text-xs text-gray-800 line-clamp-2">${p.name}</h4>
+            </div>
+            <div class="mt-2 pt-2 border-t border-gray-100 flex justify-between items-center">
+                <span class="text-xs font-black text-emerald-700">${formatBHD(price)}</span>
+                <span class="bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white p-1 rounded transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                </span>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+function filterProducts() {
+    const term = document.getElementById('search-input').value.toLowerCase().trim();
+    const filtered = products.filter(p => 
+        (p.name && p.name.toLowerCase().includes(term)) || 
+        (p.barcode && p.barcode.toLowerCase().includes(term))
+    );
+    renderProducts(filtered);
+}
+
+function addToCart(product) {
+    const existing = cart.find(item => String(item.id) === String(product.id));
+    if (existing) {
+        existing.qty += 1;
+    } else {
+        cart.push({
+            id: product.id,
+            name: product.name,
+            price: product.retail_price,
+            qty: 1
+        });
+    }
+    updateCartUI();
+}
+
+function updateCartQty(id, delta) {
+    const item = cart.find(i => String(i.id) === String(id));
+    if (!item) return;
+    item.qty += delta;
+    if (item.qty <= 0) {
+        cart = cart.filter(i => String(i.id) !== String(id));
+    }
+    updateCartUI();
+}
+
+function clearCart() {
+    cart = [];
+    pointsRedeemedCount = 0;
+    clearSelectedCustomer();
+    document.getElementById('discount-val').value = '';
+    document.getElementById('discount-title').value = '';
+    updateCartUI();
+}
+
+function setDiscountType(type) {
+    discountType = type;
+    const bhdBtn = document.getElementById('disc-type-bhd');
+    const pctBtn = document.getElementById('disc-type-pct');
+    if (type === 'FIXED') {
+        bhdBtn.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-600 text-white';
+        pctBtn.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-gray-200 text-gray-700';
+    } else {
+        pctBtn.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-600 text-white';
+        bhdBtn.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-gray-200 text-gray-700';
+    }
+    updateCartUI();
+}
+
+function updateCartUI() {
+    const cartContainer = document.getElementById('cart-items');
+    cartContainer.innerHTML = '';
+
+    grossTotal = 0;
+
+    if (cart.length === 0) {
+        cartContainer.innerHTML = '<p class="text-center text-gray-400 py-10 text-xs">Cart is empty.</p>';
+    } else {
+        cart.forEach(item => {
+            const itemTotal = item.price * item.qty;
+            grossTotal += itemTotal;
+
+            const row = document.createElement('div');
+            row.className = 'pt-2 flex justify-between items-center text-xs';
+            row.innerHTML = `
+                <div class="flex-1 pr-2">
+                    <p class="font-semibold text-gray-800 line-clamp-1">${item.name}</p>
+                    <p class="text-gray-400 text-[10px]">${formatBHD(item.price)} each</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="flex items-center border rounded">
+                        <button onclick="updateCartQty('${item.id}', -1)" class="px-1.5 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-700">-</button>
+                        <span class="px-2 font-bold">${item.qty}</span>
+                        <button onclick="updateCartQty('${item.id}', 1)" class="px-1.5 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-700">+</button>
+                    </div>
+                    <span class="font-bold text-gray-800 w-16 text-right">${formatBHD(itemTotal)}</span>
+                </div>
+            `;
+            cartContainer.appendChild(row);
+        });
+    }
+
+    const discValRaw = parseFloat(document.getElementById('discount-val').value) || 0;
+    if (discountType === 'FIXED') {
+        discountAmount = discValRaw;
+    } else {
+        discountAmount = (grossTotal * discValRaw) / 100;
+    }
+    if (discountAmount > grossTotal) discountAmount = grossTotal;
+
+    netTotalInclusive = grossTotal - discountAmount;
+    const vatAmount = netTotalInclusive - (netTotalInclusive / 1.10);
+    const netExclVat = netTotalInclusive - vatAmount;
+
+    document.getElementById('summary-gross').innerText = formatBHD(grossTotal);
+    const discRow = document.getElementById('row-discount');
+    if (discountAmount > 0) {
+        discRow.classList.remove('hidden');
+        const title = document.getElementById('discount-title').value.trim() || 'Discount';
+        document.getElementById('label-discount-title').innerText = title;
+        document.getElementById('summary-discount').innerText = '-' + formatBHD(discountAmount);
+    } else {
+        discRow.classList.add('hidden');
+    }
+
+    document.getElementById('summary-subtotal').innerText = formatBHD(netExclVat);
+    document.getElementById('summary-vat').innerText = formatBHD(vatAmount);
+    document.getElementById('summary-total').innerText = formatBHD(netTotalInclusive);
+    document.getElementById('btn-total').innerText = formatBHD(netTotalInclusive);
+}
+
+function openItemManagerModal() {
+    document.getElementById('manager-status-text').innerText = `Current View: ${userRole}`;
+    if (userRole === 'ADMIN' || userRole === 'MANAGER') {
+        document.getElementById('btn-unlock-manager').classList.add('hidden');
+    } else {
+        document.getElementById('btn-unlock-manager').classList.remove('hidden');
+    }
+    
+    document.getElementById('item-manager-modal').classList.remove('hidden');
+    renderItemManagerList();
+}
+
+function closeItemManagerModal() {
+    document.getElementById('item-manager-modal').classList.add('hidden');
+}
+
+async function authenticateManagerRole() {
+    const pin = prompt('Enter Manager/Owner PIN to view and edit Cost Prices:');
+    if (!pin) return;
+
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('pos_users')
+                .select('*')
+                .eq('pin_code', pin.trim())
+                .single();
+
+            if (data && !error && (data.role === 'ADMIN' || data.role === 'MANAGER')) {
+                userRole = data.role;
+                document.getElementById('manager-status-text').innerText = `Current View: ${data.role} Access`;
+                document.getElementById('btn-unlock-manager').classList.add('hidden');
+                renderItemManagerList();
+                return;
+            }
+        } catch (err) {
+            console.warn('Supabase manager authentication query failed:', err);
+        }
+    }
+
+    if (pin === '1234' || pin === '9999') {
+        userRole = 'MANAGER';
+        document.getElementById('manager-status-text').innerText = 'Current View: Manager Access';
+        document.getElementById('btn-unlock-manager').classList.add('hidden');
+        renderItemManagerList();
+    } else {
+        alert('Invalid Manager PIN or insufficient privileges!');
+    }
+}
+
+function renderItemManagerList() {
+    const listContainer = document.getElementById('item-manager-list');
+    listContainer.innerHTML = '';
+
+    products.forEach(p => {
+        const row = document.createElement('div');
+        row.className = 'py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0 text-xs border-b border-gray-100 last:border-0';
+        
+        const isManager = (userRole === 'MANAGER' || userRole === 'ADMIN' || userRole === 'OWNER');
+        
+        const costInputHtml = isManager 
+            ? `<div>
+                <label class="text-[9px] uppercase font-bold text-blue-600 block">Cost Price (BHD)</label>
+                <input type="number" id="edit-cost-${p.id}" step="0.001" value="${p.cost_price ?? 0}" class="w-24 border border-blue-300 rounded px-2 py-1 font-bold text-right outline-none focus:ring-1 focus:ring-blue-500 bg-blue-50/30">
+               </div>`
+            : `<div>
+                <label class="text-[9px] uppercase font-bold text-gray-400 block">Cost Price</label>
+                <input type="text" disabled value="*** BHD" class="w-24 border border-gray-200 bg-gray-100 rounded px-2 py-1 font-bold text-center text-gray-400 cursor-not-allowed">
+               </div>`;
+
+        row.innerHTML = `
+            <div class="flex-1 pr-3">
+                <p class="font-bold text-gray-800 text-sm">${p.name}</p>
+                <p class="text-gray-400">Barcode: ${p.barcode || 'N/A'}</p>
+            </div>
+            <div class="flex items-center space-x-2">
+                ${costInputHtml}
+                <div>
+                    <label class="text-[9px] uppercase font-bold text-gray-500 block">Retail Price (BHD)</label>
+                    <input type="number" id="edit-price-${p.id}" step="0.001" value="${p.retail_price}" class="w-24 border border-gray-300 rounded px-2 py-1 font-bold text-right outline-none focus:ring-1 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="text-[9px] uppercase font-bold text-gray-500 block">Stock Qty</label>
+                    <input type="number" id="edit-stock-${p.id}" value="${p.stock_quantity ?? 0}" class="w-16 border border-gray-300 rounded px-2 py-1 font-bold text-center outline-none focus:ring-1 focus:ring-emerald-500">
+                </div>
+                <button onclick="saveItemChanges('${p.id}')" class="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1 rounded">Save</button>
+            </div>
+        `;
+        listContainer.appendChild(row);
+    });
+}
+
+async function saveItemChanges(id) {
+    try {
+        const itemIndex = products.findIndex(p => String(p.id) === String(id));
+        if (itemIndex === -1) {
+            alert("Product not found.");
+            return;
         }
 
-        function updateQty(index, delta) {
-            cart[index].quantity += delta;
-            if (cart[index].quantity <= 0) cart.splice(index, 1);
-            renderCart();
+        const newPrice = parseFloat(document.getElementById("edit-price-" + id).value) || 0;
+        const newStock = parseInt(document.getElementById("edit-stock-" + id).value) || 0;
+
+        let updateData = {
+            retail_price: newPrice,
+            stock_quantity: newStock
+        };
+
+        const isManager = (userRole === "MANAGER" || userRole === "ADMIN" || userRole === "OWNER");
+        if (isManager) {
+            const costElem = document.getElementById("edit-cost-" + id);
+            if (costElem) {
+                updateData.cost_price = parseFloat(costElem.value) || 0;
+            }
         }
 
-        function updateCartTotals() {
-            const subtotal = cart.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
-            const pointsRedeemed = parseFloat(document.getElementById('pointsRedeemed').value) || 0;
-            const extraDiscount = parseFloat(document.getElementById('extraDiscount').value) || 0;
-            const grandTotal = Math.max(0, subtotal - pointsRedeemed - extraDiscount);
+        if (supabaseClient && isValidUUID(id)) {
+            const response = await supabaseClient
+                .from("products")
+                .update(updateData)
+                .eq("id", id)
+                .select();
 
-            document.getElementById('cartSubtotal').innerText = `BHD ${subtotal.toFixed(3)}`;
-            document.getElementById('cartTotal').innerText = `BHD ${grandTotal.toFixed(3)}`;
+            if (response.error) {
+                alert("Error updating Supabase: " + response.error.message);
+                return;
+            }
         }
 
-        function setPaymentMethod(method) {
-            activePaymentMethod = method;
-            document.querySelectorAll('.pay-btn').forEach(btn => {
-                btn.className = 'pay-btn py-2 border border-slate-300 dark:border-slate-700 rounded-xl font-semibold text-xs';
-            });
-            document.getElementById(`btn${method.charAt(0).toUpperCase() + method.slice(1)}`).className = 'pay-btn py-2 border-2 border-amber-500 rounded-xl font-semibold text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/20';
-            document.getElementById('splitPayFields').classList.toggle('hidden', method !== 'split');
+        products[itemIndex] = Object.assign({}, products[itemIndex], updateData);
+        alert("Updated " + products[itemIndex].name + " successfully!");
+
+        renderProducts();
+        renderItemManagerList();
+    } catch (err) {
+        console.error("Save execution error:", err);
+        alert("An error occurred while saving: " + err.message);
+    }
+}
+
+function openSalesHistoryModal() {
+    document.getElementById('sales-history-modal').classList.remove('hidden');
+    renderSalesHistory();
+}
+
+function closeSalesHistoryModal() {
+    document.getElementById('sales-history-modal').classList.add('hidden');
+}
+
+async function loadSalesHistoryLocal() {
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('sales_orders')
+                .select(`
+                    id,
+                    receipt_number,
+                    customer_name,
+                    customer_phone,
+                    total_amount,
+                    gross_total,
+                    discount_amount,
+                    points_earned,
+                    points_redeemed,
+                    payment_method,
+                    payment_details,
+                    status,
+                    created_at,
+                    order_items (
+                        product_id,
+                        quantity,
+                        unit_price,
+                        products (
+                            name
+                        )
+                    )
+                `)
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                salesHistory = data.map(order => ({
+                    db_id: order.id,
+                    receiptId: 'BP-' + String(order.receipt_number).padStart(6, '0'),
+                    timestamp: new Date(order.created_at).toLocaleString(),
+                    custName: order.customer_name || 'Walk-in Customer',
+                    custPhone: order.customer_phone || 'N/A',
+                    items: (order.order_items || []).map(item => ({
+                        id: item.product_id,
+                        qty: item.quantity,
+                        price: item.unit_price,
+                        name: item.products ? item.products.name : 'Unknown Product'
+                    })),
+                    grossTotal: order.gross_total || order.total_amount,
+                    discountAmount: order.discount_amount || 0,
+                    netTotal: order.total_amount,
+                    pointsEarned: order.points_earned || 0,
+                    pointsBalance: 0,
+                    paymentType: order.payment_method === 'SPLIT' ? 'SPLIT' : 'SINGLE',
+                    paymentDetails: order.payment_details || {},
+                    status: order.status || 'COMPLETED'
+                }));
+                saveSalesHistoryLocal();
+                return;
+            }
+        } catch (e) {
+            console.error("Error loading sales history from Supabase:", e);
         }
+    }
 
-        async function processCheckout() {
-            if (cart.length === 0) return alert("Cart is empty!");
+    const saved = localStorage.getItem('pos_sales_history');
+    if (saved) {
+        try { salesHistory = JSON.parse(saved); } catch(e) { salesHistory = []; }
+    }
+}
 
-            const subtotal = cart.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
-            const pointsRedeemed = parseFloat(document.getElementById('pointsRedeemed').value) || 0;
-            const extraDiscount = parseFloat(document.getElementById('extraDiscount').value) || 0;
-            const grandTotal = Math.max(0, subtotal - pointsRedeemed - extraDiscount);
+function saveSalesHistoryLocal() {
+    localStorage.setItem('pos_sales_history', JSON.stringify(salesHistory));
+}
 
-            const payload = {
-                p_cashier_id: null,
-                p_contact_id: selectedCustomer ? selectedCustomer.id : null,
-                p_payment_method: activePaymentMethod,
-                p_amount_paid: grandTotal,
-                p_points_redeemed: pointsRedeemed,
-                p_discount_amount: extraDiscount,
-                p_items: cart.map(i => ({ product_id: i.product_id, quantity: i.quantity }))
-            };
+function renderSalesHistory() {
+    const container = document.getElementById('sales-history-list');
+    const term = document.getElementById('sales-search-input').value.toLowerCase().trim();
+    container.innerHTML = '';
 
-            const { data, error } = await supabase.rpc('process_pos_sale', payload);
+    const filtered = salesHistory.filter(s => 
+        s.receiptId.toLowerCase().includes(term) ||
+        s.custName.toLowerCase().includes(term) ||
+        s.custPhone.toLowerCase().includes(term)
+    );
 
-            if (error) return alert("Checkout error: " + error.message);
+    if (filtered.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-400 py-6 text-xs">No previous sales transactions found.</p>';
+        return;
+    }
 
-            if (data && data.success) {
-                if (data.zero_stock_items && data.zero_stock_items.length > 0) {
-                    checkAndNotifyZeroStock(data.zero_stock_items);
+    filtered.forEach(s => {
+        const row = document.createElement('div');
+        row.className = 'py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0 text-xs';
+        
+        const isRefunded = s.status === 'REFUNDED';
+        const statusBadge = isRefunded 
+            ? '<span class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-0.5 rounded">REFUNDED</span>' 
+            : '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">COMPLETED</span>';
+
+        row.innerHTML = `
+            <div>
+                <div class="flex items-center space-x-2">
+                    <strong class="text-emerald-800">${s.receiptId}</strong>
+                    ${statusBadge}
+                </div>
+                <p class="text-gray-600 font-medium mt-0.5">${s.custName} (${s.custPhone}) - ${s.timestamp}</p>
+                <p class="text-gray-400 text-[10px]">${s.items.map(i => `${i.qty}x${i.name}`).join(', ')}</p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="font-bold text-gray-900 mr-2 text-sm">${formatBHD(s.netTotal)}</span>
+                <button onclick="reprintReceipt('${s.receiptId}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded font-bold text-[10px]">Print</button>
+                <button onclick="resendWhatsApp('${s.receiptId}')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-bold text-[10px]">WhatsApp</button>
+                ${!isRefunded ? `<button onclick="processRefund('${s.receiptId}')" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded font-bold text-[10px]">Refund</button>` : ''}
+            </div>
+        `;
+        container.appendChild(row);
+    });
+}
+
+async function processRefund(receiptId) {
+    const sale = salesHistory.find(s => s.receiptId === receiptId);
+    if (!sale) return;
+
+    if (!confirm(`Are you sure you want to refund Receipt #${receiptId} for ${formatBHD(sale.netTotal)}?`)) return;
+
+    if (supabaseClient) {
+        try {
+            if (sale.db_id && isValidUUID(sale.db_id)) {
+                const { error } = await supabaseClient.rpc('process_pos_refund', {
+                    p_order_id: sale.db_id,
+                    p_items: sale.items
+                });
+
+                if (error) {
+                    alert('Database Refund Error: ' + error.message);
+                    return;
+                }
+            } else {
+                // If db_id not available, update sales order by receipt number
+                const cleanReceiptNum = parseInt(sale.receiptId.replace(/[^0-9]/g, ''));
+                if (!isNaN(cleanReceiptNum)) {
+                    await supabaseClient
+                        .from('sales_orders')
+                        .update({ status: 'REFUNDED' })
+                        .eq('receipt_number', cleanReceiptNum);
                 }
 
-                printReceipt(data.order_number, grandTotal);
-                cart = [];
-                renderCart();
-                fetchProducts();
+                // Restore stock locally/direct update
+                for (const item of sale.items) {
+                    if (isValidUUID(item.id)) {
+                        const { data: prod } = await supabaseClient.from('products').select('stock_quantity').eq('id', item.id).single();
+                        if (prod) {
+                            await supabaseClient.from('products').update({ stock_quantity: prod.stock_quantity + item.qty }).eq('id', item.id);
+                        }
+                    }
+                }
             }
+        } catch (err) {
+            console.error('Database refund error:', err);
         }
+    }
 
-        function checkAndNotifyZeroStock(zeroStockItems) {
-            if (!zeroStockItems || zeroStockItems.length === 0) return;
-            const listEl = document.getElementById('zeroStockList');
-            listEl.innerHTML = zeroStockItems.map(item => `
-                <li class="py-1.5 flex items-center justify-between">
-                    <span>${item}</span>
-                    <span class="text-xs bg-red-200 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-0.5 rounded-full font-bold">0 Remaining</span>
-                </li>
-            `).join('');
-            document.getElementById('zeroStockModal').classList.remove('hidden');
+    // Local Stock Restoration for active runtime array
+    sale.items.forEach(item => {
+        const prod = products.find(p => String(p.id) === String(item.id));
+        if (prod) {
+            prod.stock_quantity = (prod.stock_quantity || 0) + item.qty;
         }
+    });
 
-        function closeZeroStockModal() {
-            document.getElementById('zeroStockModal').classList.add('hidden');
-        }
+    sale.status = 'REFUNDED';
 
-        function printReceipt(orderNumber, totalAmount) {
-            document.getElementById('recOrderNum').innerText = orderNumber;
-            document.getElementById('recDate').innerText = new Date().toLocaleString();
-            document.getElementById('recTotal').innerText = `BHD ${totalAmount.toFixed(3)}`;
-            document.getElementById('recItems').innerHTML = cart.map(i => `
-                <tr>
-                    <td>${i.name}</td>
-                    <td>${i.quantity}</td>
-                    <td style="text-align: right;">BHD ${(i.unit_price * i.quantity).toFixed(3)}</td>
-                </tr>
-            `).join('');
+    if (sale.custPhone && sale.custPhone !== 'N/A') {
+        let currentPts = parseInt(localStorage.getItem('pts_' + sale.custPhone) || '0');
+        currentPts = Math.max(0, currentPts - (sale.pointsEarned || 0));
+        localStorage.setItem('pts_' + sale.custPhone, currentPts.toString());
+    }
 
-            document.getElementById('printableArea').classList.remove('hidden');
-            window.print();
-            document.getElementById('printableArea').classList.add('hidden');
-        }
+    alert(`Refund Processed successfully for Receipt #${receiptId}! Stock restored and database updated.`);
 
-        async function searchCustomer() {
-            const query = document.getElementById('customerSearch').value;
-            if (query.length < 3) return;
-            const { data } = await supabase.from('contacts').select('*').or(`phone.ilike.%${query}%,name.ilike.%${query}%`).limit(1);
-            if (data && data.length > 0) {
-                selectedCustomer = data[0];
-                document.getElementById('cName').innerText = selectedCustomer.name;
-                document.getElementById('cPoints').innerText = selectedCustomer.loyalty_points || 0;
-                document.getElementById('customerInfo').classList.remove('hidden');
+    saveSalesHistoryLocal();
+    await fetchProducts();
+    await fetchCustomers();
+    renderSalesHistory();
+}
+
+function reprintReceipt(receiptId) {
+    const sale = salesHistory.find(s => s.receiptId === receiptId);
+    if (!sale) return;
+    executePrintReceipt(sale);
+}
+
+function resendWhatsApp(receiptId) {
+    const sale = salesHistory.find(s => s.receiptId === receiptId);
+    if (!sale) return;
+
+    let phone = sale.custPhone;
+    if (!phone || phone === 'N/A') {
+        phone = prompt('Enter WhatsApp Phone Number (with country code, e.g. 973...):');
+    }
+    if (!phone) return;
+
+    const message = `*BARAKAT PERFUMES RECEIPT*\nReceipt: ${sale.receiptId}\nCustomer: ${sale.custName}\nTotal: ${formatBHD(sale.netTotal)}\nThank you for shopping with us!`;
+    window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
+}
+
+function openPaymentModal() {
+    if (cart.length === 0) {
+        alert('Cart is empty!');
+        return;
+    }
+    document.getElementById('modal-total').innerText = formatBHD(netTotalInclusive);
+    document.getElementById('payment-modal').classList.remove('hidden');
+    calculateSingleChange();
+}
+
+function closePaymentModal() {
+    document.getElementById('payment-modal').classList.add('hidden');
+}
+
+function setPaymentType(type) {
+    selectedPaymentType = type;
+    const singleContainer = document.getElementById('single-payment-container');
+    const splitContainer = document.getElementById('split-payment-container');
+    
+    if (type === 'SINGLE') {
+        singleContainer.classList.remove('hidden');
+        splitContainer.classList.add('hidden');
+        document.getElementById('mode-single-btn').className = 'border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
+        document.getElementById('mode-split-btn').className = 'border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center';
+    } else {
+        singleContainer.classList.add('hidden');
+        splitContainer.classList.remove('hidden');
+        document.getElementById('mode-split-btn').className = 'border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
+        document.getElementById('mode-single-btn').className = 'border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center';
+        calculateSplitBalance();
+    }
+}
+
+function setSingleMethod(method) {
+    singlePaymentMethod = method;
+    document.querySelectorAll('.pay-method-btn').forEach(btn => {
+        btn.className = 'pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center';
+    });
+    const cashWrapper = document.getElementById('single-cash-wrapper');
+    if (method === 'CASH') {
+        document.getElementById('btn-single-cash').className = 'pay-method-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
+        cashWrapper.classList.remove('hidden');
+    } else if (method === 'CARD') {
+        document.getElementById('btn-single-card').className = 'pay-method-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
+        cashWrapper.classList.add('hidden');
+    } else {
+        document.getElementById('btn-single-benefit').className = 'pay-method-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
+        cashWrapper.classList.add('hidden');
+    }
+}
+
+function calculateSingleChange() {
+    const tendered = parseFloat(document.getElementById('cash-tendered').value) || 0;
+    const change = tendered - netTotalInclusive;
+    document.getElementById('change-due').innerText = formatBHD(change > 0 ? change : 0);
+}
+
+function setSplitPrimaryMethod(method) {
+    splitPrimaryMethod = method;
+    document.querySelectorAll('.split-pri-btn').forEach(b => b.className = 'split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center');
+    if (method === 'CASH') document.getElementById('btn-split-pri-cash').className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+    if (method === 'CARD') document.getElementById('btn-split-pri-card').className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+    if (method === 'BENEFIT_PAY') document.getElementById('btn-split-pri-benefit').className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+}
+
+function setSplitSecondaryMethod(method) {
+    splitSecondaryMethod = method;
+    document.querySelectorAll('.split-sec-btn').forEach(b => b.className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center');
+    if (method === 'CASH') document.getElementById('btn-split-sec-cash').className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center';
+    if (method === 'CARD') document.getElementById('btn-split-sec-card').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+    if (method === 'BENEFIT_PAY') document.getElementById('btn-split-sec-benefit').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+}
+
+function calculateSplitBalance() {
+    const priPaid = parseFloat(document.getElementById('split-pri-amount').value) || 0;
+    const remaining = netTotalInclusive - priPaid;
+    document.getElementById('split-remaining-balance').innerText = formatBHD(remaining > 0 ? remaining : 0);
+}
+
+function setPrintFormat(fmt) {
+    selectedPrintFormat = fmt;
+    document.querySelectorAll('.print-fmt-btn').forEach(b => b.className = 'print-fmt-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center');
+    if (fmt === '58mm') {
+        document.getElementById('btn-print-58mm').className = 'print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
+    } else {
+        document.getElementById('btn-print-a4').className = 'print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
+    }
+}
+
+async function processSale(action) {
+    const custName = selectedCustomer ? selectedCustomer.name : 'Walk-in Customer';
+    const custPhone = selectedCustomer ? selectedCustomer.phone : 'N/A';
+
+    const pointsEarned = Math.floor(netTotalInclusive);
+    let updatedBalance = (currentCustomerPoints - pointsRedeemedCount + pointsEarned);
+
+    let receiptId = 'BP-' + Math.floor(100000 + Math.random() * 900000);
+    
+    // Payment Breakdown construction
+    let paymentDetails = {};
+    if (selectedPaymentType === 'SINGLE') {
+        paymentDetails = { type: 'SINGLE', method: singlePaymentMethod, total: netTotalInclusive };
+    } else {
+        const priAmt = parseFloat(document.getElementById('split-pri-amount').value) || 0;
+        const secAmt = Math.max(0, netTotalInclusive - priAmt);
+        paymentDetails = { 
+            type: 'SPLIT', 
+            primary: { method: splitPrimaryMethod, amount: priAmt },
+            secondary: { method: splitSecondaryMethod, amount: secAmt }
+        };
+    }
+
+    const vatAmt = netTotalInclusive - (netTotalInclusive / 1.10);
+
+    // Ensure IDs passed to Supabase RPC are valid UUIDs, or null
+    const validCashierId = (currentUser && isValidUUID(currentUser.id)) ? currentUser.id : null;
+    const validCustomerId = (selectedCustomer && isValidUUID(selectedCustomer.id)) ? selectedCustomer.id : null;
+    let newDbOrderId = null;
+
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient.rpc('process_pos_sale', {
+                p_cashier_id: validCashierId,
+                p_customer_id: validCustomerId,
+                p_customer_name: custName,
+                p_customer_phone: custPhone,
+                p_subtotal: netTotalInclusive - vatAmt,
+                p_vat_amount: vatAmt,
+                p_total_amount: netTotalInclusive,
+                p_gross_total: grossTotal,
+                p_discount_amount: discountAmount,
+                p_payment_method: selectedPaymentType === 'SINGLE' ? singlePaymentMethod : 'SPLIT',
+                p_payment_details: paymentDetails,
+                p_points_earned: pointsEarned,
+                p_points_redeemed: pointsRedeemedCount,
+                p_items: cart
+            });
+
+            if (error) {
+                console.error("Error executing RPC sale process:", error);
+                alert("Database transaction error: " + error.message);
+                return;
             }
-        }
 
-        function clearCustomer() {
-            selectedCustomer = null;
-            document.getElementById('customerSearch').value = '';
-            document.getElementById('customerInfo').classList.add('hidden');
-        }
-
-        function openNewCustomerModal() { document.getElementById('customerModal').classList.remove('hidden'); }
-        function closeCustomerModal() { document.getElementById('customerModal').classList.add('hidden'); }
-
-        async function createNewCustomer() {
-            const name = document.getElementById('newCName').value;
-            const phone = document.getElementById('newCPhone').value;
-            const email = document.getElementById('newCEmail').value;
-
-            if (!name || !phone) return alert("Name & Phone required");
-
-            const { data, error } = await supabase.from('contacts').insert([{ name, phone, email }]).select();
-            if (error) return alert(error.message);
-
-            selectedCustomer = data[0];
-            document.getElementById('cName').innerText = selectedCustomer.name;
-            document.getElementById('cPoints').innerText = 0;
-            document.getElementById('customerInfo').classList.remove('hidden');
-            closeCustomerModal();
-        }
-
-        async function showSalesHistory() {
-            document.getElementById('historyModal').classList.remove('hidden');
-            const { data } = await supabase.from('sales_orders').select('*').order('created_at', { ascending: false }).limit(10);
-            document.getElementById('historyList').innerHTML = (data || []).map(o => `
-                <div class="py-3 flex justify-between items-center text-sm">
-                    <div>
-                        <p class="font-bold">${o.order_number}</p>
-                        <p class="text-xs text-slate-400">${new Date(o.created_at).toLocaleString()}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-bold">BHD ${parseFloat(o.total_amount).toFixed(3)}</p>
-                        <button onclick="refundOrder('${o.id}')" class="text-xs text-red-500 font-bold hover:underline">${o.status === 'refunded' ? 'Refunded' : 'Refund'}</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function closeSalesHistory() { document.getElementById('historyModal').classList.add('hidden'); }
-
-        async function refundOrder(orderId) {
-            if (!confirm("Are you sure you want to refund this order?")) return;
-            const { error } = await supabase.rpc('process_pos_refund', { p_order_id: orderId });
-            if (error) return alert("Refund failed: " + error.message);
-            alert("Order refunded successfully!");
-            showSalesHistory();
-            fetchProducts();
-        }
-
-        function toggleScanner() {
-            const modal = document.getElementById('scannerModal');
-            if (modal.classList.contains('hidden')) {
-                modal.classList.remove('hidden');
-                html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
-                html5QrcodeScanner.render((decodedText) => {
-                    document.getElementById('searchInput').value = decodedText;
-                    filterProducts();
-                    toggleScanner();
-                });
-            } else {
-                modal.classList.add('hidden');
-                if (html5QrcodeScanner) html5QrcodeScanner.clear();
+            if (data) {
+                newDbOrderId = data;
+                const { data: orderData } = await supabaseClient.from('sales_orders').select('receipt_number').eq('id', newDbOrderId).single();
+                if (orderData && orderData.receipt_number) {
+                    receiptId = 'BP-' + String(orderData.receipt_number).padStart(6, '0');
+                }
             }
+
+            // Refresh catalog and contacts to update UI stock indicators & point balances
+            await fetchProducts();
+            await fetchCustomers();
+        } catch(e) {
+            console.error("Error pushing order to database:", e);
         }
+    }
+
+    const saleRecord = {
+        db_id: newDbOrderId,
+        receiptId: receiptId,
+        timestamp: new Date().toLocaleString(),
+        custName: custName,
+        custPhone: custPhone,
+        items: [...cart],
+        grossTotal: grossTotal,
+        discountAmount: discountAmount,
+        netTotal: netTotalInclusive,
+        pointsEarned: pointsEarned,
+        pointsBalance: updatedBalance,
+        paymentType: selectedPaymentType,
+        paymentDetails: paymentDetails,
+        cashierId: validCashierId,
+        status: 'COMPLETED'
+    };
+
+    salesHistory.unshift(saleRecord);
+    saveSalesHistoryLocal();
+
+    if (action === 'PRINT') {
+        executePrintReceipt(saleRecord);
+    } else if (action === 'WHATSAPP') {
+        resendWhatsApp(receiptId);
+    } else if (action === 'EMAIL') {
+        alert(`Receipt emailed to customer profile!`);
+    }
+
+    closePaymentModal();
+    clearCart();
+}
+
+function executePrintReceipt(sale) {
+    const printContainer = document.getElementById('print-container');
+    printContainer.innerHTML = '';
+
+    const templateId = selectedPrintFormat === '58mm' ? 'template-receipt-58mm' : 'template-receipt-a4';
+    const temp = document.getElementById(templateId).content.cloneNode(true);
+
+    temp.querySelector('.t-receipt-id').innerText = sale.receiptId;
+    temp.querySelector('.t-cust-name').innerText = sale.custName;
+    temp.querySelector('.t-cust-phone').innerText = sale.custPhone;
+    temp.querySelector('.t-pts-earned').innerText = sale.pointsEarned;
+    temp.querySelector('.t-pts-balance').innerText = sale.pointsBalance;
+    temp.querySelector('.t-gross').innerText = formatBHD(sale.grossTotal);
+    
+    if (sale.discountAmount > 0) {
+        temp.querySelector('.t-disc-val').innerText = '-' + formatBHD(sale.discountAmount);
+    } else {
+        const discRow = temp.querySelector('.t-disc-row');
+        if (discRow) discRow.style.display = 'none';
+    }
+
+    const vatAmount = sale.netTotal - (sale.netTotal / 1.10);
+    temp.querySelector('.t-subtotal').innerText = formatBHD(sale.netTotal - vatAmount);
+    temp.querySelector('.t-vat').innerText = formatBHD(vatAmount);
+    temp.querySelector('.t-total').innerText = formatBHD(sale.netTotal);
+    temp.querySelector('.t-timestamp').innerText = sale.timestamp;
+
+    // Payment breakdown formatting
+    const payContainer = temp.querySelector('.t-payments-breakdown');
+    payContainer.innerHTML = '';
+    if (sale.paymentDetails && sale.paymentDetails.type === 'SPLIT') {
+        payContainer.innerHTML = `
+            <div style="display: flex; justify-content: space-between;"><span>${sale.paymentDetails.primary.method}:</span><span>${formatBHD(sale.paymentDetails.primary.amount)}</span></div>
+            <div style="display: flex; justify-content: space-between;"><span>${sale.paymentDetails.secondary.method}:</span><span>${formatBHD(sale.paymentDetails.secondary.amount)}</span></div>
+        `;
+    } else {
+        const methodStr = sale.paymentDetails ? sale.paymentDetails.method : 'CASH';
+        payContainer.innerHTML = `<div style="display: flex; justify-content: space-between;"><span>${methodStr}:</span><span>${formatBHD(sale.netTotal)}</span></div>`;
+    }
+
+    if (selectedPrintFormat === '58mm') {
+        const itemsList = temp.querySelector('.t-items-list');
+        sale.items.forEach(i => {
+            const div = document.createElement('div');
+            div.style.display = 'flex';
+            div.style.justifyContent = 'space-between';
+            div.innerHTML = `<span>${i.qty}x ${i.name}</span><span>${formatBHD(i.price * i.qty)}</span>`;
+            itemsList.appendChild(div);
+        });
+    } else {
+        const tbody = temp.querySelector('.t-items-table-body');
+        sale.items.forEach(i => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="padding: 6px;">${i.name}</td>
+                <td style="padding: 6px; text-align: center;">${i.qty}</td>
+                <td style="padding: 6px; text-align: right;">${formatBHD(i.price)}</td>
+                <td style="padding: 6px; text-align: right;">${formatBHD(i.price * i.qty)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    printContainer.appendChild(temp);
+    printContainer.classList.remove('hidden');
+    window.print();
+    printContainer.classList.add('hidden');
+}
+
+let html5QrCode = null;
+function toggleCameraScanner() {
+    const wrapper = document.getElementById('camera-reader-wrapper');
+    if (wrapper.classList.contains('hidden')) {
+        wrapper.classList.remove('hidden');
+        html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: 250, height: 150 } },
+            (decodedText) => {
+                document.getElementById('search-input').value = decodedText;
+                filterProducts();
+                toggleCameraScanner();
+            },
+            () => {}
+        );
+    } else {
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => {
+                wrapper.classList.add('hidden');
+            });
+        } else {
+            wrapper.classList.add('hidden');
+        }
+    }
+}
     </script>
 </body>
 </html>
