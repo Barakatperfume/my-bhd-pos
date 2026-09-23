@@ -1184,7 +1184,7 @@ async function processRefund(receiptId) {
                         .eq('receipt_number', cleanReceiptNum);
                 }
 
-                // Restore stock locally/direct update
+                -- Restore stock locally/direct update
                 for (const item of sale.items) {
                     if (isValidUUID(item.id)) {
                         const { data: prod } = await supabaseClient.from('products').select('stock_quantity').eq('id', item.id).single();
@@ -1357,7 +1357,7 @@ async function processSale(action) {
 
     const vatAmt = netTotalInclusive - (netTotalInclusive / 1.10);
 
-    // Ensure IDs passed to Supabase RPC are valid UUIDs, or null
+    -- Ensure IDs passed to Supabase RPC are valid UUIDs, or null
     const validCashierId = (currentUser && isValidUUID(currentUser.id)) ? currentUser.id : null;
     const validCustomerId = (selectedCustomer && isValidUUID(selectedCustomer.id)) ? selectedCustomer.id : null;
     let newDbOrderId = null;
