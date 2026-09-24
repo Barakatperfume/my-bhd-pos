@@ -493,7 +493,6 @@ let currentCustomerPoints = 0;
 let pointsRedeemedCount = 0;
 let userRole = 'CASHIER';
 let currentUser = { id: null, name: 'Cashier 1', role: 'CASHIER' };
-let isManagerUnlocked = false; // Controls temporary cost price access inside Items Manager
 
 let grossTotal = 0;
 let discountAmount = 0;
@@ -509,12 +508,12 @@ const formatBHD = (amount) => {
     return 'BHD ' + (Math.round((amount || 0) * 1000) / 1000).toFixed(3);
 };
 
-// Helper to reliably sort products array alphabetically by name
+// Best Practice: Helper to reliably sort products array alphabetically by name
 const sortProductsAlphabetically = (arr) => {
     return (arr || []).sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
 };
 
-// Validates if string is a valid PostgreSQL UUID
+// Best Practice: Validates if string is a valid PostgreSQL UUID
 const isValidUUID = (id) => {
     return typeof id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 };
@@ -794,34 +793,6 @@ function filterProducts() {
     renderProducts(filtered);
 }
 
-let html5QrCode = null;
-function toggleCameraScanner() {
-    const wrapper = document.getElementById('camera-reader-wrapper');
-    if (wrapper.classList.contains('hidden')) {
-        wrapper.classList.remove('hidden');
-        html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: { width: 250, height: 150 } },
-            (decodedText) => {
-                document.getElementById('search-input').value = decodedText;
-                filterProducts();
-                toggleCameraScanner();
-            },
-            () => {}
-        ).catch(err => console.error("Camera access error:", err));
-    } else {
-        if (html5QrCode) {
-            html5QrCode.stop().then(() => {
-                html5QrCode.clear();
-                wrapper.classList.add('hidden');
-            }).catch(() => wrapper.classList.add('hidden'));
-        } else {
-            wrapper.classList.add('hidden');
-        }
-    }
-}
-
 function addToCart(product) {
     const existing = cart.find(item => String(item.id) === String(product.id));
     if (existing) {
@@ -933,12 +904,10 @@ function updateCartUI() {
 }
 
 function openItemManagerModal() {
-    const hasAdminAccess = (userRole === 'ADMIN' || userRole === 'MANAGER');
-    if (hasAdminAccess || isManagerUnlocked) {
-        document.getElementById('manager-status-text').innerText = `Current View: Unlocked Access (${userRole})`;
+    document.getElementById('manager-status-text').innerText = `Current View: ${userRole}`;
+    if (userRole === 'ADMIN' || userRole === 'MANAGER') {
         document.getElementById('btn-unlock-manager').classList.add('hidden');
     } else {
-        document.getElementById('manager-status-text').innerText = `Current View: Standard Staff (${userRole})`;
         document.getElementById('btn-unlock-manager').classList.remove('hidden');
     }
     
@@ -947,8 +916,6 @@ function openItemManagerModal() {
 }
 
 function closeItemManagerModal() {
-    // Revoke temporary window unlock status so it asks for PIN again next time
-    isManagerUnlocked = false;
     document.getElementById('item-manager-modal').classList.add('hidden');
 }
 
@@ -965,7 +932,7 @@ async function authenticateManagerRole() {
                 .single();
 
             if (data && !error && (data.role === 'ADMIN' || data.role === 'MANAGER')) {
-                isManagerUnlocked = true;
+                userRole = data.role;
                 document.getElementById('manager-status-text').innerText = `Current View: ${data.role} Access`;
                 document.getElementById('btn-unlock-manager').classList.add('hidden');
                 renderItemManagerList();
@@ -977,7 +944,7 @@ async function authenticateManagerRole() {
     }
 
     if (pin === '1234' || pin === '9999') {
-        isManagerUnlocked = true;
+        userRole = 'MANAGER';
         document.getElementById('manager-status-text').innerText = 'Current View: Manager Access';
         document.getElementById('btn-unlock-manager').classList.add('hidden');
         renderItemManagerList();
@@ -996,9 +963,9 @@ function renderItemManagerList() {
         const row = document.createElement('div');
         row.className = 'py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0 text-xs border-b border-gray-100 last:border-0';
         
-        const canViewCost = (userRole === 'MANAGER' || userRole === 'ADMIN' || isManagerUnlocked);
+        const isManager = (userRole === 'MANAGER' || userRole === 'ADMIN' || userRole === 'OWNER');
         
-        const costInputHtml = canViewCost 
+        const costInputHtml = isManager 
             ? `<div>
                 <label class="text-[9px] uppercase font-bold text-blue-600 block">Cost Price (BHD)</label>
                 <input type="number" id="edit-cost-${p.id}" step="0.001" value="${p.cost_price ?? 0}" class="w-24 border border-blue-300 rounded px-2 py-1 font-bold text-right outline-none focus:ring-1 focus:ring-blue-500 bg-blue-50/30">
@@ -1030,6 +997,7 @@ function renderItemManagerList() {
     });
 }
 
+// Best Practice: Fully safe save function with proper object cloning & UUID verification
 async function saveItemChanges(id) {
     try {
         const itemIndex = products.findIndex(p => String(p.id) === String(id));
@@ -1046,8 +1014,8 @@ async function saveItemChanges(id) {
             stock_quantity: newStock
         };
 
-        const canViewCost = (userRole === "MANAGER" || userRole === "ADMIN" || isManagerUnlocked);
-        if (canViewCost) {
+        const isManager = (userRole === "MANAGER" || userRole === "ADMIN" || userRole === "OWNER");
+        if (isManager) {
             const costElem = document.getElementById("edit-cost-" + id);
             if (costElem) {
                 updateData.cost_price = parseFloat(costElem.value) || 0;
@@ -1357,7 +1325,7 @@ function setSplitSecondaryMethod(method) {
     document.querySelectorAll('.split-sec-btn').forEach(b => b.className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center');
     if (method === 'CASH') document.getElementById('btn-split-sec-cash').className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center';
     if (method === 'CARD') document.getElementById('btn-split-sec-card').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
-    if (method === 'BENEFIT_PAY') document.getElementById('btn-split-sec-benefit').className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center';
+    if (method === 'BENEFIT_PAY') document.getElementById('btn-split-sec-benefit').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
 }
 
 function calculateSplitBalance() {
@@ -1400,6 +1368,7 @@ async function processSale(action) {
 
     const vatAmt = netTotalInclusive - (netTotalInclusive / 1.10);
 
+    -- Best Practice: Ensure foreign keys are strictly valid UUIDs or set to null
     const validCashierId = (currentUser && isValidUUID(currentUser.id)) ? currentUser.id : null;
     const validCustomerId = (selectedCustomer && isValidUUID(selectedCustomer.id)) ? selectedCustomer.id : null;
     let newDbOrderId = null;
@@ -1526,22 +1495,50 @@ function executePrintReceipt(sale) {
             itemsList.appendChild(div);
         });
     } else {
-        const tableBody = temp.querySelector('.t-items-table-body');
+        const tbody = temp.querySelector('.t-items-table-body');
         sale.items.forEach(i => {
             const tr = document.createElement('tr');
-            tr.style.borderBottom = '1px solid #f3f4f6';
             tr.innerHTML = `
                 <td style="padding: 6px;">${i.name}</td>
                 <td style="padding: 6px; text-align: center;">${i.qty}</td>
                 <td style="padding: 6px; text-align: right;">${formatBHD(i.price)}</td>
-                <td style="padding: 6px; text-align: right; font-weight: bold;">${formatBHD(i.price * i.qty)}</td>
+                <td style="padding: 6px; text-align: right;">${formatBHD(i.price * i.qty)}</td>
             `;
-            tableBody.appendChild(tr);
+            tbody.appendChild(tr);
         });
     }
 
     printContainer.appendChild(temp);
+    printContainer.classList.remove('hidden');
     window.print();
+    printContainer.classList.add('hidden');
+}
+
+let html5QrCode = null;
+function toggleCameraScanner() {
+    const wrapper = document.getElementById('camera-reader-wrapper');
+    if (wrapper.classList.contains('hidden')) {
+        wrapper.classList.remove('hidden');
+        html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: 250, height: 150 } },
+            (decodedText) => {
+                document.getElementById('search-input').value = decodedText;
+                filterProducts();
+                toggleCameraScanner();
+            },
+            () => {}
+        );
+    } else {
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => {
+                wrapper.classList.add('hidden');
+            });
+        } else {
+            wrapper.classList.add('hidden');
+        }
+    }
 }
     </script>
 </body>
