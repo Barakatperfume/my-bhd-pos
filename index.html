@@ -494,10 +494,6 @@ let pointsRedeemedCount = 0;
 let userRole = 'CASHIER';
 let currentUser = { id: null, name: 'Cashier 1', role: 'CASHIER' };
 
-let grossTotal = 0;
-let discountAmount = 0;
-let netTotalInclusive = 0;
-
 const fallbackProducts = [
     { id: '1', name: 'Aromatix Frost Bite 100ml', retail_price: 22.000, cost_price: 11.200, stock_quantity: 3, barcode: '10003' },
     { id: '2', name: 'Lattafa Maahir Honor 100ml', retail_price: 14.000, cost_price: 6.500, stock_quantity: 8, barcode: '10002' },
@@ -508,12 +504,12 @@ const formatBHD = (amount) => {
     return 'BHD ' + (Math.round((amount || 0) * 1000) / 1000).toFixed(3);
 };
 
-// Best Practice: Helper to reliably sort products array alphabetically by name
+// Helper to reliably sort products array alphabetically by name
 const sortProductsAlphabetically = (arr) => {
     return (arr || []).sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
 };
 
-// Best Practice: Validates if string is a valid PostgreSQL UUID
+// Validates if string is a valid PostgreSQL UUID
 const isValidUUID = (id) => {
     return typeof id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 };
@@ -574,6 +570,7 @@ async function fetchProducts() {
     }
 
     try {
+        // Enforce ORDER BY name ascending directly from Supabase
         const { data, error } = await supabaseClient.from('products').select('*').order('name', { ascending: true });
         if (error || !data || data.length === 0) {
             console.warn('Fallback triggered or Supabase query error:', error);
@@ -749,6 +746,7 @@ function renderProducts(list = products) {
     const grid = document.getElementById('product-grid');
     grid.innerHTML = '';
 
+    // Enforce sorting prior to rendering grid UI
     const sortedList = sortProductsAlphabetically(list);
 
     if (!sortedList || sortedList.length === 0) {
@@ -997,7 +995,6 @@ function renderItemManagerList() {
     });
 }
 
-// Best Practice: Fully safe save function with proper object cloning & UUID verification
 async function saveItemChanges(id) {
     try {
         const itemIndex = products.findIndex(p => String(p.id) === String(id));
@@ -1190,6 +1187,7 @@ async function processRefund(receiptId) {
                     return;
                 }
             } else {
+                // If db_id not available, update sales order by receipt number
                 const cleanReceiptNum = parseInt(sale.receiptId.replace(/[^0-9]/g, ''));
                 if (!isNaN(cleanReceiptNum)) {
                     await supabaseClient
@@ -1198,6 +1196,7 @@ async function processRefund(receiptId) {
                         .eq('receipt_number', cleanReceiptNum);
                 }
 
+                // Restore stock locally/direct update
                 for (const item of sale.items) {
                     if (isValidUUID(item.id)) {
                         const { data: prod } = await supabaseClient.from('products').select('stock_quantity').eq('id', item.id).single();
@@ -1212,6 +1211,7 @@ async function processRefund(receiptId) {
         }
     }
 
+    // Local Stock Restoration for active runtime array
     sale.items.forEach(item => {
         const prod = products.find(p => String(p.id) === String(item.id));
         if (prod) {
@@ -1353,6 +1353,7 @@ async function processSale(action) {
 
     let receiptId = 'BP-' + Math.floor(100000 + Math.random() * 900000);
     
+    // Payment Breakdown construction
     let paymentDetails = {};
     if (selectedPaymentType === 'SINGLE') {
         paymentDetails = { type: 'SINGLE', method: singlePaymentMethod, total: netTotalInclusive };
@@ -1368,7 +1369,7 @@ async function processSale(action) {
 
     const vatAmt = netTotalInclusive - (netTotalInclusive / 1.10);
 
-    -- Best Practice: Ensure foreign keys are strictly valid UUIDs or set to null
+    // Ensure IDs passed to Supabase RPC are valid UUIDs, or null
     const validCashierId = (currentUser && isValidUUID(currentUser.id)) ? currentUser.id : null;
     const validCustomerId = (selectedCustomer && isValidUUID(selectedCustomer.id)) ? selectedCustomer.id : null;
     let newDbOrderId = null;
@@ -1406,6 +1407,7 @@ async function processSale(action) {
                 }
             }
 
+            // Refresh catalog and contacts to update UI stock indicators & point balances
             await fetchProducts();
             await fetchCustomers();
         } catch(e) {
@@ -1473,6 +1475,7 @@ function executePrintReceipt(sale) {
     temp.querySelector('.t-total').innerText = formatBHD(sale.netTotal);
     temp.querySelector('.t-timestamp').innerText = sale.timestamp;
 
+    // Payment breakdown formatting
     const payContainer = temp.querySelector('.t-payments-breakdown');
     payContainer.innerHTML = '';
     if (sale.paymentDetails && sale.paymentDetails.type === 'SPLIT') {
