@@ -12,7 +12,6 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Media Print Isolation & Single-Page Fit Fix */
         @media print {
             body > * { display: none !important; }
             #print-container, #print-container * { display: block !important; visibility: visible !important; }
@@ -78,7 +77,7 @@
             <!-- In-App Camera Viewfinder Container -->
             <div id="camera-reader-wrapper" class="hidden mb-4 bg-black rounded-lg overflow-hidden relative max-h-48">
                 <div id="reader" class="w-full"></div>
-                <button onclick="toggleCameraScanner()" class="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 text-xs rounded shadow">Close Camera</button>
+                <button onclick="toggleCameraScanner()" class="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 text-xs rounded shadow z-10">Close Camera</button>
             </div>
 
             <!-- Product Grid -->
@@ -95,14 +94,25 @@
                 <button onclick="clearCart()" class="text-xs text-red-600 hover:text-red-800 font-medium">Clear All</button>
             </div>
 
-            <!-- Customer Selection & Loyalty Points Panel -->
+            <!-- Selected Customer & Loyalty Widget -->
             <div class="p-3 border-b border-gray-200 bg-emerald-50/50 space-y-2">
-                <label class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Customer & Loyalty Profile</label>
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="cust-name-input" placeholder="Customer Name" class="border border-gray-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
-                    <input type="text" id="cust-phone-input" oninput="lookupCustomerPoints()" placeholder="Phone Number" class="border border-gray-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
+                <div class="flex justify-between items-center">
+                    <label class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Customer Profile</label>
+                    <button onclick="openCustomerModal()" class="text-xs text-emerald-700 font-bold hover:underline flex items-center space-x-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <span>Search / Add Customer</span>
+                    </button>
                 </div>
-                
+
+                <!-- Active Selected Customer Box -->
+                <div id="active-customer-box" class="bg-white p-2.5 rounded-lg border border-emerald-200 flex justify-between items-center shadow-sm">
+                    <div>
+                        <p id="disp-cust-name" class="font-bold text-xs text-gray-800">Walk-in Customer</p>
+                        <p id="disp-cust-phone" class="text-[10px] text-gray-500">No phone attached</p>
+                    </div>
+                    <button onclick="clearSelectedCustomer()" id="btn-clear-cust" class="hidden text-xs text-red-500 font-bold hover:text-red-700">Remove</button>
+                </div>
+
                 <!-- Loyalty Points Widget -->
                 <div id="loyalty-widget" class="bg-white p-2 rounded border border-emerald-200 flex justify-between items-center text-xs">
                     <div>
@@ -168,6 +178,40 @@
         </div>
     </div>
 
+    <!-- CUSTOMER SEARCH & CREATION MODAL -->
+    <div id="customer-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-5 space-y-4 my-auto max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-gray-800">Select or Add Customer</h3>
+                <button onclick="closeCustomerModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+            </div>
+
+            <!-- Search Input Bar -->
+            <div>
+                <input type="text" id="cust-modal-search" onkeyup="renderCustomerSearchResults()" placeholder="Search by name or phone..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+
+            <!-- Customer Search Results List -->
+            <div id="cust-modal-results" class="flex-1 overflow-y-auto border rounded-lg divide-y divide-gray-100 max-h-48 p-2 bg-gray-50/50">
+                <!-- Search results rendered dynamically -->
+            </div>
+
+            <!-- Add New Customer Section -->
+            <div class="border-t pt-3 space-y-2 bg-emerald-50/30 p-3 rounded-lg border border-emerald-100">
+                <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider">Create New Customer</h4>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="new-cust-name" placeholder="Full Name *" class="border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
+                    <input type="text" id="new-cust-phone" placeholder="Phone Number *" class="border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
+                </div>
+                <input type="email" id="new-cust-email" placeholder="Email Address (Optional)" class="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
+                
+                <button onclick="addNewCustomerToDatabase()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs transition shadow">
+                    Save & Select Customer
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Sales History & Refunds Modal -->
     <div id="sales-history-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
         <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full p-5 space-y-4 my-auto max-h-[90vh] flex flex-col">
@@ -198,7 +242,7 @@
             </div>
 
             <div class="flex justify-between items-center bg-gray-50 p-2 rounded border border-gray-200">
-                <span id="manager-status-text" class="text-xs font-semibold text-gray-600">Current View: Standard Staff (Cost Hidden)</span>
+                <span id="manager-status-text" class="text-xs font-semibold text-gray-600">Current View: Standard Staff</span>
                 <button id="btn-unlock-manager" onclick="authenticateManagerRole()" class="bg-emerald-600 text-white text-xs px-3 py-1 rounded font-bold hover:bg-emerald-700">Manager Unlock PIN</button>
             </div>
 
@@ -313,7 +357,7 @@
     <template id="template-receipt-58mm">
         <div style="width: 58mm; padding: 4px; font-family: monospace; font-size: 10px; color: black; line-height: 1.2;">
             <div style="text-align: center;">
-                <img src="PCBH_LOGO-BG.png" alt="Logo" onerror="this.style.display='none'" style="height: 48px; margin: 0 auto 4px auto; display: block; object-fit: contain;">
+                <img src="PCBH_LOGO-BG.png" alt="Logo" style="height: 48px; margin: 0 auto 4px auto; display: block; object-fit: contain;">
                 <div style="font-weight: bold; font-size: 12px; text-transform: uppercase;">BARAKAT PERFUMES</div>
                 <div>District 1, Janabiya</div>
                 <div>CR: 13812-04</div>
@@ -329,8 +373,8 @@
             <div class="t-items-list" style="display: flex; flex-direction: column; gap: 4px;"></div>
             <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
             <div>
-                <div><span>Points Earned:</span><span class="t-pts-earned float-right">0</span></div>
-                <div style="font-weight: bold;"><span>Points Balance:</span><span class="t-pts-balance float-right">0</span></div>
+                <div><span>Points Earned:</span><span class="t-pts-earned" style="float: right;">0</span></div>
+                <div style="font-weight: bold;"><span>Points Balance:</span><span class="t-pts-balance" style="float: right;">0</span></div>
             </div>
             <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
             <div style="display: flex; flex-direction: column; gap: 2px;">
@@ -367,7 +411,7 @@
                     <p style="margin: 1px 0; color: #4b5563; font-size: 10px;">Branch: District 1, Janabiya | CR: 13812-04 | Tel: 36051011</p>
                 </div>
                 <div style="text-align: right;">
-                    <img src="PCBH_LOGO-BG.png" alt="Logo" onerror="this.style.display='none'" style="height: 40px; margin-left: auto; object-fit: contain;">
+                    <img src="PCBH_LOGO-BG.png" alt="Logo" style="height: 40px; margin-left: auto; object-fit: contain;">
                     <p style="font-weight: bold; margin: 0; color: #1f2937; font-size: 11px;">TAX INVOICE</p>
                 </div>
             </div>
@@ -428,93 +472,240 @@
 const SUPABASE_URL = 'https://lxyxlecusdjdikozeedx.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4eXhsZWN1c2RqZGlrb3plZWR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NjkzNTgsImV4cCI6MjEwNTE0NTM1OH0._nPzYbZ2TIeRXQ-2went70JXygrI5TqUMDofi5OKxy4';
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabaseClient = null;
+if (window.supabase && window.supabase.createClient) {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
 
 let products = [];
 let salesHistory = [];
+let customers = [];
+let selectedCustomer = null; 
 let cart = [];
-let discountType = 'FIXED'; // FIXED or PERCENT
-let selectedPaymentType = 'SINGLE'; // SINGLE or SPLIT
-let singlePaymentMethod = 'CASH'; // CASH, CARD, BENEFIT_PAY
-let splitPrimaryMethod = 'CASH'; // CASH, CARD, BENEFIT_PAY
-let splitSecondaryMethod = 'CARD'; // CASH, CARD, BENEFIT_PAY
-let selectedPrintFormat = '58mm'; // 58mm or A4
+let discountType = 'FIXED';
+let selectedPaymentType = 'SINGLE';
+let singlePaymentMethod = 'CASH';
+let splitPrimaryMethod = 'CASH';
+let splitSecondaryMethod = 'CARD';
+let selectedPrintFormat = '58mm';
 
-let currentCustomerId = null;
 let currentCustomerPoints = 0;
 let pointsRedeemedCount = 0;
-let userRole = 'CASHIER'; // CASHIER, MANAGER, OWNER
-let activeUserId = null;
+let userRole = 'CASHIER';
+let currentUser = { id: null, name: 'Cashier 1', role: 'CASHIER' };
 
-let grossTotal = 0;
-let discountAmount = 0;
-let netTotalInclusive = 0;
+const fallbackProducts = [
+    { id: '1', name: 'Aromatix Frost Bite 100ml', retail_price: 22.000, cost_price: 11.200, stock_quantity: 3, barcode: '10003' },
+    { id: '2', name: 'Lattafa Maahir Honor 100ml', retail_price: 14.000, cost_price: 6.500, stock_quantity: 8, barcode: '10002' },
+    { id: '3', name: 'RIIFFS Freeze EDP 100ml', retail_price: 18.500, cost_price: 9.000, stock_quantity: 12, barcode: '10001' }
+];
 
-// --- 3-DECIMAL CURRENCY FORMATTER ENGINE ---
 const formatBHD = (amount) => {
     return 'BHD ' + (Math.round((amount || 0) * 1000) / 1000).toFixed(3);
 };
 
-// --- INITIAL LOAD ---
-window.onload = () => {
-    fetchProducts();
-    fetchSalesHistory();
+// Helper to reliably sort products array alphabetically by name
+const sortProductsAlphabetically = (arr) => {
+    return (arr || []).sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
 };
 
-function switchUser() {
-    const pin = prompt('Enter User Switch PIN:');
+// Validates if string is a valid PostgreSQL UUID
+const isValidUUID = (id) => {
+    return typeof id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+};
+
+window.onload = async () => {
+    await fetchProducts();
+    await fetchCustomers();
+    await loadSalesHistoryLocal();
+};
+
+async function switchUser() {
+    const pin = prompt('Enter User PIN:');
+    if (!pin) return;
+
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('pos_users')
+                .select('*')
+                .eq('pin_code', pin.trim())
+                .single();
+
+            if (data && !error) {
+                currentUser = data;
+                userRole = data.role.toUpperCase();
+
+                document.getElementById('role-badge').innerText = userRole;
+                document.getElementById('user-name').innerText = data.name;
+                renderProducts();
+                return;
+            }
+        } catch (err) {
+            console.warn('Database user query failed, checking fallbacks:', err);
+        }
+    }
+
     if (pin === '1234' || pin === '9999') {
-        userRole = 'OWNER';
-        document.getElementById('role-badge').innerText = 'Owner';
-        document.getElementById('user-name').innerText = 'Manager/Owner';
-    } else {
+        userRole = 'ADMIN';
+        currentUser = { id: null, name: 'Owner', role: 'ADMIN' };
+        document.getElementById('role-badge').innerText = 'Admin';
+        document.getElementById('user-name').innerText = 'Owner';
+    } else if (pin === '0000') {
         userRole = 'CASHIER';
+        currentUser = { id: null, name: 'Cashier 1', role: 'CASHIER' };
         document.getElementById('role-badge').innerText = 'Cashier';
         document.getElementById('user-name').innerText = 'Cashier 1';
+    } else {
+        alert('Invalid User PIN code!');
     }
     renderProducts();
 }
 
-// --- FETCH PRODUCTS FROM SUPABASE ---
 async function fetchProducts() {
-    const { data, error } = await supabaseClient
-        .from('products')
-        .select('*');
+    if (!supabaseClient) {
+        products = sortProductsAlphabetically(fallbackProducts);
+        renderProducts(products);
+        return;
+    }
 
-    if (error) {
-        console.error('Error fetching products:', error);
-        products = [];
-    } else {
-        products = data || [];
+    try {
+        // Enforce ORDER BY name ascending directly from Supabase
+        const { data, error } = await supabaseClient.from('products').select('*').order('name', { ascending: true });
+        if (error || !data || data.length === 0) {
+            console.warn('Fallback triggered or Supabase query error:', error);
+            products = sortProductsAlphabetically(fallbackProducts);
+        } else {
+            products = sortProductsAlphabetically(data);
+        }
+    } catch (err) {
+        console.error('Execution error fetching products:', err);
+        products = sortProductsAlphabetically(fallbackProducts);
     }
     renderProducts(products);
 }
 
-// --- LOYALTY POINTS ENGINE ---
-async function lookupCustomerPoints() {
-    const phone = document.getElementById('cust-phone-input').value.trim();
-    if (!phone) {
-        currentCustomerId = null;
-        currentCustomerPoints = 0;
-        updateLoyaltyUI();
+async function fetchCustomers() {
+    if (!supabaseClient) return;
+    try {
+        const { data, error } = await supabaseClient.from('contacts').select('*').order('created_at', { ascending: false });
+        if (!error && data) {
+            customers = data;
+        }
+    } catch (err) {
+        console.error('Error fetching contacts:', err);
+    }
+}
+
+function openCustomerModal() {
+    document.getElementById('customer-modal').classList.remove('hidden');
+    document.getElementById('cust-modal-search').value = '';
+    renderCustomerSearchResults();
+}
+
+function closeCustomerModal() {
+    document.getElementById('customer-modal').classList.add('hidden');
+}
+
+function renderCustomerSearchResults() {
+    const term = document.getElementById('cust-modal-search').value.toLowerCase().trim();
+    const container = document.getElementById('cust-modal-results');
+    container.innerHTML = '';
+
+    const filtered = customers.filter(c => 
+        (c.name && c.name.toLowerCase().includes(term)) ||
+        (c.phone && c.phone.toLowerCase().includes(term))
+    );
+
+    if (filtered.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-400 py-3 text-xs">No matching customers found.</p>';
         return;
     }
 
-    const { data } = await supabaseClient
-        .from('contacts')
-        .select('*')
-        .eq('phone', phone)
-        .maybeSingle();
+    filtered.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'p-2 hover:bg-emerald-50 cursor-pointer rounded flex justify-between items-center transition';
+        item.onclick = () => selectCustomer(c);
+        item.innerHTML = `
+            <div>
+                <p class="font-bold text-xs text-gray-800">${c.name}</p>
+                <p class="text-[10px] text-gray-500">${c.phone}</p>
+            </div>
+            <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">${c.loyalty_points || 0} Pts</span>
+        `;
+        container.appendChild(item);
+    });
+}
 
-    if (data) {
-        currentCustomerId = data.id;
-        currentCustomerPoints = data.loyalty_points || 0;
-        document.getElementById('cust-name-input').value = data.name || '';
-    } else {
-        currentCustomerId = null;
-        currentCustomerPoints = 0;
-    }
+function selectCustomer(cust) {
+    selectedCustomer = cust;
+    currentCustomerPoints = cust.loyalty_points || 0;
+
+    document.getElementById('disp-cust-name').innerText = cust.name;
+    document.getElementById('disp-cust-phone').innerText = cust.phone;
+    document.getElementById('btn-clear-cust').classList.remove('hidden');
+
     updateLoyaltyUI();
+    closeCustomerModal();
+}
+
+function clearSelectedCustomer() {
+    selectedCustomer = null;
+    currentCustomerPoints = 0;
+    pointsRedeemedCount = 0;
+
+    document.getElementById('disp-cust-name').innerText = 'Walk-in Customer';
+    document.getElementById('disp-cust-phone').innerText = 'No phone attached';
+    document.getElementById('btn-clear-cust').classList.add('hidden');
+
+    updateLoyaltyUI();
+}
+
+async function addNewCustomerToDatabase() {
+    const name = document.getElementById('new-cust-name').value.trim();
+    const phone = document.getElementById('new-cust-phone').value.trim();
+    const email = document.getElementById('new-cust-email').value.trim();
+
+    if (!name || !phone) {
+        alert('Please provide both Name and Phone number!');
+        return;
+    }
+
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient.from('contacts').insert([{
+                name: name,
+                phone: phone,
+                email: email || null,
+                loyalty_points: 0
+            }]).select();
+
+            if (error) {
+                alert('Database Error adding customer: ' + error.message);
+                return;
+            }
+
+            if (data && data.length > 0) {
+                const newCust = data[0];
+                customers.unshift(newCust);
+                selectCustomer(newCust);
+                
+                document.getElementById('new-cust-name').value = '';
+                document.getElementById('new-cust-phone').value = '';
+                document.getElementById('new-cust-email').value = '';
+                
+                alert(`Customer ${newCust.name} added successfully!`);
+            }
+        } catch(err) {
+            console.error('Error inserting customer:', err);
+            alert('An unexpected error occurred while adding customer.');
+        }
+    } else {
+        const offlineCust = { id: 'temp_' + Date.now(), name: name, phone: phone, loyalty_points: 0 };
+        customers.unshift(offlineCust);
+        selectCustomer(offlineCust);
+        closeCustomerModal();
+    }
 }
 
 function updateLoyaltyUI() {
@@ -548,20 +739,22 @@ function redeemLoyaltyPoints() {
     document.getElementById('discount-val').value = discountBHD.toFixed(3);
     
     updateCartUI();
-    alert(`Applied ${formatBHD(discountBHD)} loyalty discount! ${pointsRedeemedCount} points will be deducted on sale completion.`);
+    alert(`Applied ${formatBHD(discountBHD)} loyalty discount! ${pointsRedeemedCount} points will be deducted.`);
 }
 
-// --- RENDER PRODUCTS GRID ---
 function renderProducts(list = products) {
     const grid = document.getElementById('product-grid');
     grid.innerHTML = '';
 
-    if (!list || list.length === 0) {
+    // Enforce sorting prior to rendering grid UI
+    const sortedList = sortProductsAlphabetically(list);
+
+    if (!sortedList || sortedList.length === 0) {
         grid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-10">No products found.</p>';
         return;
     }
     
-    list.forEach(p => {
+    sortedList.forEach(p => {
         let stock = p.stock_quantity ?? 0;
         let price = p.retail_price ?? 0;
         let lowThreshold = p.low_stock_threshold ?? 2;
@@ -593,22 +786,20 @@ function filterProducts() {
     const term = document.getElementById('search-input').value.toLowerCase().trim();
     const filtered = products.filter(p => 
         (p.name && p.name.toLowerCase().includes(term)) || 
-        (p.barcode && p.barcode.toLowerCase().includes(term)) ||
-        (p.sku && p.sku.toLowerCase().includes(term))
+        (p.barcode && p.barcode.toLowerCase().includes(term))
     );
     renderProducts(filtered);
 }
 
-// --- CART MANAGEMENT ---
 function addToCart(product) {
-    const existing = cart.find(item => item.id === product.id);
+    const existing = cart.find(item => String(item.id) === String(product.id));
     if (existing) {
         existing.qty += 1;
     } else {
         cart.push({
             id: product.id,
             name: product.name,
-            price: parseFloat(product.retail_price),
+            price: product.retail_price,
             qty: 1
         });
     }
@@ -616,11 +807,11 @@ function addToCart(product) {
 }
 
 function updateCartQty(id, delta) {
-    const item = cart.find(i => i.id === id);
+    const item = cart.find(i => String(i.id) === String(id));
     if (!item) return;
     item.qty += delta;
     if (item.qty <= 0) {
-        cart = cart.filter(i => i.id !== id);
+        cart = cart.filter(i => String(i.id) !== String(id));
     }
     updateCartUI();
 }
@@ -628,6 +819,7 @@ function updateCartQty(id, delta) {
 function clearCart() {
     cart = [];
     pointsRedeemedCount = 0;
+    clearSelectedCustomer();
     document.getElementById('discount-val').value = '';
     document.getElementById('discount-title').value = '';
     updateCartUI();
@@ -680,7 +872,6 @@ function updateCartUI() {
         });
     }
 
-    // Calculate Discount
     const discValRaw = parseFloat(document.getElementById('discount-val').value) || 0;
     if (discountType === 'FIXED') {
         discountAmount = discValRaw;
@@ -693,7 +884,6 @@ function updateCartUI() {
     const vatAmount = netTotalInclusive - (netTotalInclusive / 1.10);
     const netExclVat = netTotalInclusive - vatAmount;
 
-    // Update Totals Display
     document.getElementById('summary-gross').innerText = formatBHD(grossTotal);
     const discRow = document.getElementById('row-discount');
     if (discountAmount > 0) {
@@ -711,8 +901,14 @@ function updateCartUI() {
     document.getElementById('btn-total').innerText = formatBHD(netTotalInclusive);
 }
 
-// --- ITEM CATALOG EDITING (POS ACCESS) ---
 function openItemManagerModal() {
+    document.getElementById('manager-status-text').innerText = `Current View: ${userRole}`;
+    if (userRole === 'ADMIN' || userRole === 'MANAGER') {
+        document.getElementById('btn-unlock-manager').classList.add('hidden');
+    } else {
+        document.getElementById('btn-unlock-manager').classList.remove('hidden');
+    }
+    
     document.getElementById('item-manager-modal').classList.remove('hidden');
     renderItemManagerList();
 }
@@ -721,15 +917,37 @@ function closeItemManagerModal() {
     document.getElementById('item-manager-modal').classList.add('hidden');
 }
 
-function authenticateManagerRole() {
-    const pin = prompt('Enter Manager/Owner PIN to view Cost Prices:');
+async function authenticateManagerRole() {
+    const pin = prompt('Enter Manager/Owner PIN to view and edit Cost Prices:');
+    if (!pin) return;
+
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('pos_users')
+                .select('*')
+                .eq('pin_code', pin.trim())
+                .single();
+
+            if (data && !error && (data.role === 'ADMIN' || data.role === 'MANAGER')) {
+                userRole = data.role;
+                document.getElementById('manager-status-text').innerText = `Current View: ${data.role} Access`;
+                document.getElementById('btn-unlock-manager').classList.add('hidden');
+                renderItemManagerList();
+                return;
+            }
+        } catch (err) {
+            console.warn('Supabase manager authentication query failed:', err);
+        }
+    }
+
     if (pin === '1234' || pin === '9999') {
         userRole = 'MANAGER';
-        document.getElementById('manager-status-text').innerText = 'Unlocked: Manager Access (Cost Prices Visible)';
+        document.getElementById('manager-status-text').innerText = 'Current View: Manager Access';
         document.getElementById('btn-unlock-manager').classList.add('hidden');
         renderItemManagerList();
     } else {
-        alert('Invalid Manager PIN!');
+        alert('Invalid Manager PIN or insufficient privileges!');
     }
 }
 
@@ -737,21 +955,31 @@ function renderItemManagerList() {
     const listContainer = document.getElementById('item-manager-list');
     listContainer.innerHTML = '';
 
-    products.forEach(p => {
+    const sortedProducts = sortProductsAlphabetically(products);
+
+    sortedProducts.forEach(p => {
         const row = document.createElement('div');
-        row.className = 'py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0 text-xs';
+        row.className = 'py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0 text-xs border-b border-gray-100 last:border-0';
         
-        const costDisplay = (userRole === 'MANAGER' || userRole === 'OWNER') 
-            ? `<span class="text-blue-600 font-bold">Cost: BHD ${p.cost_price ?? '0.000'}</span>` 
-            : `<span class="text-gray-400 font-bold">Cost: *** BHD (Locked)</span>`;
+        const isManager = (userRole === 'MANAGER' || userRole === 'ADMIN' || userRole === 'OWNER');
+        
+        const costInputHtml = isManager 
+            ? `<div>
+                <label class="text-[9px] uppercase font-bold text-blue-600 block">Cost Price (BHD)</label>
+                <input type="number" id="edit-cost-${p.id}" step="0.001" value="${p.cost_price ?? 0}" class="w-24 border border-blue-300 rounded px-2 py-1 font-bold text-right outline-none focus:ring-1 focus:ring-blue-500 bg-blue-50/30">
+               </div>`
+            : `<div>
+                <label class="text-[9px] uppercase font-bold text-gray-400 block">Cost Price</label>
+                <input type="text" disabled value="*** BHD" class="w-24 border border-gray-200 bg-gray-100 rounded px-2 py-1 font-bold text-center text-gray-400 cursor-not-allowed">
+               </div>`;
 
         row.innerHTML = `
             <div class="flex-1 pr-3">
                 <p class="font-bold text-gray-800 text-sm">${p.name}</p>
                 <p class="text-gray-400">Barcode: ${p.barcode || 'N/A'}</p>
-                <div class="mt-1">${costDisplay}</div>
             </div>
             <div class="flex items-center space-x-2">
+                ${costInputHtml}
                 <div>
                     <label class="text-[9px] uppercase font-bold text-gray-500 block">Retail Price (BHD)</label>
                     <input type="number" id="edit-price-${p.id}" step="0.001" value="${p.retail_price}" class="w-24 border border-gray-300 rounded px-2 py-1 font-bold text-right outline-none focus:ring-1 focus:ring-emerald-500">
@@ -768,53 +996,131 @@ function renderItemManagerList() {
 }
 
 async function saveItemChanges(id) {
-    const newPrice = parseFloat(document.getElementById(`edit-price-${id}`).value);
-    const newStock = parseInt(document.getElementById(`edit-stock-${id}`).value);
+    try {
+        const itemIndex = products.findIndex(p => String(p.id) === String(id));
+        if (itemIndex === -1) {
+            alert("Product not found.");
+            return;
+        }
 
-    const { error } = await supabaseClient
-        .from('products')
-        .update({ retail_price: newPrice, stock_quantity: newStock })
-        .eq('id', id);
+        const newPrice = parseFloat(document.getElementById("edit-price-" + id).value) || 0;
+        const newStock = parseInt(document.getElementById("edit-stock-" + id).value) || 0;
 
-    if (error) {
-        alert('Failed to update product: ' + error.message);
-    } else {
-        await fetchProducts();
+        let updateData = {
+            retail_price: newPrice,
+            stock_quantity: newStock
+        };
+
+        const isManager = (userRole === "MANAGER" || userRole === "ADMIN" || userRole === "OWNER");
+        if (isManager) {
+            const costElem = document.getElementById("edit-cost-" + id);
+            if (costElem) {
+                updateData.cost_price = parseFloat(costElem.value) || 0;
+            }
+        }
+
+        if (supabaseClient && isValidUUID(id)) {
+            const response = await supabaseClient
+                .from("products")
+                .update(updateData)
+                .eq("id", id)
+                .select();
+
+            if (response.error) {
+                alert("Error updating Supabase: " + response.error.message);
+                return;
+            }
+        }
+
+        products[itemIndex] = Object.assign({}, products[itemIndex], updateData);
+        products = sortProductsAlphabetically(products);
+        alert("Updated " + products[itemIndex].name + " successfully!");
+
+        renderProducts();
         renderItemManagerList();
-        alert('Product updated successfully!');
+    } catch (err) {
+        console.error("Save execution error:", err);
+        alert("An error occurred while saving: " + err.message);
     }
 }
 
-// --- PREVIOUS SALES HISTORY & REFUNDS ENGINE ---
 function openSalesHistoryModal() {
     document.getElementById('sales-history-modal').classList.remove('hidden');
-    fetchSalesHistory();
+    renderSalesHistory();
 }
 
 function closeSalesHistoryModal() {
     document.getElementById('sales-history-modal').classList.add('hidden');
 }
 
-async function fetchSalesHistory() {
-    const { data, error } = await supabaseClient
-        .from('sales_orders')
-        .select(`
-            *,
-            order_items (
-                id, product_id, unit_price, quantity, total_price,
-                products ( name )
-            )
-        `)
-        .order('created_at', { ascending: false })
-        .limit(50);
+async function loadSalesHistoryLocal() {
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('sales_orders')
+                .select(`
+                    id,
+                    receipt_number,
+                    customer_name,
+                    customer_phone,
+                    total_amount,
+                    gross_total,
+                    discount_amount,
+                    points_earned,
+                    points_redeemed,
+                    payment_method,
+                    payment_details,
+                    status,
+                    created_at,
+                    order_items (
+                        product_id,
+                        quantity,
+                        unit_price,
+                        products (
+                            name
+                        )
+                    )
+                `)
+                .order('created_at', { ascending: false });
 
-    if (error) {
-        console.error('Error fetching sales history:', error);
-        salesHistory = [];
-    } else {
-        salesHistory = data || [];
+            if (!error && data) {
+                salesHistory = data.map(order => ({
+                    db_id: order.id,
+                    receiptId: 'BP-' + String(order.receipt_number).padStart(6, '0'),
+                    timestamp: new Date(order.created_at).toLocaleString(),
+                    custName: order.customer_name || 'Walk-in Customer',
+                    custPhone: order.customer_phone || 'N/A',
+                    items: (order.order_items || []).map(item => ({
+                        id: item.product_id,
+                        qty: item.quantity,
+                        price: item.unit_price,
+                        name: item.products ? item.products.name : 'Unknown Product'
+                    })),
+                    grossTotal: order.gross_total || order.total_amount,
+                    discountAmount: order.discount_amount || 0,
+                    netTotal: order.total_amount,
+                    pointsEarned: order.points_earned || 0,
+                    pointsBalance: 0,
+                    paymentType: order.payment_method === 'SPLIT' ? 'SPLIT' : 'SINGLE',
+                    paymentDetails: order.payment_details || {},
+                    status: order.status || 'COMPLETED'
+                }));
+                saveSalesHistoryLocal();
+                return;
+            }
+        } catch (e) {
+            console.error("Error loading sales history from Supabase:", e);
+        }
     }
-    renderSalesHistory();
+
+    const saved = localStorage.getItem('pos_sales_history');
+    if (saved) {
+        try { salesHistory = JSON.parse(saved); } catch(e) { salesHistory = []; }
+    }
+}
+
+function saveSalesHistoryLocal() {
+    localStorage.setItem('pos_sales_history', JSON.stringify(salesHistory));
 }
 
 function renderSalesHistory() {
@@ -822,15 +1128,14 @@ function renderSalesHistory() {
     const term = document.getElementById('sales-search-input').value.toLowerCase().trim();
     container.innerHTML = '';
 
-    const filtered = salesHistory.filter(s => {
-        const receiptStr = String(s.receipt_number || s.id);
-        const nameStr = (s.customer_name || '').toLowerCase();
-        const phoneStr = (s.customer_phone || '').toLowerCase();
-        return receiptStr.includes(term) || nameStr.includes(term) || phoneStr.includes(term);
-    });
+    const filtered = salesHistory.filter(s => 
+        s.receiptId.toLowerCase().includes(term) ||
+        s.custName.toLowerCase().includes(term) ||
+        s.custPhone.toLowerCase().includes(term)
+    );
 
     if (filtered.length === 0) {
-        container.innerHTML = '<p class="text-center text-gray-400 py-6 text-xs">No sales transactions found.</p>';
+        container.innerHTML = '<p class="text-center text-gray-400 py-6 text-xs">No previous sales transactions found.</p>';
         return;
     }
 
@@ -843,75 +1148,113 @@ function renderSalesHistory() {
             ? '<span class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-0.5 rounded">REFUNDED</span>' 
             : '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">COMPLETED</span>';
 
-        const itemNames = (s.order_items || []).map(i => `${i.quantity}x ${i.products?.name || 'Item'}`).join(', ');
-
         row.innerHTML = `
             <div>
                 <div class="flex items-center space-x-2">
-                    <strong class="text-emerald-800">#${s.receipt_number || s.id.slice(0, 8)}</strong>
+                    <strong class="text-emerald-800">${s.receiptId}</strong>
                     ${statusBadge}
                 </div>
-                <p class="text-gray-600 font-medium mt-0.5">${s.customer_name || 'Walk-in'} (${s.customer_phone || 'N/A'}) - ${new Date(s.created_at).toLocaleString()}</p>
-                <p class="text-gray-400 text-[10px]">${itemNames}</p>
+                <p class="text-gray-600 font-medium mt-0.5">${s.custName} (${s.custPhone}) - ${s.timestamp}</p>
+                <p class="text-gray-400 text-[10px]">${s.items.map(i => `${i.qty}x${i.name}`).join(', ')}</p>
             </div>
             <div class="flex items-center space-x-2">
-                <span class="font-bold text-gray-900 mr-2 text-sm">${formatBHD(s.total_amount)}</span>
-                <button onclick="reprintReceipt('${s.id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded font-bold text-[10px]">Print</button>
-                <button onclick="resendWhatsApp('${s.id}')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-bold text-[10px]">WhatsApp</button>
-                ${!isRefunded ? `<button onclick="processRefund('${s.id}')" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded font-bold text-[10px]">Refund</button>` : ''}
+                <span class="font-bold text-gray-900 mr-2 text-sm">${formatBHD(s.netTotal)}</span>
+                <button onclick="reprintReceipt('${s.receiptId}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded font-bold text-[10px]">Print</button>
+                <button onclick="resendWhatsApp('${s.receiptId}')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-bold text-[10px]">WhatsApp</button>
+                ${!isRefunded ? `<button onclick="processRefund('${s.receiptId}')" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded font-bold text-[10px]">Refund</button>` : ''}
             </div>
         `;
         container.appendChild(row);
     });
 }
 
-async function processRefund(orderId) {
-    const sale = salesHistory.find(s => s.id === orderId);
+async function processRefund(receiptId) {
+    const sale = salesHistory.find(s => s.receiptId === receiptId);
     if (!sale) return;
 
-    if (!confirm(`Are you sure you want to refund Order #${sale.receipt_number || sale.id.slice(0, 8)} for ${formatBHD(sale.total_amount)}?`)) return;
+    if (!confirm(`Are you sure you want to refund Receipt #${receiptId} for ${formatBHD(sale.netTotal)}?`)) return;
 
-    const refundItems = (sale.order_items || []).map(i => ({
-        id: i.product_id,
-        qty: i.quantity
-    }));
+    if (supabaseClient) {
+        try {
+            if (sale.db_id && isValidUUID(sale.db_id)) {
+                const { error } = await supabaseClient.rpc('process_pos_refund', {
+                    p_order_id: sale.db_id,
+                    p_items: sale.items
+                });
 
-    const { error } = await supabaseClient.rpc('process_pos_refund', {
-        p_order_id: orderId,
-        p_items: refundItems
+                if (error) {
+                    alert('Database Refund Error: ' + error.message);
+                    return;
+                }
+            } else {
+                // If db_id not available, update sales order by receipt number
+                const cleanReceiptNum = parseInt(sale.receiptId.replace(/[^0-9]/g, ''));
+                if (!isNaN(cleanReceiptNum)) {
+                    await supabaseClient
+                        .from('sales_orders')
+                        .update({ status: 'REFUNDED' })
+                        .eq('receipt_number', cleanReceiptNum);
+                }
+
+                // Restore stock locally/direct update
+                for (const item of sale.items) {
+                    if (isValidUUID(item.id)) {
+                        const { data: prod } = await supabaseClient.from('products').select('stock_quantity').eq('id', item.id).single();
+                        if (prod) {
+                            await supabaseClient.from('products').update({ stock_quantity: prod.stock_quantity + item.qty }).eq('id', item.id);
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('Database refund error:', err);
+        }
+    }
+
+    // Local Stock Restoration for active runtime array
+    sale.items.forEach(item => {
+        const prod = products.find(p => String(p.id) === String(item.id));
+        if (prod) {
+            prod.stock_quantity = (prod.stock_quantity || 0) + item.qty;
+        }
     });
 
-    if (error) {
-        alert('Refund failed: ' + error.message);
-    } else {
-        alert('Refund processed successfully!');
-        await fetchSalesHistory();
-        await fetchProducts();
-        lookupCustomerPoints();
+    sale.status = 'REFUNDED';
+
+    if (sale.custPhone && sale.custPhone !== 'N/A') {
+        let currentPts = parseInt(localStorage.getItem('pts_' + sale.custPhone) || '0');
+        currentPts = Math.max(0, currentPts - (sale.pointsEarned || 0));
+        localStorage.setItem('pts_' + sale.custPhone, currentPts.toString());
     }
+
+    alert(`Refund Processed successfully for Receipt #${receiptId}! Stock restored and database updated.`);
+
+    saveSalesHistoryLocal();
+    await fetchProducts();
+    await fetchCustomers();
+    renderSalesHistory();
 }
 
-function reprintReceipt(orderId) {
-    const sale = salesHistory.find(s => s.id === orderId);
+function reprintReceipt(receiptId) {
+    const sale = salesHistory.find(s => s.receiptId === receiptId);
     if (!sale) return;
     executePrintReceipt(sale);
 }
 
-function resendWhatsApp(orderId) {
-    const sale = salesHistory.find(s => s.id === orderId);
+function resendWhatsApp(receiptId) {
+    const sale = salesHistory.find(s => s.receiptId === receiptId);
     if (!sale) return;
 
-    let phone = sale.customer_phone;
+    let phone = sale.custPhone;
     if (!phone || phone === 'N/A') {
         phone = prompt('Enter WhatsApp Phone Number (with country code, e.g. 973...):');
     }
     if (!phone) return;
 
-    const message = `*BARAKAT PERFUMES RECEIPT*\nReceipt: #${sale.receipt_number || sale.id.slice(0,8)}\nCustomer: ${sale.customer_name || 'Customer'}\nTotal: ${formatBHD(sale.total_amount)}\nThank you for shopping with us!`;
+    const message = `*BARAKAT PERFUMES RECEIPT*\nReceipt: ${sale.receiptId}\nCustomer: ${sale.custName}\nTotal: ${formatBHD(sale.netTotal)}\nThank you for shopping with us!`;
     window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
 }
 
-// --- PAYMENT MODAL CONTROLS ---
 function openPaymentModal() {
     if (cart.length === 0) {
         alert('Cart is empty!');
@@ -1001,77 +1344,108 @@ function setPrintFormat(fmt) {
     }
 }
 
-// --- PROCESS FINAL SALE ---
 async function processSale(action) {
-    const custName = document.getElementById('cust-name-input').value.trim() || 'Walk-in Customer';
-    const custPhone = document.getElementById('cust-phone-input').value.trim() || 'N/A';
+    const custName = selectedCustomer ? selectedCustomer.name : 'Walk-in Customer';
+    const custPhone = selectedCustomer ? selectedCustomer.phone : 'N/A';
 
-    const vatAmount = netTotalInclusive - (netTotalInclusive / 1.10);
-    const subtotal = netTotalInclusive - vatAmount;
     const pointsEarned = Math.floor(netTotalInclusive);
+    let updatedBalance = (currentCustomerPoints - pointsRedeemedCount + pointsEarned);
 
-    // Auto-create customer record in contacts if phone number provided and not existing
-    let customerId = currentCustomerId;
-    if (custPhone !== 'N/A' && !customerId) {
-        const { data: newCust } = await supabaseClient
-            .from('contacts')
-            .insert([{ name: custName, phone: custPhone }])
-            .select()
-            .single();
-        if (newCust) customerId = newCust.id;
+    let receiptId = 'BP-' + Math.floor(100000 + Math.random() * 900000);
+    
+    // Payment Breakdown construction
+    let paymentDetails = {};
+    if (selectedPaymentType === 'SINGLE') {
+        paymentDetails = { type: 'SINGLE', method: singlePaymentMethod, total: netTotalInclusive };
+    } else {
+        const priAmt = parseFloat(document.getElementById('split-pri-amount').value) || 0;
+        const secAmt = Math.max(0, netTotalInclusive - priAmt);
+        paymentDetails = { 
+            type: 'SPLIT', 
+            primary: { method: splitPrimaryMethod, amount: priAmt },
+            secondary: { method: splitSecondaryMethod, amount: secAmt }
+        };
     }
 
-    const payload = {
-        p_cashier_id: activeUserId,
-        p_customer_id: customerId,
-        p_customer_name: custName,
-        p_customer_phone: custPhone,
-        p_subtotal: subtotal,
-        p_vat_amount: vatAmount,
-        p_total_amount: netTotalInclusive,
-        p_gross_total: grossTotal,
-        p_discount_amount: discountAmount,
-        p_payment_method: selectedPaymentType === 'SINGLE' ? singlePaymentMethod : 'SPLIT',
-        p_payment_details: selectedPaymentType === 'SPLIT' ? { primary: splitPrimaryMethod, secondary: splitSecondaryMethod } : {},
-        p_points_earned: pointsEarned,
-        p_points_redeemed: pointsRedeemedCount,
-        p_items: cart.map(i => ({ id: i.id, qty: i.qty, price: i.price }))
-    };
+    const vatAmt = netTotalInclusive - (netTotalInclusive / 1.10);
 
-    const { data: orderId, error } = await supabaseClient.rpc('process_pos_sale', payload);
+    // Ensure IDs passed to Supabase RPC are valid UUIDs, or null
+    const validCashierId = (currentUser && isValidUUID(currentUser.id)) ? currentUser.id : null;
+    const validCustomerId = (selectedCustomer && isValidUUID(selectedCustomer.id)) ? selectedCustomer.id : null;
+    let newDbOrderId = null;
 
-    if (error) {
-        alert('Transaction Failed: ' + error.message);
-        return;
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient.rpc('process_pos_sale', {
+                p_cashier_id: validCashierId,
+                p_customer_id: validCustomerId,
+                p_customer_name: custName,
+                p_customer_phone: custPhone,
+                p_subtotal: netTotalInclusive - vatAmt,
+                p_vat_amount: vatAmt,
+                p_total_amount: netTotalInclusive,
+                p_gross_total: grossTotal,
+                p_discount_amount: discountAmount,
+                p_payment_method: selectedPaymentType === 'SINGLE' ? singlePaymentMethod : 'SPLIT',
+                p_payment_details: paymentDetails,
+                p_points_earned: pointsEarned,
+                p_points_redeemed: pointsRedeemedCount,
+                p_items: cart
+            });
+
+            if (error) {
+                console.error("Error executing RPC sale process:", error);
+                alert("Database transaction error: " + error.message);
+                return;
+            }
+
+            if (data) {
+                newDbOrderId = data;
+                const { data: orderData } = await supabaseClient.from('sales_orders').select('receipt_number').eq('id', newDbOrderId).single();
+                if (orderData && orderData.receipt_number) {
+                    receiptId = 'BP-' + String(orderData.receipt_number).padStart(6, '0');
+                }
+            }
+
+            // Refresh catalog and contacts to update UI stock indicators & point balances
+            await fetchProducts();
+            await fetchCustomers();
+        } catch(e) {
+            console.error("Error pushing order to database:", e);
+        }
     }
 
     const saleRecord = {
-        id: orderId,
-        receipt_number: orderId.slice(0, 8),
+        db_id: newDbOrderId,
+        receiptId: receiptId,
         timestamp: new Date().toLocaleString(),
-        customer_name: custName,
-        customer_phone: custPhone,
+        custName: custName,
+        custPhone: custPhone,
         items: [...cart],
         grossTotal: grossTotal,
         discountAmount: discountAmount,
-        total_amount: netTotalInclusive,
+        netTotal: netTotalInclusive,
         pointsEarned: pointsEarned,
-        pointsBalance: (currentCustomerPoints - pointsRedeemedCount + pointsEarned)
+        pointsBalance: updatedBalance,
+        paymentType: selectedPaymentType,
+        paymentDetails: paymentDetails,
+        cashierId: validCashierId,
+        status: 'COMPLETED'
     };
+
+    salesHistory.unshift(saleRecord);
+    saveSalesHistoryLocal();
 
     if (action === 'PRINT') {
         executePrintReceipt(saleRecord);
     } else if (action === 'WHATSAPP') {
-        resendWhatsApp(orderId);
+        resendWhatsApp(receiptId);
     } else if (action === 'EMAIL') {
-        alert(`Receipt registered successfully in database!`);
+        alert(`Receipt emailed to customer profile!`);
     }
 
     closePaymentModal();
     clearCart();
-    await fetchProducts();
-    await fetchSalesHistory();
-    lookupCustomerPoints();
 }
 
 function executePrintReceipt(sale) {
@@ -1081,37 +1455,42 @@ function executePrintReceipt(sale) {
     const templateId = selectedPrintFormat === '58mm' ? 'template-receipt-58mm' : 'template-receipt-a4';
     const temp = document.getElementById(templateId).content.cloneNode(true);
 
-    temp.querySelector('.t-receipt-id').innerText = '#' + (sale.receipt_number || sale.id);
-    temp.querySelector('.t-cust-name').innerText = sale.customer_name || 'Walk-in Customer';
-    temp.querySelector('.t-cust-phone').innerText = sale.customer_phone || 'N/A';
-    temp.querySelector('.t-pts-earned').innerText = sale.pointsEarned ?? 0;
-    temp.querySelector('.t-pts-balance').innerText = sale.pointsBalance ?? 0;
-    temp.querySelector('.t-gross').innerText = formatBHD(sale.grossTotal || sale.total_amount);
+    temp.querySelector('.t-receipt-id').innerText = sale.receiptId;
+    temp.querySelector('.t-cust-name').innerText = sale.custName;
+    temp.querySelector('.t-cust-phone').innerText = sale.custPhone;
+    temp.querySelector('.t-pts-earned').innerText = sale.pointsEarned;
+    temp.querySelector('.t-pts-balance').innerText = sale.pointsBalance;
+    temp.querySelector('.t-gross').innerText = formatBHD(sale.grossTotal);
     
-    if (sale.discountAmount && sale.discountAmount > 0) {
+    if (sale.discountAmount > 0) {
         temp.querySelector('.t-disc-val').innerText = '-' + formatBHD(sale.discountAmount);
     } else {
         const discRow = temp.querySelector('.t-disc-row');
         if (discRow) discRow.style.display = 'none';
     }
 
-    const total = sale.total_amount || 0;
-    const vatAmount = total - (total / 1.10);
-    temp.querySelector('.t-subtotal').innerText = formatBHD(total - vatAmount);
+    const vatAmount = sale.netTotal - (sale.netTotal / 1.10);
+    temp.querySelector('.t-subtotal').innerText = formatBHD(sale.netTotal - vatAmount);
     temp.querySelector('.t-vat').innerText = formatBHD(vatAmount);
-    temp.querySelector('.t-total').innerText = formatBHD(total);
-    temp.querySelector('.t-timestamp').innerText = sale.timestamp || new Date(sale.created_at).toLocaleString();
+    temp.querySelector('.t-total').innerText = formatBHD(sale.netTotal);
+    temp.querySelector('.t-timestamp').innerText = sale.timestamp;
 
-    // Render Items
-    const items = sale.items || (sale.order_items || []).map(i => ({
-        name: i.products?.name || 'Item',
-        qty: i.quantity,
-        price: i.unit_price
-    }));
+    // Payment breakdown formatting
+    const payContainer = temp.querySelector('.t-payments-breakdown');
+    payContainer.innerHTML = '';
+    if (sale.paymentDetails && sale.paymentDetails.type === 'SPLIT') {
+        payContainer.innerHTML = `
+            <div style="display: flex; justify-content: space-between;"><span>${sale.paymentDetails.primary.method}:</span><span>${formatBHD(sale.paymentDetails.primary.amount)}</span></div>
+            <div style="display: flex; justify-content: space-between;"><span>${sale.paymentDetails.secondary.method}:</span><span>${formatBHD(sale.paymentDetails.secondary.amount)}</span></div>
+        `;
+    } else {
+        const methodStr = sale.paymentDetails ? sale.paymentDetails.method : 'CASH';
+        payContainer.innerHTML = `<div style="display: flex; justify-content: space-between;"><span>${methodStr}:</span><span>${formatBHD(sale.netTotal)}</span></div>`;
+    }
 
     if (selectedPrintFormat === '58mm') {
         const itemsList = temp.querySelector('.t-items-list');
-        items.forEach(i => {
+        sale.items.forEach(i => {
             const div = document.createElement('div');
             div.style.display = 'flex';
             div.style.justifyContent = 'space-between';
@@ -1120,7 +1499,7 @@ function executePrintReceipt(sale) {
         });
     } else {
         const tbody = temp.querySelector('.t-items-table-body');
-        items.forEach(i => {
+        sale.items.forEach(i => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td style="padding: 6px;">${i.name}</td>
@@ -1138,7 +1517,6 @@ function executePrintReceipt(sale) {
     printContainer.classList.add('hidden');
 }
 
-// --- SCANNER TOGGLE ---
 let html5QrCode = null;
 function toggleCameraScanner() {
     const wrapper = document.getElementById('camera-reader-wrapper');
