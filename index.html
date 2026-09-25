@@ -379,7 +379,7 @@
             <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
             <div style="display: flex; flex-direction: column; gap: 2px;">
                 <div style="display: flex; justify-content: space-between;"><span>Gross Total:</span><span class="t-gross"></span></div>
-                <div class="t-disc-row" style="display: flex; justify-between; color: black;"><span>Discount:</span><span class="t-disc-val"></span></div>
+                <div class="t-disc-row" style="display: flex; justify-content: space-between; color: black;"><span>Discount:</span><span class="t-disc-val"></span></div>
                 <div style="display: flex; justify-content: space-between;"><span>Subtotal (Excl. VAT):</span><span class="t-subtotal"></span></div>
                 <div style="display: flex; justify-content: space-between;"><span>VAT (10% Incl.):</span><span class="t-vat"></span></div>
                 <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 11px; border-top: 1px solid black; padding-top: 2px;"><span>TOTAL BILL:</span><span class="t-total"></span></div>
@@ -452,7 +452,7 @@
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 2px; text-align: right;">
                     <div style="display: flex; justify-content: space-between;"><span>Gross Total:</span><span class="t-gross font-mono"></span></div>
-                    <div class="t-disc-row" style="display: flex; justify-between; color: #dc2626;"><span>Discount:</span><span class="t-disc-val font-mono"></span></div>
+                    <div class="t-disc-row" style="display: flex; justify-content: space-between; color: #dc2626;"><span>Discount:</span><span class="t-disc-val font-mono"></span></div>
                     <div style="display: flex; justify-content: space-between;"><span>Subtotal (Excl. VAT):</span><span class="t-subtotal font-mono"></span></div>
                     <div style="display: flex; justify-content: space-between;"><span>VAT (10% Incl.):</span><span class="t-vat font-mono"></span></div>
                     <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: 12px; border-top: 1px solid #9ca3af; padding-top: 2px; color: #065f46;"><span>Total Bill:</span><span class="t-total font-mono"></span></div>
@@ -489,6 +489,7 @@ let splitPrimaryMethod = 'CASH';
 let splitSecondaryMethod = 'CARD';
 let selectedPrintFormat = '58mm';
 
+// Declared global variables to fix ReferenceErrors across calculation blocks
 let grossTotal = 0;
 let discountAmount = 0;
 let netTotalInclusive = 0;
@@ -802,8 +803,7 @@ function addToCart(product) {
             id: product.id,
             name: product.name,
             price: product.retail_price,
-            qty: 1,
-            quantity: 1
+            qty: 1
         });
     }
     updateCartUI();
@@ -813,7 +813,6 @@ function updateCartQty(id, delta) {
     const item = cart.find(i => String(i.id) === String(id));
     if (!item) return;
     item.qty += delta;
-    item.quantity = item.qty;
     if (item.qty <= 0) {
         cart = cart.filter(i => String(i.id) !== String(id));
     }
@@ -1090,14 +1089,13 @@ async function loadSalesHistoryLocal() {
             if (!error && data) {
                 salesHistory = data.map(order => ({
                     db_id: order.id,
-                    receiptId: 'BP-' + String(order.receipt_number).padStart(6, '0'),
+                    receiptId: 'BP-' + String(order.receipt_number || 0).padStart(6, '0'),
                     timestamp: new Date(order.created_at).toLocaleString(),
                     custName: order.customer_name || 'Walk-in Customer',
                     custPhone: order.customer_phone || 'N/A',
                     items: (order.order_items || []).map(item => ({
                         id: item.product_id,
                         qty: item.quantity,
-                        quantity: item.quantity,
                         price: item.unit_price,
                         name: item.products ? item.products.name : 'Unknown Product'
                     })),
@@ -1160,7 +1158,7 @@ function renderSalesHistory() {
                     ${statusBadge}
                 </div>
                 <p class="text-gray-600 font-medium mt-0.5">${s.custName} (${s.custPhone}) - ${s.timestamp}</p>
-                <p class="text-gray-400 text-[10px]">${s.items.map(i => `${i.qty \vert{}\vert{} i.quantity}x${i.name}`).join(', ')}</p>
+                <p class="text-gray-400 text-[10px]">${s.items.map(i => `${i.qty}x${i.name}`).join(', ')}</p>
             </div>
             <div class="flex items-center space-x-2">
                 <span class="font-bold text-gray-900 mr-2 text-sm">${formatBHD(s.netTotal)}</span>
@@ -1200,11 +1198,12 @@ async function processRefund(receiptId) {
                         .eq('receipt_number', cleanReceiptNum);
                 }
 
+                // Corrected stock quantity check property
                 for (const item of sale.items) {
                     if (isValidUUID(item.id)) {
                         const { data: prod } = await supabaseClient.from('products').select('stock_quantity').eq('id', item.id).single();
-                        if (prod) {
-                            await supabaseClient.from('products').update({ stock_quantity: prod.stock_quantity + (item.qty || item.quantity) }).eq('id', item.id);
+                        if (prod && prod.stock_quantity !== undefined) {
+                            await supabaseClient.from('products').update({ stock_quantity: prod.stock_quantity + item.qty }).eq('id', item.id);
                         }
                     }
                 }
@@ -1217,7 +1216,7 @@ async function processRefund(receiptId) {
     sale.items.forEach(item => {
         const prod = products.find(p => String(p.id) === String(item.id));
         if (prod) {
-            prod.stock_quantity = (prod.stock_quantity || 0) + (item.qty || item.quantity);
+            prod.stock_quantity = (prod.stock_quantity || 0) + item.qty;
         }
     });
 
@@ -1327,7 +1326,7 @@ function setSplitSecondaryMethod(method) {
     document.querySelectorAll('.split-sec-btn').forEach(b => b.className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center');
     if (method === 'CASH') document.getElementById('btn-split-sec-cash').className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center';
     if (method === 'CARD') document.getElementById('btn-split-sec-card').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
-    if (method === 'BENEFIT_PAY') document.getElementById('btn-split-sec-benefit').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+    if (method === 'BENEFIT_PAY') document.getElementById('btn-split-sec-benefit').className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center';
 }
 
 function calculateSplitBalance() {
@@ -1412,15 +1411,6 @@ async function processSale(action) {
         } catch(e) {
             console.error("Error pushing order to database:", e);
         }
-    } else {
-        -- Local stock fallback deduction if offline
-        cart.forEach(item => {
-            const prod = products.find(p => String(p.id) === String(item.id));
-            if (prod) {
-                prod.stock_quantity = Math.max(0, (prod.stock_quantity || 0) - (item.qty || item.quantity));
-            }
-        });
-        renderProducts();
     }
 
     const saleRecord = {
@@ -1501,20 +1491,18 @@ function executePrintReceipt(sale) {
             const div = document.createElement('div');
             div.style.display = 'flex';
             div.style.justifyContent = 'space-between';
-            const q = i.qty || i.quantity || 1;
-            div.innerHTML = `<span>${q}x ${i.name}</span><span>${formatBHD(i.price * q)}</span>`;
+            div.innerHTML = `<span>${i.qty}x ${i.name}</span><span>${formatBHD(i.price * i.qty)}</span>`;
             itemsList.appendChild(div);
         });
     } else {
         const tbody = temp.querySelector('.t-items-table-body');
         sale.items.forEach(i => {
             const tr = document.createElement('tr');
-            const q = i.qty || i.quantity || 1;
             tr.innerHTML = `
                 <td style="padding: 6px;">${i.name}</td>
-                <td style="padding: 6px; text-align: center;">${q}</td>
+                <td style="padding: 6px; text-align: center;">${i.qty}</td>
                 <td style="padding: 6px; text-align: right;">${formatBHD(i.price)}</td>
-                <td style="padding: 6px; text-align: right;">${formatBHD(i.price * q)}</td>
+                <td style="padding: 6px; text-align: right;">${formatBHD(i.price * i.qty)}</td>
             `;
             tbody.appendChild(tr);
         });
