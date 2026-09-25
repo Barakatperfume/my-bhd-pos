@@ -483,16 +483,14 @@ let customers = [];
 let selectedCustomer = null; 
 let cart = [];
 let discountType = 'FIXED';
+let discountAmount = 0;
+let grossTotal = 0;
+let netTotalInclusive = 0;
 let selectedPaymentType = 'SINGLE';
 let singlePaymentMethod = 'CASH';
 let splitPrimaryMethod = 'CASH';
 let splitSecondaryMethod = 'CARD';
 let selectedPrintFormat = '58mm';
-
-// Declared global variables to fix ReferenceErrors across calculation blocks
-let grossTotal = 0;
-let discountAmount = 0;
-let netTotalInclusive = 0;
 
 let currentCustomerPoints = 0;
 let pointsRedeemedCount = 0;
@@ -575,6 +573,7 @@ async function fetchProducts() {
     }
 
     try {
+        -- Enforce ORDER BY name ascending directly from Supabase
         const { data, error } = await supabaseClient.from('products').select('*').order('name', { ascending: true });
         if (error || !data || data.length === 0) {
             console.warn('Fallback triggered or Supabase query error:', error);
@@ -750,6 +749,7 @@ function renderProducts(list = products) {
     const grid = document.getElementById('product-grid');
     grid.innerHTML = '';
 
+    // Enforce sorting prior to rendering grid UI
     const sortedList = sortProductsAlphabetically(list);
 
     if (!sortedList || sortedList.length === 0) {
@@ -1089,7 +1089,7 @@ async function loadSalesHistoryLocal() {
             if (!error && data) {
                 salesHistory = data.map(order => ({
                     db_id: order.id,
-                    receiptId: 'BP-' + String(order.receipt_number || 0).padStart(6, '0'),
+                    receiptId: 'BP-' + String(order.receipt_number).padStart(6, '0'),
                     timestamp: new Date(order.created_at).toLocaleString(),
                     custName: order.customer_name || 'Walk-in Customer',
                     custPhone: order.customer_phone || 'N/A',
@@ -1190,6 +1190,7 @@ async function processRefund(receiptId) {
                     return;
                 }
             } else {
+                // If db_id not available, update sales order by receipt number
                 const cleanReceiptNum = parseInt(sale.receiptId.replace(/[^0-9]/g, ''));
                 if (!isNaN(cleanReceiptNum)) {
                     await supabaseClient
@@ -1198,11 +1199,11 @@ async function processRefund(receiptId) {
                         .eq('receipt_number', cleanReceiptNum);
                 }
 
-                // Corrected stock quantity check property
+                -- Restore stock locally/direct update
                 for (const item of sale.items) {
                     if (isValidUUID(item.id)) {
                         const { data: prod } = await supabaseClient.from('products').select('stock_quantity').eq('id', item.id).single();
-                        if (prod && prod.stock_quantity !== undefined) {
+                        if (prod) {
                             await supabaseClient.from('products').update({ stock_quantity: prod.stock_quantity + item.qty }).eq('id', item.id);
                         }
                     }
@@ -1213,6 +1214,7 @@ async function processRefund(receiptId) {
         }
     }
 
+    // Local Stock Restoration for active runtime array
     sale.items.forEach(item => {
         const prod = products.find(p => String(p.id) === String(item.id));
         if (prod) {
@@ -1326,7 +1328,7 @@ function setSplitSecondaryMethod(method) {
     document.querySelectorAll('.split-sec-btn').forEach(b => b.className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center');
     if (method === 'CASH') document.getElementById('btn-split-sec-cash').className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center';
     if (method === 'CARD') document.getElementById('btn-split-sec-card').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
-    if (method === 'BENEFIT_PAY') document.getElementById('btn-split-sec-benefit').className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center';
+    if (method === 'BENEFIT_PAY') document.getElementById('btn-split-sec-benefit').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
 }
 
 function calculateSplitBalance() {
@@ -1354,6 +1356,7 @@ async function processSale(action) {
 
     let receiptId = 'BP-' + Math.floor(100000 + Math.random() * 900000);
     
+    // Payment Breakdown construction
     let paymentDetails = {};
     if (selectedPaymentType === 'SINGLE') {
         paymentDetails = { type: 'SINGLE', method: singlePaymentMethod, total: netTotalInclusive };
@@ -1369,6 +1372,7 @@ async function processSale(action) {
 
     const vatAmt = netTotalInclusive - (netTotalInclusive / 1.10);
 
+    // Ensure IDs passed to Supabase RPC are valid UUIDs, or null
     const validCashierId = (currentUser && isValidUUID(currentUser.id)) ? currentUser.id : null;
     const validCustomerId = (selectedCustomer && isValidUUID(selectedCustomer.id)) ? selectedCustomer.id : null;
     let newDbOrderId = null;
@@ -1406,6 +1410,7 @@ async function processSale(action) {
                 }
             }
 
+            // Refresh catalog and contacts to update UI stock indicators & point balances
             await fetchProducts();
             await fetchCustomers();
         } catch(e) {
@@ -1473,6 +1478,7 @@ function executePrintReceipt(sale) {
     temp.querySelector('.t-total').innerText = formatBHD(sale.netTotal);
     temp.querySelector('.t-timestamp').innerText = sale.timestamp;
 
+    // Payment breakdown formatting
     const payContainer = temp.querySelector('.t-payments-breakdown');
     payContainer.innerHTML = '';
     if (sale.paymentDetails && sale.paymentDetails.type === 'SPLIT') {
