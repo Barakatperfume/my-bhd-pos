@@ -440,9 +440,11 @@ let splitPrimaryMethod = 'CASH'; // CASH, CARD, BENEFIT_PAY
 let splitSecondaryMethod = 'CARD'; // CASH, CARD, BENEFIT_PAY
 let selectedPrintFormat = '58mm'; // 58mm or A4
 
+let currentCustomerId = null;
 let currentCustomerPoints = 0;
 let pointsRedeemedCount = 0;
 let userRole = 'CASHIER'; // CASHIER, MANAGER, OWNER
+let activeUserId = null;
 
 let grossTotal = 0;
 let discountAmount = 0;
@@ -456,12 +458,12 @@ const formatBHD = (amount) => {
 // --- INITIAL LOAD ---
 window.onload = () => {
     fetchProducts();
-    loadSalesHistoryLocal();
+    fetchSalesHistory();
 };
 
 function switchUser() {
     const pin = prompt('Enter User Switch PIN:');
-    if (pin === '9999') {
+    if (pin === '1234' || pin === '9999') {
         userRole = 'OWNER';
         document.getElementById('role-badge').innerText = 'Owner';
         document.getElementById('user-name').innerText = 'Manager/Owner';
@@ -481,12 +483,7 @@ async function fetchProducts() {
 
     if (error) {
         console.error('Error fetching products:', error);
-        // Fallback demo dataset if table doesn't exist yet
-        products = [
-            { id: 1, name: 'RIIFFS Freeze EDP 100ml', retail_price: 18.500, cost_price: 9.000, stock_quantity: 12, barcode: '10001' },
-            { id: 2, name: 'Lattafa Maahir Honor 100ml', retail_price: 14.000, cost_price: 6.500, stock_quantity: 8, barcode: '10002' },
-            { id: 3, name: 'Aromatix Frost Bite 100ml', retail_price: 22.000, cost_price: 11.200, stock_quantity: 3, barcode: '10003' }
-        ];
+        products = [];
     } else {
         products = data || [];
     }
@@ -494,16 +491,29 @@ async function fetchProducts() {
 }
 
 // --- LOYALTY POINTS ENGINE ---
-function lookupCustomerPoints() {
+async function lookupCustomerPoints() {
     const phone = document.getElementById('cust-phone-input').value.trim();
     if (!phone) {
+        currentCustomerId = null;
         currentCustomerPoints = 0;
         updateLoyaltyUI();
         return;
     }
-    // Saved customer points lookup simulation
-    const savedPts = localStorage.getItem('pts_' + phone);
-    currentCustomerPoints = savedPts ? parseInt(savedPts) : (phone.length * 25) % 350;
+
+    const { data } = await supabaseClient
+        .from('contacts')
+        .select('*')
+        .eq('phone', phone)
+        .maybeSingle();
+
+    if (data) {
+        currentCustomerId = data.id;
+        currentCustomerPoints = data.loyalty_points || 0;
+        document.getElementById('cust-name-input').value = data.name || '';
+    } else {
+        currentCustomerId = null;
+        currentCustomerPoints = 0;
+    }
     updateLoyaltyUI();
 }
 
@@ -538,7 +548,7 @@ function redeemLoyaltyPoints() {
     document.getElementById('discount-val').value = discountBHD.toFixed(3);
     
     updateCartUI();
-    alert(`Applied ${formatBHD(discountBHD)} loyalty discount! ${pointsRedeemedCount} points will be deducted.`);
+    alert(`Applied ${formatBHD(discountBHD)} loyalty discount! ${pointsRedeemedCount} points will be deducted on sale completion.`);
 }
 
 // --- RENDER PRODUCTS GRID ---
@@ -554,7 +564,7 @@ function renderProducts(list = products) {
     list.forEach(p => {
         let stock = p.stock_quantity ?? 0;
         let price = p.retail_price ?? 0;
-        let lowThreshold = p.low_stock_threshold ?? 5;
+        let lowThreshold = p.low_stock_threshold ?? 2;
         
         let badgeColor = stock > lowThreshold ? 'bg-emerald-100 text-emerald-800' : stock > 0 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800';
         
@@ -583,7 +593,8 @@ function filterProducts() {
     const term = document.getElementById('search-input').value.toLowerCase().trim();
     const filtered = products.filter(p => 
         (p.name && p.name.toLowerCase().includes(term)) || 
-        (p.barcode && p.barcode.toLowerCase().includes(term))
+        (p.barcode && p.barcode.toLowerCase().includes(term)) ||
+        (p.sku && p.sku.toLowerCase().includes(term))
     );
     renderProducts(filtered);
 }
@@ -597,7 +608,7 @@ function addToCart(product) {
         cart.push({
             id: product.id,
             name: product.name,
-            price: product.retail_price,
+            price: parseFloat(product.retail_price),
             qty: 1
         });
     }
@@ -658,9 +669,9 @@ function updateCartUI() {
                 </div>
                 <div class="flex items-center space-x-2">
                     <div class="flex items-center border rounded">
-                        <button onclick="updateCartQty(${item.id}, -1)" class="px-1.5 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-700">-</button>
+                        <button onclick="updateCartQty('${item.id}', -1)" class="px-1.5 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-700">-</button>
                         <span class="px-2 font-bold">${item.qty}</span>
-                        <button onclick="updateCartQty(${item.id}, 1)" class="px-1.5 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-700">+</button>
+                        <button onclick="updateCartQty('${item.id}', 1)" class="px-1.5 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-700">+</button>
                     </div>
                     <span class="font-bold text-gray-800 w-16 text-right">${formatBHD(itemTotal)}</span>
                 </div>
@@ -749,46 +760,61 @@ function renderItemManagerList() {
                     <label class="text-[9px] uppercase font-bold text-gray-500 block">Stock Qty</label>
                     <input type="number" id="edit-stock-${p.id}" value="${p.stock_quantity ?? 0}" class="w-16 border border-gray-300 rounded px-2 py-1 font-bold text-center outline-none focus:ring-1 focus:ring-emerald-500">
                 </div>
-                <button onclick="saveItemChanges(${p.id})" class="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1 rounded">Save</button>
+                <button onclick="saveItemChanges('${p.id}')" class="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1 rounded">Save</button>
             </div>
         `;
         listContainer.appendChild(row);
     });
 }
 
-function saveItemChanges(id) {
+async function saveItemChanges(id) {
     const newPrice = parseFloat(document.getElementById(`edit-price-${id}`).value);
     const newStock = parseInt(document.getElementById(`edit-stock-${id}`).value);
 
-    const item = products.find(p => p.id === id);
-    if (item) {
-        item.retail_price = newPrice;
-        item.stock_quantity = newStock;
-        renderProducts();
+    const { error } = await supabaseClient
+        .from('products')
+        .update({ retail_price: newPrice, stock_quantity: newStock })
+        .eq('id', id);
+
+    if (error) {
+        alert('Failed to update product: ' + error.message);
+    } else {
+        await fetchProducts();
         renderItemManagerList();
-        alert(`Updated ${item.name} successfully!`);
+        alert('Product updated successfully!');
     }
 }
 
 // --- PREVIOUS SALES HISTORY & REFUNDS ENGINE ---
 function openSalesHistoryModal() {
     document.getElementById('sales-history-modal').classList.remove('hidden');
-    renderSalesHistory();
+    fetchSalesHistory();
 }
 
 function closeSalesHistoryModal() {
     document.getElementById('sales-history-modal').classList.add('hidden');
 }
 
-function loadSalesHistoryLocal() {
-    const saved = localStorage.getItem('pos_sales_history');
-    if (saved) {
-        try { salesHistory = JSON.parse(saved); } catch(e) { salesHistory = []; }
-    }
-}
+async function fetchSalesHistory() {
+    const { data, error } = await supabaseClient
+        .from('sales_orders')
+        .select(`
+            *,
+            order_items (
+                id, product_id, unit_price, quantity, total_price,
+                products ( name )
+            )
+        `)
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-function saveSalesHistoryLocal() {
-    localStorage.setItem('pos_sales_history', JSON.stringify(salesHistory));
+    if (error) {
+        console.error('Error fetching sales history:', error);
+        salesHistory = [];
+    } else {
+        salesHistory = data || [];
+    }
+    renderSalesHistory();
 }
 
 function renderSalesHistory() {
@@ -796,14 +822,15 @@ function renderSalesHistory() {
     const term = document.getElementById('sales-search-input').value.toLowerCase().trim();
     container.innerHTML = '';
 
-    const filtered = salesHistory.filter(s => 
-        s.receiptId.toLowerCase().includes(term) ||
-        s.custName.toLowerCase().includes(term) ||
-        s.custPhone.toLowerCase().includes(term)
-    );
+    const filtered = salesHistory.filter(s => {
+        const receiptStr = String(s.receipt_number || s.id);
+        const nameStr = (s.customer_name || '').toLowerCase();
+        const phoneStr = (s.customer_phone || '').toLowerCase();
+        return receiptStr.includes(term) || nameStr.includes(term) || phoneStr.includes(term);
+    });
 
     if (filtered.length === 0) {
-        container.innerHTML = '<p class="text-center text-gray-400 py-6 text-xs">No previous sales transactions found.</p>';
+        container.innerHTML = '<p class="text-center text-gray-400 py-6 text-xs">No sales transactions found.</p>';
         return;
     }
 
@@ -816,67 +843,71 @@ function renderSalesHistory() {
             ? '<span class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-0.5 rounded">REFUNDED</span>' 
             : '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">COMPLETED</span>';
 
+        const itemNames = (s.order_items || []).map(i => `${i.quantity}x ${i.products?.name || 'Item'}`).join(', ');
+
         row.innerHTML = `
             <div>
                 <div class="flex items-center space-x-2">
-                    <strong class="text-emerald-800">${s.receiptId}</strong>
+                    <strong class="text-emerald-800">#${s.receipt_number || s.id.slice(0, 8)}</strong>
                     ${statusBadge}
                 </div>
-                <p class="text-gray-600 font-medium mt-0.5">${s.custName} (${s.custPhone}) - ${s.timestamp}</p>
-                <p class="text-gray-400 text-[10px]">${s.items.map(i => `${i.qty}x${i.name}`).join(', ')}</p>
+                <p class="text-gray-600 font-medium mt-0.5">${s.customer_name || 'Walk-in'} (${s.customer_phone || 'N/A'}) - ${new Date(s.created_at).toLocaleString()}</p>
+                <p class="text-gray-400 text-[10px]">${itemNames}</p>
             </div>
             <div class="flex items-center space-x-2">
-                <span class="font-bold text-gray-900 mr-2 text-sm">${formatBHD(s.netTotal)}</span>
-                <button onclick="reprintReceipt('${s.receiptId}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded font-bold text-[10px]">Print</button>
-                <button onclick="resendWhatsApp('${s.receiptId}')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-bold text-[10px]">WhatsApp</button>
-                ${!isRefunded ? `<button onclick="processRefund('${s.receiptId}')" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded font-bold text-[10px]">Refund</button>` : ''}
+                <span class="font-bold text-gray-900 mr-2 text-sm">${formatBHD(s.total_amount)}</span>
+                <button onclick="reprintReceipt('${s.id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded font-bold text-[10px]">Print</button>
+                <button onclick="resendWhatsApp('${s.id}')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-bold text-[10px]">WhatsApp</button>
+                ${!isRefunded ? `<button onclick="processRefund('${s.id}')" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded font-bold text-[10px]">Refund</button>` : ''}
             </div>
         `;
         container.appendChild(row);
     });
 }
 
-function processRefund(receiptId) {
-    const sale = salesHistory.find(s => s.receiptId === receiptId);
+async function processRefund(orderId) {
+    const sale = salesHistory.find(s => s.id === orderId);
     if (!sale) return;
 
-    if (!confirm(`Are you sure you want to refund Receipt #${receiptId} for ${formatBHD(sale.netTotal)}?`)) return;
+    if (!confirm(`Are you sure you want to refund Order #${sale.receipt_number || sale.id.slice(0, 8)} for ${formatBHD(sale.total_amount)}?`)) return;
 
-    // Mark Sale as Refunded
-    sale.status = 'REFUNDED';
+    const refundItems = (sale.order_items || []).map(i => ({
+        id: i.product_id,
+        qty: i.quantity
+    }));
 
-    // Deduct loyalty points earned on this receipt from customer's balance
-    if (sale.custPhone && sale.custPhone !== 'N/A' && sale.pointsEarned > 0) {
-        let currentPts = parseInt(localStorage.getItem('pts_' + sale.custPhone) || '0');
-        currentPts = Math.max(0, currentPts - sale.pointsEarned);
-        localStorage.setItem('pts_' + sale.custPhone, currentPts.toString());
-        alert(`Refund Processed! Deducted ${sale.pointsEarned} loyalty points from customer ${sale.custPhone}. New Balance: ${currentPts} Pts.`);
+    const { error } = await supabaseClient.rpc('process_pos_refund', {
+        p_order_id: orderId,
+        p_items: refundItems
+    });
+
+    if (error) {
+        alert('Refund failed: ' + error.message);
     } else {
-        alert(`Refund Processed successfully for Receipt #${receiptId}!`);
+        alert('Refund processed successfully!');
+        await fetchSalesHistory();
+        await fetchProducts();
+        lookupCustomerPoints();
     }
-
-    saveSalesHistoryLocal();
-    renderSalesHistory();
-    lookupCustomerPoints();
 }
 
-function reprintReceipt(receiptId) {
-    const sale = salesHistory.find(s => s.receiptId === receiptId);
+function reprintReceipt(orderId) {
+    const sale = salesHistory.find(s => s.id === orderId);
     if (!sale) return;
     executePrintReceipt(sale);
 }
 
-function resendWhatsApp(receiptId) {
-    const sale = salesHistory.find(s => s.receiptId === receiptId);
+function resendWhatsApp(orderId) {
+    const sale = salesHistory.find(s => s.id === orderId);
     if (!sale) return;
 
-    let phone = sale.custPhone;
+    let phone = sale.customer_phone;
     if (!phone || phone === 'N/A') {
         phone = prompt('Enter WhatsApp Phone Number (with country code, e.g. 973...):');
     }
     if (!phone) return;
 
-    const message = `*BARAKAT PERFUMES RECEIPT*\nReceipt: ${sale.receiptId}\nCustomer: ${sale.custName}\nTotal: ${formatBHD(sale.netTotal)}\nThank you for shopping with us!`;
+    const message = `*BARAKAT PERFUMES RECEIPT*\nReceipt: #${sale.receipt_number || sale.id.slice(0,8)}\nCustomer: ${sale.customer_name || 'Customer'}\nTotal: ${formatBHD(sale.total_amount)}\nThank you for shopping with us!`;
     window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
 }
 
@@ -971,48 +1002,75 @@ function setPrintFormat(fmt) {
 }
 
 // --- PROCESS FINAL SALE ---
-function processSale(action) {
+async function processSale(action) {
     const custName = document.getElementById('cust-name-input').value.trim() || 'Walk-in Customer';
     const custPhone = document.getElementById('cust-phone-input').value.trim() || 'N/A';
 
-    // Calculate Loyalty Earned (1 point per 1 BHD spent)
+    const vatAmount = netTotalInclusive - (netTotalInclusive / 1.10);
+    const subtotal = netTotalInclusive - vatAmount;
     const pointsEarned = Math.floor(netTotalInclusive);
-    
-    // Update Customer's Saved Points
-    if (custPhone !== 'N/A') {
-        let updatedBalance = currentCustomerPoints - pointsRedeemedCount + pointsEarned;
-        localStorage.setItem('pts_' + custPhone, updatedBalance.toString());
+
+    // Auto-create customer record in contacts if phone number provided and not existing
+    let customerId = currentCustomerId;
+    if (custPhone !== 'N/A' && !customerId) {
+        const { data: newCust } = await supabaseClient
+            .from('contacts')
+            .insert([{ name: custName, phone: custPhone }])
+            .select()
+            .single();
+        if (newCust) customerId = newCust.id;
     }
 
-    const receiptId = 'BP-' + Math.floor(100000 + Math.random() * 900000);
+    const payload = {
+        p_cashier_id: activeUserId,
+        p_customer_id: customerId,
+        p_customer_name: custName,
+        p_customer_phone: custPhone,
+        p_subtotal: subtotal,
+        p_vat_amount: vatAmount,
+        p_total_amount: netTotalInclusive,
+        p_gross_total: grossTotal,
+        p_discount_amount: discountAmount,
+        p_payment_method: selectedPaymentType === 'SINGLE' ? singlePaymentMethod : 'SPLIT',
+        p_payment_details: selectedPaymentType === 'SPLIT' ? { primary: splitPrimaryMethod, secondary: splitSecondaryMethod } : {},
+        p_points_earned: pointsEarned,
+        p_points_redeemed: pointsRedeemedCount,
+        p_items: cart.map(i => ({ id: i.id, qty: i.qty, price: i.price }))
+    };
+
+    const { data: orderId, error } = await supabaseClient.rpc('process_pos_sale', payload);
+
+    if (error) {
+        alert('Transaction Failed: ' + error.message);
+        return;
+    }
+
     const saleRecord = {
-        receiptId: receiptId,
+        id: orderId,
+        receipt_number: orderId.slice(0, 8),
         timestamp: new Date().toLocaleString(),
-        custName: custName,
-        custPhone: custPhone,
+        customer_name: custName,
+        customer_phone: custPhone,
         items: [...cart],
         grossTotal: grossTotal,
         discountAmount: discountAmount,
-        netTotal: netTotalInclusive,
+        total_amount: netTotalInclusive,
         pointsEarned: pointsEarned,
-        pointsBalance: (currentCustomerPoints - pointsRedeemedCount + pointsEarned),
-        paymentType: selectedPaymentType,
-        status: 'COMPLETED'
+        pointsBalance: (currentCustomerPoints - pointsRedeemedCount + pointsEarned)
     };
-
-    salesHistory.unshift(saleRecord);
-    saveSalesHistoryLocal();
 
     if (action === 'PRINT') {
         executePrintReceipt(saleRecord);
     } else if (action === 'WHATSAPP') {
-        resendWhatsApp(receiptId);
+        resendWhatsApp(orderId);
     } else if (action === 'EMAIL') {
-        alert(`Receipt emailed to customer profile!`);
+        alert(`Receipt registered successfully in database!`);
     }
 
     closePaymentModal();
     clearCart();
+    await fetchProducts();
+    await fetchSalesHistory();
     lookupCustomerPoints();
 }
 
@@ -1023,30 +1081,37 @@ function executePrintReceipt(sale) {
     const templateId = selectedPrintFormat === '58mm' ? 'template-receipt-58mm' : 'template-receipt-a4';
     const temp = document.getElementById(templateId).content.cloneNode(true);
 
-    temp.querySelector('.t-receipt-id').innerText = sale.receiptId;
-    temp.querySelector('.t-cust-name').innerText = sale.custName;
-    temp.querySelector('.t-cust-phone').innerText = sale.custPhone;
-    temp.querySelector('.t-pts-earned').innerText = sale.pointsEarned;
-    temp.querySelector('.t-pts-balance').innerText = sale.pointsBalance;
-    temp.querySelector('.t-gross').innerText = formatBHD(sale.grossTotal);
+    temp.querySelector('.t-receipt-id').innerText = '#' + (sale.receipt_number || sale.id);
+    temp.querySelector('.t-cust-name').innerText = sale.customer_name || 'Walk-in Customer';
+    temp.querySelector('.t-cust-phone').innerText = sale.customer_phone || 'N/A';
+    temp.querySelector('.t-pts-earned').innerText = sale.pointsEarned ?? 0;
+    temp.querySelector('.t-pts-balance').innerText = sale.pointsBalance ?? 0;
+    temp.querySelector('.t-gross').innerText = formatBHD(sale.grossTotal || sale.total_amount);
     
-    if (sale.discountAmount > 0) {
+    if (sale.discountAmount && sale.discountAmount > 0) {
         temp.querySelector('.t-disc-val').innerText = '-' + formatBHD(sale.discountAmount);
     } else {
         const discRow = temp.querySelector('.t-disc-row');
         if (discRow) discRow.style.display = 'none';
     }
 
-    const vatAmount = sale.netTotal - (sale.netTotal / 1.10);
-    temp.querySelector('.t-subtotal').innerText = formatBHD(sale.netTotal - vatAmount);
+    const total = sale.total_amount || 0;
+    const vatAmount = total - (total / 1.10);
+    temp.querySelector('.t-subtotal').innerText = formatBHD(total - vatAmount);
     temp.querySelector('.t-vat').innerText = formatBHD(vatAmount);
-    temp.querySelector('.t-total').innerText = formatBHD(sale.netTotal);
-    temp.querySelector('.t-timestamp').innerText = sale.timestamp;
+    temp.querySelector('.t-total').innerText = formatBHD(total);
+    temp.querySelector('.t-timestamp').innerText = sale.timestamp || new Date(sale.created_at).toLocaleString();
 
     // Render Items
+    const items = sale.items || (sale.order_items || []).map(i => ({
+        name: i.products?.name || 'Item',
+        qty: i.quantity,
+        price: i.unit_price
+    }));
+
     if (selectedPrintFormat === '58mm') {
         const itemsList = temp.querySelector('.t-items-list');
-        sale.items.forEach(i => {
+        items.forEach(i => {
             const div = document.createElement('div');
             div.style.display = 'flex';
             div.style.justifyContent = 'space-between';
@@ -1055,7 +1120,7 @@ function executePrintReceipt(sale) {
         });
     } else {
         const tbody = temp.querySelector('.t-items-table-body');
-        sale.items.forEach(i => {
+        items.forEach(i => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td style="padding: 6px;">${i.name}</td>
