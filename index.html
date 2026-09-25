@@ -313,7 +313,7 @@
     <template id="template-receipt-58mm">
         <div style="width: 58mm; padding: 4px; font-family: monospace; font-size: 10px; color: black; line-height: 1.2;">
             <div style="text-align: center;">
-                <img src="PCBH_LOGO-BG.png" alt="Logo" style="height: 48px; margin: 0 auto 4px auto; display: block; object-fit: contain;">
+                <img src="PCBH_LOGO-BG.png" alt="Logo" onerror="this.style.display='none'" style="height: 48px; margin: 0 auto 4px auto; display: block; object-fit: contain;">
                 <div style="font-weight: bold; font-size: 12px; text-transform: uppercase;">BARAKAT PERFUMES</div>
                 <div>District 1, Janabiya</div>
                 <div>CR: 13812-04</div>
@@ -367,7 +367,7 @@
                     <p style="margin: 1px 0; color: #4b5563; font-size: 10px;">Branch: District 1, Janabiya | CR: 13812-04 | Tel: 36051011</p>
                 </div>
                 <div style="text-align: right;">
-                    <img src="PCBH_LOGO-BG.png" alt="Logo" style="height: 40px; margin-left: auto; object-fit: contain;">
+                    <img src="PCBH_LOGO-BG.png" alt="Logo" onerror="this.style.display='none'" style="height: 40px; margin-left: auto; object-fit: contain;">
                     <p style="font-weight: bold; margin: 0; color: #1f2937; font-size: 11px;">TAX INVOICE</p>
                 </div>
             </div>
@@ -980,7 +980,7 @@ function setSplitPrimaryMethod(method) {
 function setSplitSecondaryMethod(method) {
     splitSecondaryMethod = method;
     document.querySelectorAll('.split-sec-btn').forEach(b => b.className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center');
-    if (method === 'CASH') document.getElementById('btn-split-sec-cash').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+    if (method === 'CASH') document.getElementById('btn-split-sec-cash').className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center';
     if (method === 'CARD') document.getElementById('btn-split-sec-card').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
     if (method === 'BENEFIT_PAY') document.getElementById('btn-split-sec-benefit').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
 }
