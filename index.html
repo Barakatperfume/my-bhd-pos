@@ -902,6 +902,13 @@ function updateCartUI() {
 }
 
 function openItemManagerModal() {
+    // Re-verify current active user status before showing manager view
+    if (currentUser && (currentUser.role === 'ADMIN' || currentUser.role === 'MANAGER')) {
+        userRole = currentUser.role;
+    } else {
+        userRole = 'CASHIER';
+    }
+
     document.getElementById('manager-status-text').innerText = `Current View: ${userRole}`;
     if (userRole === 'ADMIN' || userRole === 'MANAGER') {
         document.getElementById('btn-unlock-manager').classList.add('hidden');
@@ -914,6 +921,8 @@ function openItemManagerModal() {
 }
 
 function closeItemManagerModal() {
+    // Reset back to current logged in user role on window close
+    userRole = currentUser ? currentUser.role : 'CASHIER';
     document.getElementById('item-manager-modal').classList.add('hidden');
 }
 
