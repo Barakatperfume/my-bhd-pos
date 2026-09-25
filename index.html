@@ -509,10 +509,10 @@ const isValidUUID = (id) => {
     return typeof id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 };
 
-window.onload = () => {
-    fetchProducts();
-    fetchCustomers();
-    loadSalesHistoryLocal();
+window.onload = async () => {
+    await fetchProducts();
+    await fetchCustomers();
+    await loadSalesHistoryLocal();
 };
 
 async function switchUser() {
@@ -1041,7 +1041,66 @@ function closeSalesHistoryModal() {
     document.getElementById('sales-history-modal').classList.add('hidden');
 }
 
-function loadSalesHistoryLocal() {
+async function loadSalesHistoryLocal() {
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('sales_orders')
+                .select(`
+                    id,
+                    receipt_number,
+                    customer_name,
+                    customer_phone,
+                    total_amount,
+                    gross_total,
+                    discount_amount,
+                    points_earned,
+                    points_redeemed,
+                    payment_method,
+                    payment_details,
+                    status,
+                    created_at,
+                    order_items (
+                        product_id,
+                        quantity,
+                        unit_price,
+                        products (
+                            name
+                        )
+                    )
+                `)
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                salesHistory = data.map(order => ({
+                    db_id: order.id,
+                    receiptId: 'BP-' + String(order.receipt_number).padStart(6, '0'),
+                    timestamp: new Date(order.created_at).toLocaleString(),
+                    custName: order.customer_name || 'Walk-in Customer',
+                    custPhone: order.customer_phone || 'N/A',
+                    items: (order.order_items || []).map(item => ({
+                        id: item.product_id,
+                        qty: item.quantity,
+                        price: item.unit_price,
+                        name: item.products ? item.products.name : 'Unknown Product'
+                    })),
+                    grossTotal: order.gross_total || order.total_amount,
+                    discountAmount: order.discount_amount || 0,
+                    netTotal: order.total_amount,
+                    pointsEarned: order.points_earned || 0,
+                    pointsBalance: 0,
+                    paymentType: order.payment_method === 'SPLIT' ? 'SPLIT' : 'SINGLE',
+                    paymentDetails: order.payment_details || {},
+                    status: order.status || 'COMPLETED'
+                }));
+                saveSalesHistoryLocal();
+                return;
+            }
+        } catch (e) {
+            console.error("Error loading sales history from Supabase:", e);
+        }
+    }
+
     const saved = localStorage.getItem('pos_sales_history');
     if (saved) {
         try { salesHistory = JSON.parse(saved); } catch(e) { salesHistory = []; }
@@ -1097,24 +1156,70 @@ function renderSalesHistory() {
     });
 }
 
-function processRefund(receiptId) {
+async function processRefund(receiptId) {
     const sale = salesHistory.find(s => s.receiptId === receiptId);
     if (!sale) return;
 
     if (!confirm(`Are you sure you want to refund Receipt #${receiptId} for ${formatBHD(sale.netTotal)}?`)) return;
 
-    sale.status = 'REFUNDED';
+    if (supabaseClient) {
+        try {
+            if (sale.db_id && isValidUUID(sale.db_id)) {
+                const { error } = await supabaseClient.rpc('process_pos_refund', {
+                    p_order_id: sale.db_id,
+                    p_items: sale.items
+                });
 
-    if (sale.custPhone && sale.custPhone !== 'N/A' && sale.pointsEarned > 0) {
-        let currentPts = parseInt(localStorage.getItem('pts_' + sale.custPhone) || '0');
-        currentPts = Math.max(0, currentPts - sale.pointsEarned);
-        localStorage.setItem('pts_' + sale.custPhone, currentPts.toString());
-        alert(`Refund Processed! Deducted ${sale.pointsEarned} loyalty points from customer ${sale.custPhone}. New Balance: ${currentPts} Pts.`);
-    } else {
-        alert(`Refund Processed successfully for Receipt #${receiptId}!`);
+                if (error) {
+                    alert('Database Refund Error: ' + error.message);
+                    return;
+                }
+            } else {
+                // If db_id not available, update sales order by receipt number
+                const cleanReceiptNum = parseInt(sale.receiptId.replace(/[^0-9]/g, ''));
+                if (!isNaN(cleanReceiptNum)) {
+                    await supabaseClient
+                        .from('sales_orders')
+                        .update({ status: 'REFUNDED' })
+                        .eq('receipt_number', cleanReceiptNum);
+                }
+
+                // Restore stock locally/direct update
+                for (const item of sale.items) {
+                    if (isValidUUID(item.id)) {
+                        const { data: prod } = await supabaseClient.from('products').select('stock_quantity').eq('id', item.id).single();
+                        if (prod) {
+                            await supabaseClient.from('products').update({ stock_quantity: prod.stock_quantity + item.qty }).eq('id', item.id);
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('Database refund error:', err);
+        }
     }
 
+    // Local Stock Restoration for active runtime array
+    sale.items.forEach(item => {
+        const prod = products.find(p => String(p.id) === String(item.id));
+        if (prod) {
+            prod.stock_quantity = (prod.stock_quantity || 0) + item.qty;
+        }
+    });
+
+    sale.status = 'REFUNDED';
+
+    if (sale.custPhone && sale.custPhone !== 'N/A') {
+        let currentPts = parseInt(localStorage.getItem('pts_' + sale.custPhone) || '0');
+        currentPts = Math.max(0, currentPts - (sale.pointsEarned || 0));
+        localStorage.setItem('pts_' + sale.custPhone, currentPts.toString());
+    }
+
+    alert(`Refund Processed successfully for Receipt #${receiptId}! Stock restored and database updated.`);
+
     saveSalesHistoryLocal();
+    await fetchProducts();
+    await fetchCustomers();
     renderSalesHistory();
 }
 
@@ -1234,7 +1339,7 @@ async function processSale(action) {
     const pointsEarned = Math.floor(netTotalInclusive);
     let updatedBalance = (currentCustomerPoints - pointsRedeemedCount + pointsEarned);
 
-    const receiptId = 'BP-' + Math.floor(100000 + Math.random() * 900000);
+    let receiptId = 'BP-' + Math.floor(100000 + Math.random() * 900000);
     
     // Payment Breakdown construction
     let paymentDetails = {};
@@ -1255,6 +1360,7 @@ async function processSale(action) {
     // Ensure IDs passed to Supabase RPC are valid UUIDs, or null
     const validCashierId = (currentUser && isValidUUID(currentUser.id)) ? currentUser.id : null;
     const validCustomerId = (selectedCustomer && isValidUUID(selectedCustomer.id)) ? selectedCustomer.id : null;
+    let newDbOrderId = null;
 
     if (supabaseClient) {
         try {
@@ -1281,6 +1387,14 @@ async function processSale(action) {
                 return;
             }
 
+            if (data) {
+                newDbOrderId = data;
+                const { data: orderData } = await supabaseClient.from('sales_orders').select('receipt_number').eq('id', newDbOrderId).single();
+                if (orderData && orderData.receipt_number) {
+                    receiptId = 'BP-' + String(orderData.receipt_number).padStart(6, '0');
+                }
+            }
+
             // Refresh catalog and contacts to update UI stock indicators & point balances
             await fetchProducts();
             await fetchCustomers();
@@ -1290,6 +1404,7 @@ async function processSale(action) {
     }
 
     const saleRecord = {
+        db_id: newDbOrderId,
         receiptId: receiptId,
         timestamp: new Date().toLocaleString(),
         custName: custName,
