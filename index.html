@@ -495,13 +495,18 @@ let userRole = 'CASHIER';
 let currentUser = { id: null, name: 'Cashier 1', role: 'CASHIER' };
 
 const fallbackProducts = [
-    { id: '1', name: 'RIIFFS Freeze EDP 100ml', retail_price: 18.500, cost_price: 9.000, stock_quantity: 12, barcode: '10001' },
+    { id: '1', name: 'Aromatix Frost Bite 100ml', retail_price: 22.000, cost_price: 11.200, stock_quantity: 3, barcode: '10003' },
     { id: '2', name: 'Lattafa Maahir Honor 100ml', retail_price: 14.000, cost_price: 6.500, stock_quantity: 8, barcode: '10002' },
-    { id: '3', name: 'Aromatix Frost Bite 100ml', retail_price: 22.000, cost_price: 11.200, stock_quantity: 3, barcode: '10003' }
+    { id: '3', name: 'RIIFFS Freeze EDP 100ml', retail_price: 18.500, cost_price: 9.000, stock_quantity: 12, barcode: '10001' }
 ];
 
 const formatBHD = (amount) => {
     return 'BHD ' + (Math.round((amount || 0) * 1000) / 1000).toFixed(3);
+};
+
+// Helper to reliably sort products array alphabetically by name
+const sortProductsAlphabetically = (arr) => {
+    return (arr || []).sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
 };
 
 // Validates if string is a valid PostgreSQL UUID
@@ -559,22 +564,23 @@ async function switchUser() {
 
 async function fetchProducts() {
     if (!supabaseClient) {
-        products = fallbackProducts;
+        products = sortProductsAlphabetically(fallbackProducts);
         renderProducts(products);
         return;
     }
 
     try {
-        const { data, error } = await supabaseClient.from('products').select('*');
+        // Enforce ORDER BY name ascending directly from Supabase
+        const { data, error } = await supabaseClient.from('products').select('*').order('name', { ascending: true });
         if (error || !data || data.length === 0) {
             console.warn('Fallback triggered or Supabase query error:', error);
-            products = fallbackProducts;
+            products = sortProductsAlphabetically(fallbackProducts);
         } else {
-            products = data;
+            products = sortProductsAlphabetically(data);
         }
     } catch (err) {
         console.error('Execution error fetching products:', err);
-        products = fallbackProducts;
+        products = sortProductsAlphabetically(fallbackProducts);
     }
     renderProducts(products);
 }
@@ -740,12 +746,15 @@ function renderProducts(list = products) {
     const grid = document.getElementById('product-grid');
     grid.innerHTML = '';
 
-    if (!list || list.length === 0) {
+    // Enforce sorting prior to rendering grid UI
+    const sortedList = sortProductsAlphabetically(list);
+
+    if (!sortedList || sortedList.length === 0) {
         grid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-10">No products found.</p>';
         return;
     }
     
-    list.forEach(p => {
+    sortedList.forEach(p => {
         let stock = p.stock_quantity ?? 0;
         let price = p.retail_price ?? 0;
         let lowThreshold = p.low_stock_threshold ?? 2;
@@ -946,7 +955,9 @@ function renderItemManagerList() {
     const listContainer = document.getElementById('item-manager-list');
     listContainer.innerHTML = '';
 
-    products.forEach(p => {
+    const sortedProducts = sortProductsAlphabetically(products);
+
+    sortedProducts.forEach(p => {
         const row = document.createElement('div');
         row.className = 'py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0 text-xs border-b border-gray-100 last:border-0';
         
@@ -1022,6 +1033,7 @@ async function saveItemChanges(id) {
         }
 
         products[itemIndex] = Object.assign({}, products[itemIndex], updateData);
+        products = sortProductsAlphabetically(products);
         alert("Updated " + products[itemIndex].name + " successfully!");
 
         renderProducts();
