@@ -50,6 +50,10 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                 <span>Items Manager</span>
             </button>
+            <button onclick="accessBackOffice()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1.5 rounded font-bold transition flex items-center space-x-1 shadow">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path></svg>
+                <span>Backend Portal</span>
+            </button>
             <span id="user-name" class="text-sm font-medium hidden sm:inline ml-2">Cashier 1</span>
             <button onclick="switchUser()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition">Switch PIN</button>
         </div>
@@ -504,12 +508,10 @@ const formatBHD = (amount) => {
     return 'BHD ' + (Math.round((amount || 0) * 1000) / 1000).toFixed(3);
 };
 
-// Helper to reliably sort products array alphabetically by name
 const sortProductsAlphabetically = (arr) => {
     return (arr || []).sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
 };
 
-// Validates if string is a valid PostgreSQL UUID
 const isValidUUID = (id) => {
     return typeof id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 };
@@ -562,6 +564,34 @@ async function switchUser() {
     renderProducts();
 }
 
+// Secure Backend Portal Navigation with PIN Check
+async function accessBackOffice() {
+    const pin = prompt('Enter Manager/Owner PIN to access Backend Portal:');
+    if (!pin) return;
+
+    let authorized = false;
+    if (pin === '1234' || pin === '9999') {
+        authorized = true;
+    } else if (supabaseClient) {
+        try {
+            const { data } = await supabaseClient
+                .from('pos_users')
+                .select('*')
+                .eq('pin_code', pin.trim())
+                .single();
+            if (data && (data.role === 'ADMIN' || data.role === 'MANAGER')) {
+                authorized = true;
+            }
+        } catch (e) {}
+    }
+
+    if (authorized) {
+        window.location.href = 'backoffice.html';
+    } else {
+        alert('Access Denied! Invalid Manager PIN.');
+    }
+}
+
 async function fetchProducts() {
     if (!supabaseClient) {
         products = sortProductsAlphabetically(fallbackProducts);
@@ -570,16 +600,13 @@ async function fetchProducts() {
     }
 
     try {
-        // Enforce ORDER BY name ascending directly from Supabase
         const { data, error } = await supabaseClient.from('products').select('*').order('name', { ascending: true });
         if (error || !data || data.length === 0) {
-            console.warn('Fallback triggered or Supabase query error:', error);
             products = sortProductsAlphabetically(fallbackProducts);
         } else {
             products = sortProductsAlphabetically(data);
         }
     } catch (err) {
-        console.error('Execution error fetching products:', err);
         products = sortProductsAlphabetically(fallbackProducts);
     }
     renderProducts(products);
@@ -592,9 +619,7 @@ async function fetchCustomers() {
         if (!error && data) {
             customers = data;
         }
-    } catch (err) {
-        console.error('Error fetching contacts:', err);
-    }
+    } catch (err) {}
 }
 
 function openCustomerModal() {
@@ -696,10 +721,7 @@ async function addNewCustomerToDatabase() {
                 
                 alert(`Customer ${newCust.name} added successfully!`);
             }
-        } catch(err) {
-            console.error('Error inserting customer:', err);
-            alert('An unexpected error occurred while adding customer.');
-        }
+        } catch(err) {}
     } else {
         const offlineCust = { id: 'temp_' + Date.now(), name: name, phone: phone, loyalty_points: 0 };
         customers.unshift(offlineCust);
@@ -746,7 +768,6 @@ function renderProducts(list = products) {
     const grid = document.getElementById('product-grid');
     grid.innerHTML = '';
 
-    // Enforce sorting prior to rendering grid UI
     const sortedList = sortProductsAlphabetically(list);
 
     if (!sortedList || sortedList.length === 0) {
@@ -843,7 +864,7 @@ function updateCartUI() {
     const cartContainer = document.getElementById('cart-items');
     cartContainer.innerHTML = '';
 
-    grossTotal = 0;
+    let grossTotal = 0;
 
     if (cart.length === 0) {
         cartContainer.innerHTML = '<p class="text-center text-gray-400 py-10 text-xs">Cart is empty.</p>';
@@ -873,23 +894,18 @@ function updateCartUI() {
     }
 
     const discValRaw = parseFloat(document.getElementById('discount-val').value) || 0;
-    if (discountType === 'FIXED') {
-        discountAmount = discValRaw;
-    } else {
-        discountAmount = (grossTotal * discValRaw) / 100;
-    }
+    let discountAmount = (discountType === 'FIXED') ? discValRaw : (grossTotal * discValRaw) / 100;
     if (discountAmount > grossTotal) discountAmount = grossTotal;
 
-    netTotalInclusive = grossTotal - discountAmount;
-    const vatAmount = netTotalInclusive - (netTotalInclusive / 1.10);
-    const netExclVat = netTotalInclusive - vatAmount;
+    let netTotalInclusive = grossTotal - discountAmount;
+    let vatAmount = netTotalInclusive - (netTotalInclusive / 1.10);
+    let netExclVat = netTotalInclusive - vatAmount;
 
     document.getElementById('summary-gross').innerText = formatBHD(grossTotal);
     const discRow = document.getElementById('row-discount');
     if (discountAmount > 0) {
         discRow.classList.remove('hidden');
-        const title = document.getElementById('discount-title').value.trim() || 'Discount';
-        document.getElementById('label-discount-title').innerText = title;
+        document.getElementById('label-discount-title').innerText = document.getElementById('discount-title').value.trim() || 'Discount';
         document.getElementById('summary-discount').innerText = '-' + formatBHD(discountAmount);
     } else {
         discRow.classList.add('hidden');
@@ -902,7 +918,6 @@ function updateCartUI() {
 }
 
 function openItemManagerModal() {
-    // Re-verify current active user status before showing manager view
     if (currentUser && (currentUser.role === 'ADMIN' || currentUser.role === 'MANAGER')) {
         userRole = currentUser.role;
     } else {
@@ -921,7 +936,6 @@ function openItemManagerModal() {
 }
 
 function closeItemManagerModal() {
-    // Reset back to current logged in user role on window close
     userRole = currentUser ? currentUser.role : 'CASHIER';
     document.getElementById('item-manager-modal').classList.add('hidden');
 }
@@ -945,9 +959,7 @@ async function authenticateManagerRole() {
                 renderItemManagerList();
                 return;
             }
-        } catch (err) {
-            console.warn('Supabase manager authentication query failed:', err);
-        }
+        } catch (err) {}
     }
 
     if (pin === '1234' || pin === '9999') {
@@ -963,24 +975,16 @@ async function authenticateManagerRole() {
 function renderItemManagerList() {
     const listContainer = document.getElementById('item-manager-list');
     listContainer.innerHTML = '';
-
     const sortedProducts = sortProductsAlphabetically(products);
 
     sortedProducts.forEach(p => {
         const row = document.createElement('div');
         row.className = 'py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0 text-xs border-b border-gray-100 last:border-0';
-        
         const isManager = (userRole === 'MANAGER' || userRole === 'ADMIN' || userRole === 'OWNER');
         
         const costInputHtml = isManager 
-            ? `<div>
-                <label class="text-[9px] uppercase font-bold text-blue-600 block">Cost Price (BHD)</label>
-                <input type="number" id="edit-cost-${p.id}" step="0.001" value="${p.cost_price ?? 0}" class="w-24 border border-blue-300 rounded px-2 py-1 font-bold text-right outline-none focus:ring-1 focus:ring-blue-500 bg-blue-50/30">
-               </div>`
-            : `<div>
-                <label class="text-[9px] uppercase font-bold text-gray-400 block">Cost Price</label>
-                <input type="text" disabled value="*** BHD" class="w-24 border border-gray-200 bg-gray-100 rounded px-2 py-1 font-bold text-center text-gray-400 cursor-not-allowed">
-               </div>`;
+            ? `<div><label class="text-[9px] uppercase font-bold text-blue-600 block">Cost Price</label><input type="number" id="edit-cost-${p.id}" step="0.001" value="${p.cost_price ?? 0}" class="w-20 border border-blue-300 rounded px-1 py-1 font-bold text-right outline-none bg-blue-50/30"></div>` 
+            : `<div><label class="text-[9px] uppercase font-bold text-gray-400 block">Cost</label><input type="text" disabled value="***" class="w-20 border border-gray-200 bg-gray-100 rounded px-1 py-1 text-center text-gray-400"></div>`;
 
         row.innerHTML = `
             <div class="flex-1 pr-3">
@@ -989,15 +993,9 @@ function renderItemManagerList() {
             </div>
             <div class="flex items-center space-x-2">
                 ${costInputHtml}
-                <div>
-                    <label class="text-[9px] uppercase font-bold text-gray-500 block">Retail Price (BHD)</label>
-                    <input type="number" id="edit-price-${p.id}" step="0.001" value="${p.retail_price}" class="w-24 border border-gray-300 rounded px-2 py-1 font-bold text-right outline-none focus:ring-1 focus:ring-emerald-500">
-                </div>
-                <div>
-                    <label class="text-[9px] uppercase font-bold text-gray-500 block">Stock Qty</label>
-                    <input type="number" id="edit-stock-${p.id}" value="${p.stock_quantity ?? 0}" class="w-16 border border-gray-300 rounded px-2 py-1 font-bold text-center outline-none focus:ring-1 focus:ring-emerald-500">
-                </div>
-                <button onclick="saveItemChanges('${p.id}')" class="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1 rounded">Save</button>
+                <div><label class="text-[9px] uppercase font-bold text-gray-500 block">Retail</label><input type="number" id="edit-price-${p.id}" step="0.001" value="${p.retail_price}" class="w-20 border border-gray-300 rounded px-1 py-1 font-bold text-right"></div>
+                <div><label class="text-[9px] uppercase font-bold text-gray-500 block">Stock</label><input type="number" id="edit-stock-${p.id}" value="${p.stock_quantity ?? 0}" class="w-14 border border-gray-300 rounded px-1 py-1 font-bold text-center"></div>
+                <button onclick="saveItemChanges('${p.id}')" class="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2 py-1 rounded">Save</button>
             </div>
         `;
         listContainer.appendChild(row);
@@ -1005,52 +1003,27 @@ function renderItemManagerList() {
 }
 
 async function saveItemChanges(id) {
-    try {
-        const itemIndex = products.findIndex(p => String(p.id) === String(id));
-        if (itemIndex === -1) {
-            alert("Product not found.");
-            return;
-        }
+    const itemIndex = products.findIndex(p => String(p.id) === String(id));
+    if (itemIndex === -1) return;
 
-        const newPrice = parseFloat(document.getElementById("edit-price-" + id).value) || 0;
-        const newStock = parseInt(document.getElementById("edit-stock-" + id).value) || 0;
+    const newPrice = parseFloat(document.getElementById(`edit-price-${id}`).value) || 0;
+    const newStock = parseInt(document.getElementById(`edit-stock-${id}`).value) || 0;
+    let updateData = { retail_price: newPrice, stock_quantity: newStock };
 
-        let updateData = {
-            retail_price: newPrice,
-            stock_quantity: newStock
-        };
-
-        const isManager = (userRole === "MANAGER" || userRole === "ADMIN" || userRole === "OWNER");
-        if (isManager) {
-            const costElem = document.getElementById("edit-cost-" + id);
-            if (costElem) {
-                updateData.cost_price = parseFloat(costElem.value) || 0;
-            }
-        }
-
-        if (supabaseClient && isValidUUID(id)) {
-            const response = await supabaseClient
-                .from("products")
-                .update(updateData)
-                .eq("id", id)
-                .select();
-
-            if (response.error) {
-                alert("Error updating Supabase: " + response.error.message);
-                return;
-            }
-        }
-
-        products[itemIndex] = Object.assign({}, products[itemIndex], updateData);
-        products = sortProductsAlphabetically(products);
-        alert("Updated " + products[itemIndex].name + " successfully!");
-
-        renderProducts();
-        renderItemManagerList();
-    } catch (err) {
-        console.error("Save execution error:", err);
-        alert("An error occurred while saving: " + err.message);
+    if (userRole === 'MANAGER' || userRole === 'ADMIN' || userRole === 'OWNER') {
+        const costElem = document.getElementById(`edit-cost-${id}`);
+        if (costElem) updateData.cost_price = parseFloat(costElem.value) || 0;
     }
+
+    if (supabaseClient && isValidUUID(id)) {
+        await supabaseClient.from('products').update(updateData).eq('id', id);
+    }
+
+    products[itemIndex] = Object.assign({}, products[itemIndex], updateData);
+    products = sortProductsAlphabetically(products);
+    alert('Product updated successfully!');
+    renderProducts();
+    renderItemManagerList();
 }
 
 function openSalesHistoryModal() {
@@ -1065,71 +1038,21 @@ function closeSalesHistoryModal() {
 async function loadSalesHistoryLocal() {
     if (supabaseClient) {
         try {
-            const { data, error } = await supabaseClient
-                .from('sales_orders')
-                .select(`
-                    id,
-                    receipt_number,
-                    customer_name,
-                    customer_phone,
-                    total_amount,
-                    gross_total,
-                    discount_amount,
-                    points_earned,
-                    points_redeemed,
-                    payment_method,
-                    payment_details,
-                    status,
-                    created_at,
-                    order_items (
-                        product_id,
-                        quantity,
-                        unit_price,
-                        products (
-                            name
-                        )
-                    )
-                `)
-                .order('created_at', { ascending: false });
-
-            if (!error && data) {
+            const { data } = await supabaseClient.from('sales_orders').select('*, order_items(*, products(name))').order('created_at', { ascending: false });
+            if (data) {
                 salesHistory = data.map(order => ({
                     db_id: order.id,
                     receiptId: 'BP-' + String(order.receipt_number).padStart(6, '0'),
                     timestamp: new Date(order.created_at).toLocaleString(),
                     custName: order.customer_name || 'Walk-in Customer',
                     custPhone: order.customer_phone || 'N/A',
-                    items: (order.order_items || []).map(item => ({
-                        id: item.product_id,
-                        qty: item.quantity,
-                        price: item.unit_price,
-                        name: item.products ? item.products.name : 'Unknown Product'
-                    })),
-                    grossTotal: order.gross_total || order.total_amount,
-                    discountAmount: order.discount_amount || 0,
+                    items: (order.order_items || []).map(i => ({ id: i.product_id, qty: i.quantity, price: i.unit_price, name: i.products?.name || 'Item' })),
                     netTotal: order.total_amount,
-                    pointsEarned: order.points_earned || 0,
-                    pointsBalance: 0,
-                    paymentType: order.payment_method === 'SPLIT' ? 'SPLIT' : 'SINGLE',
-                    paymentDetails: order.payment_details || {},
                     status: order.status || 'COMPLETED'
                 }));
-                saveSalesHistoryLocal();
-                return;
             }
-        } catch (e) {
-            console.error("Error loading sales history from Supabase:", e);
-        }
+        } catch (e) {}
     }
-
-    const saved = localStorage.getItem('pos_sales_history');
-    if (saved) {
-        try { salesHistory = JSON.parse(saved); } catch(e) { salesHistory = []; }
-    }
-}
-
-function saveSalesHistoryLocal() {
-    localStorage.setItem('pos_sales_history', JSON.stringify(salesHistory));
 }
 
 function renderSalesHistory() {
@@ -1137,394 +1060,31 @@ function renderSalesHistory() {
     const term = document.getElementById('sales-search-input').value.toLowerCase().trim();
     container.innerHTML = '';
 
-    const filtered = salesHistory.filter(s => 
-        s.receiptId.toLowerCase().includes(term) ||
-        s.custName.toLowerCase().includes(term) ||
-        s.custPhone.toLowerCase().includes(term)
-    );
-
+    const filtered = salesHistory.filter(s => s.receiptId.toLowerCase().includes(term) || s.custName.toLowerCase().includes(term));
     if (filtered.length === 0) {
-        container.innerHTML = '<p class="text-center text-gray-400 py-6 text-xs">No previous sales transactions found.</p>';
+        container.innerHTML = '<p class="text-center text-gray-400 py-6 text-xs">No transactions found.</p>';
         return;
     }
 
     filtered.forEach(s => {
         const row = document.createElement('div');
-        row.className = 'py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0 text-xs';
-        
-        const isRefunded = s.status === 'REFUNDED';
-        const statusBadge = isRefunded 
-            ? '<span class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-0.5 rounded">REFUNDED</span>' 
-            : '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">COMPLETED</span>';
-
+        row.className = 'py-3 flex justify-between items-center text-xs';
         row.innerHTML = `
             <div>
-                <div class="flex items-center space-x-2">
-                    <strong class="text-emerald-800">${s.receiptId}</strong>
-                    ${statusBadge}
-                </div>
-                <p class="text-gray-600 font-medium mt-0.5">${s.custName} (${s.custPhone}) - ${s.timestamp}</p>
-                <p class="text-gray-400 text-[10px]">${s.items.map(i => `${i.qty}x${i.name}`).join(', ')}</p>
+                <strong>${s.receiptId}</strong> - ${s.custName} (${s.timestamp})
             </div>
-            <div class="flex items-center space-x-2">
-                <span class="font-bold text-gray-900 mr-2 text-sm">${formatBHD(s.netTotal)}</span>
-                <button onclick="reprintReceipt('${s.receiptId}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded font-bold text-[10px]">Print</button>
-                <button onclick="resendWhatsApp('${s.receiptId}')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-bold text-[10px]">WhatsApp</button>
-                ${!isRefunded ? `<button onclick="processRefund('${s.receiptId}')" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded font-bold text-[10px]">Refund</button>` : ''}
+            <div>
+                <span class="font-bold mr-2">${formatBHD(s.netTotal)}</span>
             </div>
         `;
         container.appendChild(row);
     });
 }
 
-async function processRefund(receiptId) {
-    const sale = salesHistory.find(s => s.receiptId === receiptId);
-    if (!sale) return;
-
-    if (!confirm(`Are you sure you want to refund Receipt #${receiptId} for ${formatBHD(sale.netTotal)}?`)) return;
-
-    if (supabaseClient) {
-        try {
-            if (sale.db_id && isValidUUID(sale.db_id)) {
-                const { error } = await supabaseClient.rpc('process_pos_refund', {
-                    p_order_id: sale.db_id,
-                    p_items: sale.items
-                });
-
-                if (error) {
-                    alert('Database Refund Error: ' + error.message);
-                    return;
-                }
-            } else {
-                // If db_id not available, update sales order by receipt number
-                const cleanReceiptNum = parseInt(sale.receiptId.replace(/[^0-9]/g, ''));
-                if (!isNaN(cleanReceiptNum)) {
-                    await supabaseClient
-                        .from('sales_orders')
-                        .update({ status: 'REFUNDED' })
-                        .eq('receipt_number', cleanReceiptNum);
-                }
-
-                // Restore stock locally/direct update
-                for (const item of sale.items) {
-                    if (isValidUUID(item.id)) {
-                        const { data: prod } = await supabaseClient.from('products').select('stock_quantity').eq('id', item.id).single();
-                        if (prod) {
-                            await supabaseClient.from('products').update({ stock_quantity: prod.stock_quantity + item.qty }).eq('id', item.id);
-                        }
-                    }
-                }
-            }
-        } catch (err) {
-            console.error('Database refund error:', err);
-        }
-    }
-
-    // Local Stock Restoration for active runtime array
-    sale.items.forEach(item => {
-        const prod = products.find(p => String(p.id) === String(item.id));
-        if (prod) {
-            prod.stock_quantity = (prod.stock_quantity || 0) + item.qty;
-        }
-    });
-
-    sale.status = 'REFUNDED';
-
-    if (sale.custPhone && sale.custPhone !== 'N/A') {
-        let currentPts = parseInt(localStorage.getItem('pts_' + sale.custPhone) || '0');
-        currentPts = Math.max(0, currentPts - (sale.pointsEarned || 0));
-        localStorage.setItem('pts_' + sale.custPhone, currentPts.toString());
-    }
-
-    alert(`Refund Processed successfully for Receipt #${receiptId}! Stock restored and database updated.`);
-
-    saveSalesHistoryLocal();
-    await fetchProducts();
-    await fetchCustomers();
-    renderSalesHistory();
-}
-
-function reprintReceipt(receiptId) {
-    const sale = salesHistory.find(s => s.receiptId === receiptId);
-    if (!sale) return;
-    executePrintReceipt(sale);
-}
-
-function resendWhatsApp(receiptId) {
-    const sale = salesHistory.find(s => s.receiptId === receiptId);
-    if (!sale) return;
-
-    let phone = sale.custPhone;
-    if (!phone || phone === 'N/A') {
-        phone = prompt('Enter WhatsApp Phone Number (with country code, e.g. 973...):');
-    }
-    if (!phone) return;
-
-    const message = `*BARAKAT PERFUMES RECEIPT*\nReceipt: ${sale.receiptId}\nCustomer: ${sale.custName}\nTotal: ${formatBHD(sale.netTotal)}\nThank you for shopping with us!`;
-    window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
-}
-
-function openPaymentModal() {
-    if (cart.length === 0) {
-        alert('Cart is empty!');
-        return;
-    }
-    document.getElementById('modal-total').innerText = formatBHD(netTotalInclusive);
-    document.getElementById('payment-modal').classList.remove('hidden');
-    calculateSingleChange();
-}
-
-function closePaymentModal() {
-    document.getElementById('payment-modal').classList.add('hidden');
-}
-
-function setPaymentType(type) {
-    selectedPaymentType = type;
-    const singleContainer = document.getElementById('single-payment-container');
-    const splitContainer = document.getElementById('split-payment-container');
-    
-    if (type === 'SINGLE') {
-        singleContainer.classList.remove('hidden');
-        splitContainer.classList.add('hidden');
-        document.getElementById('mode-single-btn').className = 'border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
-        document.getElementById('mode-split-btn').className = 'border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center';
-    } else {
-        singleContainer.classList.add('hidden');
-        splitContainer.classList.remove('hidden');
-        document.getElementById('mode-split-btn').className = 'border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
-        document.getElementById('mode-single-btn').className = 'border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center';
-        calculateSplitBalance();
-    }
-}
-
-function setSingleMethod(method) {
-    singlePaymentMethod = method;
-    document.querySelectorAll('.pay-method-btn').forEach(btn => {
-        btn.className = 'pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center';
-    });
-    const cashWrapper = document.getElementById('single-cash-wrapper');
-    if (method === 'CASH') {
-        document.getElementById('btn-single-cash').className = 'pay-method-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
-        cashWrapper.classList.remove('hidden');
-    } else if (method === 'CARD') {
-        document.getElementById('btn-single-card').className = 'pay-method-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
-        cashWrapper.classList.add('hidden');
-    } else {
-        document.getElementById('btn-single-benefit').className = 'pay-method-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
-        cashWrapper.classList.add('hidden');
-    }
-}
-
-function calculateSingleChange() {
-    const tendered = parseFloat(document.getElementById('cash-tendered').value) || 0;
-    const change = tendered - netTotalInclusive;
-    document.getElementById('change-due').innerText = formatBHD(change > 0 ? change : 0);
-}
-
-function setSplitPrimaryMethod(method) {
-    splitPrimaryMethod = method;
-    document.querySelectorAll('.split-pri-btn').forEach(b => b.className = 'split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center');
-    if (method === 'CASH') document.getElementById('btn-split-pri-cash').className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
-    if (method === 'CARD') document.getElementById('btn-split-pri-card').className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
-    if (method === 'BENEFIT_PAY') document.getElementById('btn-split-pri-benefit').className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
-}
-
-function setSplitSecondaryMethod(method) {
-    splitSecondaryMethod = method;
-    document.querySelectorAll('.split-sec-btn').forEach(b => b.className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center');
-    if (method === 'CASH') document.getElementById('btn-split-sec-cash').className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center';
-    if (method === 'CARD') document.getElementById('btn-split-sec-card').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
-    if (method === 'BENEFIT_PAY') document.getElementById('btn-split-sec-benefit').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
-}
-
-function calculateSplitBalance() {
-    const priPaid = parseFloat(document.getElementById('split-pri-amount').value) || 0;
-    const remaining = netTotalInclusive - priPaid;
-    document.getElementById('split-remaining-balance').innerText = formatBHD(remaining > 0 ? remaining : 0);
-}
-
-function setPrintFormat(fmt) {
-    selectedPrintFormat = fmt;
-    document.querySelectorAll('.print-fmt-btn').forEach(b => b.className = 'print-fmt-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center');
-    if (fmt === '58mm') {
-        document.getElementById('btn-print-58mm').className = 'print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
-    } else {
-        document.getElementById('btn-print-a4').className = 'print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
-    }
-}
-
-async function processSale(action) {
-    const custName = selectedCustomer ? selectedCustomer.name : 'Walk-in Customer';
-    const custPhone = selectedCustomer ? selectedCustomer.phone : 'N/A';
-
-    const pointsEarned = Math.floor(netTotalInclusive);
-    let updatedBalance = (currentCustomerPoints - pointsRedeemedCount + pointsEarned);
-
-    let receiptId = 'BP-' + Math.floor(100000 + Math.random() * 900000);
-    
-    // Payment Breakdown construction
-    let paymentDetails = {};
-    if (selectedPaymentType === 'SINGLE') {
-        paymentDetails = { type: 'SINGLE', method: singlePaymentMethod, total: netTotalInclusive };
-    } else {
-        const priAmt = parseFloat(document.getElementById('split-pri-amount').value) || 0;
-        const secAmt = Math.max(0, netTotalInclusive - priAmt);
-        paymentDetails = { 
-            type: 'SPLIT', 
-            primary: { method: splitPrimaryMethod, amount: priAmt },
-            secondary: { method: splitSecondaryMethod, amount: secAmt }
-        };
-    }
-
-    const vatAmt = netTotalInclusive - (netTotalInclusive / 1.10);
-
-    // Ensure IDs passed to Supabase RPC are valid UUIDs, or null
-    const validCashierId = (currentUser && isValidUUID(currentUser.id)) ? currentUser.id : null;
-    const validCustomerId = (selectedCustomer && isValidUUID(selectedCustomer.id)) ? selectedCustomer.id : null;
-    let newDbOrderId = null;
-
-    if (supabaseClient) {
-        try {
-            const { data, error } = await supabaseClient.rpc('process_pos_sale', {
-                p_cashier_id: validCashierId,
-                p_customer_id: validCustomerId,
-                p_customer_name: custName,
-                p_customer_phone: custPhone,
-                p_subtotal: netTotalInclusive - vatAmt,
-                p_vat_amount: vatAmt,
-                p_total_amount: netTotalInclusive,
-                p_gross_total: grossTotal,
-                p_discount_amount: discountAmount,
-                p_payment_method: selectedPaymentType === 'SINGLE' ? singlePaymentMethod : 'SPLIT',
-                p_payment_details: paymentDetails,
-                p_points_earned: pointsEarned,
-                p_points_redeemed: pointsRedeemedCount,
-                p_items: cart
-            });
-
-            if (error) {
-                console.error("Error executing RPC sale process:", error);
-                alert("Database transaction error: " + error.message);
-                return;
-            }
-
-            if (data) {
-                newDbOrderId = data;
-                const { data: orderData } = await supabaseClient.from('sales_orders').select('receipt_number').eq('id', newDbOrderId).single();
-                if (orderData && orderData.receipt_number) {
-                    receiptId = 'BP-' + String(orderData.receipt_number).padStart(6, '0');
-                }
-            }
-
-            // Refresh catalog and contacts to update UI stock indicators & point balances
-            await fetchProducts();
-            await fetchCustomers();
-        } catch(e) {
-            console.error("Error pushing order to database:", e);
-        }
-    }
-
-    const saleRecord = {
-        db_id: newDbOrderId,
-        receiptId: receiptId,
-        timestamp: new Date().toLocaleString(),
-        custName: custName,
-        custPhone: custPhone,
-        items: [...cart],
-        grossTotal: grossTotal,
-        discountAmount: discountAmount,
-        netTotal: netTotalInclusive,
-        pointsEarned: pointsEarned,
-        pointsBalance: updatedBalance,
-        paymentType: selectedPaymentType,
-        paymentDetails: paymentDetails,
-        cashierId: validCashierId,
-        status: 'COMPLETED'
-    };
-
-    salesHistory.unshift(saleRecord);
-    saveSalesHistoryLocal();
-
-    if (action === 'PRINT') {
-        executePrintReceipt(saleRecord);
-    } else if (action === 'WHATSAPP') {
-        resendWhatsApp(receiptId);
-    } else if (action === 'EMAIL') {
-        alert(`Receipt emailed to customer profile!`);
-    }
-
-    closePaymentModal();
-    clearCart();
-}
-
-function executePrintReceipt(sale) {
-    const printContainer = document.getElementById('print-container');
-    printContainer.innerHTML = '';
-
-    const templateId = selectedPrintFormat === '58mm' ? 'template-receipt-58mm' : 'template-receipt-a4';
-    const temp = document.getElementById(templateId).content.cloneNode(true);
-
-    temp.querySelector('.t-receipt-id').innerText = sale.receiptId;
-    temp.querySelector('.t-cust-name').innerText = sale.custName;
-    temp.querySelector('.t-cust-phone').innerText = sale.custPhone;
-    temp.querySelector('.t-pts-earned').innerText = sale.pointsEarned;
-    temp.querySelector('.t-pts-balance').innerText = sale.pointsBalance;
-    temp.querySelector('.t-gross').innerText = formatBHD(sale.grossTotal);
-    
-    if (sale.discountAmount > 0) {
-        temp.querySelector('.t-disc-val').innerText = '-' + formatBHD(sale.discountAmount);
-    } else {
-        const discRow = temp.querySelector('.t-disc-row');
-        if (discRow) discRow.style.display = 'none';
-    }
-
-    const vatAmount = sale.netTotal - (sale.netTotal / 1.10);
-    temp.querySelector('.t-subtotal').innerText = formatBHD(sale.netTotal - vatAmount);
-    temp.querySelector('.t-vat').innerText = formatBHD(vatAmount);
-    temp.querySelector('.t-total').innerText = formatBHD(sale.netTotal);
-    temp.querySelector('.t-timestamp').innerText = sale.timestamp;
-
-    // Payment breakdown formatting
-    const payContainer = temp.querySelector('.t-payments-breakdown');
-    payContainer.innerHTML = '';
-    if (sale.paymentDetails && sale.paymentDetails.type === 'SPLIT') {
-        payContainer.innerHTML = `
-            <div style="display: flex; justify-content: space-between;"><span>${sale.paymentDetails.primary.method}:</span><span>${formatBHD(sale.paymentDetails.primary.amount)}</span></div>
-            <div style="display: flex; justify-content: space-between;"><span>${sale.paymentDetails.secondary.method}:</span><span>${formatBHD(sale.paymentDetails.secondary.amount)}</span></div>
-        `;
-    } else {
-        const methodStr = sale.paymentDetails ? sale.paymentDetails.method : 'CASH';
-        payContainer.innerHTML = `<div style="display: flex; justify-content: space-between;"><span>${methodStr}:</span><span>${formatBHD(sale.netTotal)}</span></div>`;
-    }
-
-    if (selectedPrintFormat === '58mm') {
-        const itemsList = temp.querySelector('.t-items-list');
-        sale.items.forEach(i => {
-            const div = document.createElement('div');
-            div.style.display = 'flex';
-            div.style.justifyContent = 'space-between';
-            div.innerHTML = `<span>${i.qty}x ${i.name}</span><span>${formatBHD(i.price * i.qty)}</span>`;
-            itemsList.appendChild(div);
-        });
-    } else {
-        const tbody = temp.querySelector('.t-items-table-body');
-        sale.items.forEach(i => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="padding: 6px;">${i.name}</td>
-                <td style="padding: 6px; text-align: center;">${i.qty}</td>
-                <td style="padding: 6px; text-align: right;">${formatBHD(i.price)}</td>
-                <td style="padding: 6px; text-align: right;">${formatBHD(i.price * i.qty)}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    printContainer.appendChild(temp);
-    printContainer.classList.remove('hidden');
-    window.print();
-    printContainer.classList.add('hidden');
-}
+function setPaymentType(t) { selectedPaymentType = t; }
+function setSingleMethod(m) { singlePaymentMethod = m; }
+function openPaymentModal() { document.getElementById('payment-modal').classList.remove('hidden'); }
+function closePaymentModal() { document.getElementById('payment-modal').classList.add('hidden'); }
 
 let html5QrCode = null;
 function toggleCameraScanner() {
@@ -1532,24 +1092,14 @@ function toggleCameraScanner() {
     if (wrapper.classList.contains('hidden')) {
         wrapper.classList.remove('hidden');
         html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: { width: 250, height: 150 } },
-            (decodedText) => {
-                document.getElementById('search-input').value = decodedText;
-                filterProducts();
-                toggleCameraScanner();
-            },
-            () => {}
-        );
+        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 150 } }, (txt) => {
+            document.getElementById('search-input').value = txt;
+            filterProducts();
+            toggleCameraScanner();
+        }, () => {});
     } else {
-        if (html5QrCode) {
-            html5QrCode.stop().then(() => {
-                wrapper.classList.add('hidden');
-            });
-        } else {
-            wrapper.classList.add('hidden');
-        }
+        if (html5QrCode) html5QrCode.stop().then(() => wrapper.classList.add('hidden'));
+        else wrapper.classList.add('hidden');
     }
 }
     </script>
