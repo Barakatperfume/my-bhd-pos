@@ -38,25 +38,25 @@
     <!-- Top Navigation Bar -->
     <header class="bg-emerald-700 text-white p-3 flex justify-between items-center shadow-md">
         <div class="flex items-center space-x-3">
-            <span class="font-bold text-xl tracking-wide">Barakat Perfumes POS</span>[cite: 2]
-            <span id="role-badge" class="bg-emerald-900 text-emerald-200 text-xs px-2 py-1 rounded-full uppercase tracking-wider font-semibold">Cashier</span>[cite: 2]
+            <span class="font-bold text-xl tracking-wide">Barakat Perfumes POS</span>
+            <span id="role-badge" class="bg-emerald-900 text-emerald-200 text-xs px-2 py-1 rounded-full uppercase tracking-wider font-semibold">Cashier</span>
         </div>
         <div class="flex items-center space-x-2">
-            <!-- NEW: Manager Portal Button -->
+            <!-- Manager Portal Button -->
             <button onclick="openManagerPortal()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1.5 rounded transition flex items-center space-x-1 font-bold shadow">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                 <span>Manager Portal</span>
             </button>
             <button onclick="openSalesHistoryModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition flex items-center space-x-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                <span>View Sales</span>[cite: 2]
+                <span>View Sales</span>
             </button>
             <button onclick="openItemManagerModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition flex items-center space-x-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                <span>Items Manager</span>[cite: 2]
+                <span>Items Manager</span>
             </button>
-            <span id="user-name" class="text-sm font-medium hidden sm:inline ml-2">Cashier 1</span>[cite: 2]
-            <button onclick="switchUser()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition">Switch PIN</button>[cite: 2]
+            <span id="user-name" class="text-sm font-medium hidden sm:inline ml-2">Cashier 1</span>
+            <button onclick="switchUser()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition">Switch PIN</button>
         </div>
     </header>
 
@@ -183,13 +183,10 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- NEW: MANAGER PORTAL / BACKOFFICE DASHBOARD -->
-    <!-- ========================================== -->
+    <!-- MANAGER PORTAL / BACKOFFICE DASHBOARD MODAL -->
     <div id="manager-portal-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
         <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full p-6 space-y-5 my-auto max-h-[92vh] flex flex-col">
             
-            <!-- Modal Header -->
             <div class="flex justify-between items-center border-b pb-4">
                 <div class="flex items-center space-x-3">
                     <div class="bg-amber-100 p-2 rounded-lg text-amber-800">
@@ -203,7 +200,6 @@
                 <button onclick="closeManagerPortal()" class="text-gray-400 hover:text-gray-600 font-bold text-2xl">&times;</button>
             </div>
 
-            <!-- Portal Navigation Tabs -->
             <div class="flex space-x-2 border-b pb-2">
                 <button onclick="switchManagerTab('dashboard')" id="tab-btn-dashboard" class="px-4 py-2 text-xs font-bold rounded-lg bg-amber-600 text-white transition shadow">Dashboard Analytics</button>
                 <button onclick="switchManagerTab('products')" id="tab-btn-products" class="px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Manage Products</button>
@@ -243,9 +239,8 @@
                 </div>
             </div>
 
-            <!-- Tab 2: Product CRUD Management -->
+            <!-- Tab 2: Product Management -->
             <div id="manager-tab-products" class="space-y-4 flex-1 overflow-y-auto hidden pr-1">
-                <!-- Add New Product Form -->
                 <div class="bg-emerald-50/50 border border-emerald-200 p-4 rounded-xl space-y-3">
                     <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Add New Product to Catalog</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -261,7 +256,6 @@
                     </div>
                 </div>
 
-                <!-- Existing Products List with Delete/Edit -->
                 <div class="border rounded-xl p-3 bg-white space-y-2">
                     <h4 class="text-xs font-bold text-gray-700 uppercase">Existing Catalog Items</h4>
                     <div id="manager-products-list" class="divide-y divide-gray-100 max-h-72 overflow-y-auto"></div>
@@ -644,9 +638,7 @@ async function switchUser() {
                 renderProducts();
                 return;
             }
-        } catch (err) {
-            console.warn('Database user query failed:', err);
-        }
+        } catch (err) {}
     }
 
     if (pin === '1234' || pin === '9999') {
@@ -768,7 +760,6 @@ function renderManagerDashboard() {
     document.getElementById('dash-total-profit').innerText = formatBHD(estProfit);
     document.getElementById('dash-total-stock').innerText = totalStockCount;
 
-    // Recent Sales List
     const recentList = document.getElementById('dash-recent-sales-list');
     recentList.innerHTML = '';
     salesHistory.slice(0, 5).forEach(s => {
@@ -778,7 +769,6 @@ function renderManagerDashboard() {
         recentList.appendChild(div);
     });
 
-    // Low Stock List
     const lowStockList = document.getElementById('dash-low-stock-list');
     lowStockList.innerHTML = '';
     const lowItems = products.filter(p => (p.stock_quantity ?? 0) <= (p.low_stock_threshold ?? 2));
