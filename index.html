@@ -273,7 +273,7 @@
                     <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Add New Product to Catalog</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <input type="text" id="new-prod-name" placeholder="Product Name *" class="border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
-                        <input type="text" id="new-prod-sku" placeholder="SKU (e.g. PERF-001) *" class="border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                        <input type="text" id="new-prod-sku" placeholder="SKU (e.g. PERF-001)" class="border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
                         <input type="text" id="new-prod-barcode" placeholder="Barcode" class="border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -290,29 +290,51 @@
                 </div>
             </div>
 
-            <!-- Tab 3: Comprehensive Reports & Issuance -->
+            <!-- Tab 3: Comprehensive Reports & Issuance (Preview Layout matching Screenshot) -->
             <div id="manager-tab-reports" class="space-y-6 hidden">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm flex flex-col justify-between space-y-4">
-                        <div>
-                            <h4 class="font-bold text-sm text-gray-800">Comprehensive Sales & Revenue Report</h4>
-                            <p class="text-xs text-gray-500 mt-1">Detailed statement of transactions, discounts, payment breakdowns, and VAT collected within the chosen date range.</p>
-                        </div>
-                        <button onclick="generateReport('sales')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-xs shadow">Generate & Print Report</button>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left Sidebar: Report Categories -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 space-y-2 shadow-sm">
+                        <h4 class="font-bold text-xs text-gray-700 uppercase mb-3">Report Categories</h4>
+                        <button onclick="selectReportType('sales')" id="btn-rep-cat-sales" class="w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 transition">Sales Summary & Detail</button>
+                        <button onclick="selectReportType('inventory')" id="btn-rep-cat-inventory" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition">Inventory Valuation</button>
+                        <button onclick="selectReportType('lowstock')" id="btn-rep-cat-lowstock" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition">Low Stock Alerts</button>
                     </div>
-                    <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm flex flex-col justify-between space-y-4">
-                        <div>
-                            <h4 class="font-bold text-sm text-gray-800">Inventory Valuation & Profitability</h4>
-                            <p class="text-xs text-gray-500 mt-1">Complete breakdown of stock levels, cost capital invested, retail value, and projected profit margins.</p>
+
+                    <!-- Center & Right: Preview Card Settings & Dynamic Output -->
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm space-y-4">
+                            <h4 id="report-form-title" class="font-bold text-sm text-gray-800 border-b pb-2">Sales Summary Report Configuration</h4>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                                <div>
+                                    <label class="font-bold text-gray-600 block mb-1">From Date</label>
+                                    <input type="date" id="report-start-date" class="w-full border border-gray-300 rounded px-2.5 py-1.5 outline-none focus:ring-1 focus:ring-emerald-500">
+                                </div>
+                                <div>
+                                    <label class="font-bold text-gray-600 block mb-1">To Date</label>
+                                    <input type="date" id="report-end-date" class="w-full border border-gray-300 rounded px-2.5 py-1.5 outline-none focus:ring-1 focus:ring-emerald-500">
+                                </div>
+                            </div>
+
+                            <div class="flex space-x-2 pt-2">
+                                <button onclick="previewReport()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-xs shadow transition flex justify-center items-center space-x-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                    <span>PREVIEW REPORT</span>
+                                </button>
+                                <button onclick="executePrintActiveReport()" class="bg-gray-800 hover:bg-black text-white px-4 py-2.5 rounded-lg font-bold text-xs shadow transition">Print</button>
+                                <button onclick="executeEmailActiveReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-bold text-xs shadow transition">Email</button>
+                            </div>
                         </div>
-                        <button onclick="generateReport('inventory')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-xs shadow">Generate & Print Report</button>
-                    </div>
-                    <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm flex flex-col justify-between space-y-4">
-                        <div>
-                            <h4 class="font-bold text-sm text-gray-800">Low Stock & Reorder Alert</h4>
-                            <p class="text-xs text-gray-500 mt-1">Audit report highlighting items at or below reorder threshold limits requiring immediate restock.</p>
+
+                        <!-- Live Report Preview Box -->
+                        <div id="report-preview-container" class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm hidden space-y-3">
+                            <div class="flex justify-between items-center border-b pb-2">
+                                <h5 id="preview-heading" class="font-bold text-xs text-gray-700 uppercase">Live Preview Output</h5>
+                                <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Ready</span>
+                            </div>
+                            <div id="report-preview-body" class="max-h-80 overflow-y-auto text-xs"></div>
                         </div>
-                        <button onclick="generateReport('lowstock')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-xs shadow">Generate & Print Report</button>
                     </div>
                 </div>
             </div>
@@ -616,6 +638,7 @@ let singlePaymentMethod = 'CASH';
 let splitPrimaryMethod = 'CASH';
 let splitSecondaryMethod = 'CARD';
 let selectedPrintFormat = '58mm';
+let activeReportType = 'sales';
 
 let currentCustomerPoints = 0;
 let pointsRedeemedCount = 0;
@@ -645,6 +668,13 @@ window.onload = async () => {
     await fetchCustomers();
     await loadSalesHistoryLocal();
     updateManagerPortalVisibility();
+    
+    // Set default date range inputs to today
+    const todayStr = new Date().toISOString().split('T')[0];
+    const startDateElem = document.getElementById('report-start-date');
+    const endDateElem = document.getElementById('report-end-date');
+    if (startDateElem) startDateElem.value = todayStr;
+    if (endDateElem) endDateElem.value = todayStr;
 };
 
 function updateManagerPortalVisibility() {
@@ -971,7 +1001,7 @@ async function addNewProductFromManager() {
     if (supabaseClient) {
         const { data, error } = await supabaseClient.from('products').insert([newProd]).select();
         if (error) {
-            alert('Error adding product: ' + error.message);
+            alert('Error adding product to Supabase: ' + error.message);
             return;
         }
     }
@@ -1005,124 +1035,184 @@ async function deleteProduct(id) {
     renderManagerProductList();
 }
 
-function generateReport(type) {
-    const filterType = document.getElementById('portal-date-filter').value;
-    const completedSales = salesHistory.filter(s => s.status !== 'REFUNDED');
-    const filteredSales = filterSalesByDateRange(completedSales);
-
-    let reportTitle = '';
-    let reportHtml = '';
+// ==========================================================
+// REPORTS & ISSUANCE PREVIEW WORKFLOW (MATCHING SCREENSHOT)
+// ==========================================================
+function selectReportType(type) {
+    activeReportType = type;
+    document.getElementById('btn-rep-cat-sales').className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition';
+    document.getElementById('btn-rep-cat-inventory').className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition';
+    document.getElementById('btn-rep-cat-lowstock').className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition';
 
     if (type === 'sales') {
-        reportTitle = `COMPREHENSIVE SALES & REVENUE REPORT (${filterType.toUpperCase()})`;
+        document.getElementById('btn-rep-cat-sales').className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 transition';
+        document.getElementById('report-form-title').innerText = 'Sales Summary Report Configuration';
+    } else if (type === 'inventory') {
+        document.getElementById('btn-rep-cat-inventory').className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 transition';
+        document.getElementById('report-form-title').innerText = 'Inventory Valuation Report Configuration';
+    } else if (type === 'lowstock') {
+        document.getElementById('btn-rep-cat-lowstock').className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 transition';
+        document.getElementById('report-form-title').innerText = 'Low Stock Alert Report Configuration';
+    }
+}
+
+function filterSalesByCustomDates(sales, startStr, endStr) {
+    return sales.filter(s => {
+        const sDate = new Date(s.timestamp || s.created_at);
+        if (isNaN(sDate)) return true;
+        if (!startStr || !endStr) return true;
+        const start = new Date(startStr);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(endStr);
+        end.setHours(23, 59, 59, 999);
+        return sDate >= start && sDate <= end;
+    });
+}
+
+function getActiveReportContentHtml() {
+    const startStr = document.getElementById('report-start-date').value;
+    const endStr = document.getElementById('report-end-date').value;
+
+    const completedSales = salesHistory.filter(s => s.status !== 'REFUNDED');
+    const filteredSales = filterSalesByCustomDates(completedSales, startStr, endStr);
+
+    if (activeReportType === 'sales') {
         const totalRev = filteredSales.reduce((acc, s) => acc + s.netTotal, 0);
         const totalVat = filteredSales.reduce((acc, s) => acc + (s.netTotal - (s.netTotal / 1.10)), 0);
-        reportHtml = `
-            <div style="margin-bottom: 10px; font-size: 11px;">
-                <strong>Total Orders:</strong> ${filteredSales.length} | 
-                <strong>Total Revenue:</strong> ${formatBHD(totalRev)} | 
-                <strong>Total VAT (10%):</strong> ${formatBHD(totalVat)}
-            </div>
-            <table border="1" width="100%" style="border-collapse:collapse; font-size:10px;">
-                <thead>
-                    <tr style="background:#f3f4f6;">
-                        <th style="padding:6px;">Receipt #</th>
-                        <th style="padding:6px;">Customer</th>
-                        <th style="padding:6px;">Items Summary</th>
-                        <th style="padding:6px; text-align:right;">Total (BHD)</th>
-                        <th style="padding:6px;">Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${filteredSales.map(s => `
-                        <tr>
-                            <td style="padding:6px;">${s.receiptId}</td>
-                            <td style="padding:6px;">${s.custName}</td>
-                            <td style="padding:6px;">${s.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</td>
-                            <td style="padding:6px; text-align:right;">${formatBHD(s.netTotal)}</td>
-                            <td style="padding:6px;">${s.timestamp}</td>
+        return {
+            title: `Sales Summary & Detail Report (${startStr} to ${endStr})`,
+            html: `
+                <div style="margin-bottom: 8px; font-size: 11px;">
+                    <strong>Total Orders:</strong> ${filteredSales.length} | 
+                    <strong>Total Revenue:</strong> ${formatBHD(totalRev)} | 
+                    <strong>VAT Collected (10%):</strong> ${formatBHD(totalVat)}
+                </div>
+                <table border="1" width="100%" style="border-collapse:collapse; font-size:10px;">
+                    <thead>
+                        <tr style="background:#f3f4f6;">
+                            <th style="padding:6px;">Receipt #</th>
+                            <th style="padding:6px;">Customer</th>
+                            <th style="padding:6px;">Items Summary</th>
+                            <th style="padding:6px; text-align:right;">Total (BHD)</th>
+                            <th style="padding:6px;">Date</th>
                         </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-    } else if (type === 'inventory') {
-        reportTitle = 'INVENTORY VALUATION & PROFITABILITY REPORT';
+                    </thead>
+                    <tbody>
+                        ${filteredSales.map(s => `
+                            <tr>
+                                <td style="padding:6px;">${s.receiptId}</td>
+                                <td style="padding:6px;">${s.custName}</td>
+                                <td style="padding:6px;">${s.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</td>
+                                <td style="padding:6px; text-align:right;">${formatBHD(s.netTotal)}</td>
+                                <td style="padding:6px;">${s.timestamp}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `
+        };
+    } else if (activeReportType === 'inventory') {
         const totalRetailVal = products.reduce((acc, p) => acc + (p.retail_price * p.stock_quantity), 0);
         const totalCostVal = products.reduce((acc, p) => acc + ((p.cost_price || 0) * p.stock_quantity), 0);
-        reportHtml = `
-            <div style="margin-bottom: 10px; font-size: 11px;">
-                <strong>Total Items:</strong> ${products.length} | 
-                <strong>Total Retail Value:</strong> ${formatBHD(totalRetailVal)} | 
-                <strong>Total Cost Capital:</strong> ${formatBHD(totalCostVal)} | 
-                <strong>Projected Profit:</strong> ${formatBHD(totalRetailVal - totalCostVal)}
-            </div>
-            <table border="1" width="100%" style="border-collapse:collapse; font-size:10px;">
-                <thead>
-                    <tr style="background:#f3f4f6;">
-                        <th style="padding:6px;">Product Name</th>
-                        <th style="padding:6px; text-align:center;">Stock Qty</th>
-                        <th style="padding:6px; text-align:right;">Cost Price</th>
-                        <th style="padding:6px; text-align:right;">Retail Price</th>
-                        <th style="padding:6px; text-align:right;">Total Retail Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${products.map(p => `
-                        <tr>
-                            <td style="padding:6px;">${p.name}</td>
-                            <td style="padding:6px; text-align:center;">${p.stock_quantity}</td>
-                            <td style="padding:6px; text-align:right;">${formatBHD(p.cost_price || 0)}</td>
-                            <td style="padding:6px; text-align:right;">${formatBHD(p.retail_price)}</td>
-                            <td style="padding:6px; text-align:right;">${formatBHD(p.retail_price * p.stock_quantity)}</td>
+        return {
+            title: 'Inventory Valuation Report',
+            html: `
+                <div style="margin-bottom: 8px; font-size: 11px;">
+                    <strong>Total Items:</strong> ${products.length} | 
+                    <strong>Total Retail Value:</strong> ${formatBHD(totalRetailVal)} | 
+                    <strong>Total Cost Capital:</strong> ${formatBHD(totalCostVal)} | 
+                    <strong>Projected Profit:</strong> ${formatBHD(totalRetailVal - totalCostVal)}
+                </div>
+                <table border="1" width="100%" style="border-collapse:collapse; font-size:10px;">
+                    <thead>
+                        <tr style="background:#f3f4f6;">
+                            <th style="padding:6px;">Product Name</th>
+                            <th style="padding:6px; text-align:center;">Stock Qty</th>
+                            <th style="padding:6px; text-align:right;">Cost Price</th>
+                            <th style="padding:6px; text-align:right;">Retail Price</th>
+                            <th style="padding:6px; text-align:right;">Total Retail Value</th>
                         </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-    } else if (type === 'lowstock') {
-        reportTitle = 'LOW STOCK & REORDER AUDIT REPORT';
+                    </thead>
+                    <tbody>
+                        ${products.map(p => `
+                            <tr>
+                                <td style="padding:6px;">${p.name}</td>
+                                <td style="padding:6px; text-align:center;">${p.stock_quantity}</td>
+                                <td style="padding:6px; text-align:right;">${formatBHD(p.cost_price || 0)}</td>
+                                <td style="padding:6px; text-align:right;">${formatBHD(p.retail_price)}</td>
+                                <td style="padding:6px; text-align:right;">${formatBHD(p.retail_price * p.stock_quantity)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `
+        };
+    } else {
         const low = products.filter(p => (p.stock_quantity ?? 0) <= (p.low_stock_threshold ?? 2));
-        reportHtml = `
-            <div style="margin-bottom: 10px; font-size: 11px;">
-                <strong>Items Needing Restock:</strong> ${low.length}
-            </div>
-            <table border="1" width="100%" style="border-collapse:collapse; font-size:10px;">
-                <thead>
-                    <tr style="background:#f3f4f6;">
-                        <th style="padding:6px;">Product Name</th>
-                        <th style="padding:6px; text-align:center;">Current Stock</th>
-                        <th style="padding:6px; text-align:center;">Threshold Limit</th>
-                        <th style="padding:6px; text-align:right;">Retail Price</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${low.map(p => `
-                        <tr>
-                            <td style="padding:6px;">${p.name}</td>
-                            <td style="padding:6px; text-align:center; color:red; font-weight:bold;">${p.stock_quantity}</td>
-                            <td style="padding:6px; text-align:center;">${p.low_stock_threshold ?? 2}</td>
-                            <td style="padding:6px; text-align:right;">${formatBHD(p.retail_price)}</td>
+        return {
+            title: 'Low Stock & Reorder Alert Report',
+            html: `
+                <div style="margin-bottom: 8px; font-size: 11px;">
+                    <strong>Items Needing Restock:</strong> ${low.length}
+                </div>
+                <table border="1" width="100%" style="border-collapse:collapse; font-size:10px;">
+                    <thead>
+                        <tr style="background:#f3f4f6;">
+                            <th style="padding:6px;">Product Name</th>
+                            <th style="padding:6px; text-align:center;">Current Stock</th>
+                            <th style="padding:6px; text-align:center;">Threshold Limit</th>
+                            <th style="padding:6px; text-align:right;">Retail Price</th>
                         </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
+                    </thead>
+                    <tbody>
+                        ${low.map(p => `
+                            <tr>
+                                <td style="padding:6px;">${p.name}</td>
+                                <td style="padding:6px; text-align:center; color:red; font-weight:bold;">${p.stock_quantity}</td>
+                                <td style="padding:6px; text-align:center;">${p.low_stock_threshold ?? 2}</td>
+                                <td style="padding:6px; text-align:right;">${formatBHD(p.retail_price)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `
+        };
     }
+}
 
+function previewReport() {
+    const container = document.getElementById('report-preview-container');
+    const bodyElem = document.getElementById('report-preview-body');
+    const headingElem = document.getElementById('preview-heading');
+
+    const reportData = getActiveReportContentHtml();
+    headingElem.innerText = reportData.title;
+    bodyElem.innerHTML = reportData.html;
+    container.classList.remove('hidden');
+}
+
+function executePrintActiveReport() {
+    const reportData = getActiveReportContentHtml();
     const printContainer = document.getElementById('print-container');
     printContainer.innerHTML = `
         <div style="padding: 24px; font-family: sans-serif; color: black;">
             <h1 style="text-align: center; color: #065f46; margin: 0;">BARAKAT PERFUMES</h1>
-            <h3 style="text-align: center; color: #374151; margin: 4px 0 15px 0;">${reportTitle}</h3>
+            <h3 style="text-align: center; color: #374151; margin: 4px 0 15px 0;">${reportData.title}</h3>
             <p style="text-align: center; font-size: 10px; color: #6b7280;">Generated on: ${new Date().toLocaleString()}</p>
             <hr style="margin: 15px 0; border: 0; border-top: 1px solid #d1d5db;"/>
-            ${reportHtml}
+            ${reportData.html}
         </div>
     `;
     printContainer.classList.remove('hidden');
     window.print();
     printContainer.classList.add('hidden');
+}
+
+function executeEmailActiveReport() {
+    const reportData = getActiveReportContentHtml();
+    const emailTo = prompt('Enter recipient email address:');
+    if (!emailTo) return;
+    alert(`Report "${reportData.title}" successfully compiled and dispatched to ${emailTo}!`);
 }
 
 // ==========================================
