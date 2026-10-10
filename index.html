@@ -42,7 +42,6 @@
             <span id="role-badge" class="bg-emerald-900 text-emerald-200 text-xs px-2 py-1 rounded-full uppercase tracking-wider font-semibold">Cashier</span>
         </div>
         <div class="flex items-center space-x-2">
-            <!-- Manager Portal Button (Hidden until Admin/Manager PIN is entered) -->
             <button id="btn-manager-portal" onclick="openManagerPortal()" class="hidden bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1.5 rounded transition flex items-center space-x-1 font-bold shadow">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                 <span>Manager Portal</span>
@@ -269,7 +268,7 @@
                 </div>
             </div>
 
-            <!-- Tab 2: Product Management (Enhanced with Category & Toggles) -->
+            <!-- Tab 2: Product Management (Dynamic Database Categories) -->
             <div id="manager-tab-products" class="space-y-6 hidden">
                 <div class="bg-emerald-50/50 border border-emerald-200 p-5 rounded-xl space-y-3 shadow-sm">
                     <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Add New Product to Catalog</h4>
@@ -283,11 +282,7 @@
                             <label class="text-[10px] font-bold text-gray-600 block mb-1">Category</label>
                             <div class="flex space-x-1">
                                 <select id="new-prod-category-select" onchange="onCategorySelectChange()" class="flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white outline-none">
-                                    <option value="Perfumes">Perfumes</option>
-                                    <option value="Oud & Oils">Oud & Oils</option>
-                                    <option value="Gift Sets">Gift Sets</option>
-                                    <option value="Accessories">Accessories</option>
-                                    <option value="NEW_CATEGORY">+ Add New Category</option>
+                                    <!-- Populated dynamically from database products -->
                                 </select>
                                 <input type="text" id="new-prod-category-custom" placeholder="New category name" class="hidden flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white outline-none">
                             </div>
@@ -317,7 +312,7 @@
                 </div>
             </div>
 
-            <!-- Tab 3: Upload Portal (Template Download & Comparison Workflow) -->
+            <!-- Tab 3: Upload Portal -->
             <div id="manager-tab-upload" class="space-y-6 hidden">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm space-y-4">
@@ -337,7 +332,6 @@
                     </div>
                 </div>
 
-                <!-- Comparison & Action Modal / Box -->
                 <div id="upload-comparison-box" class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm hidden space-y-4">
                     <div class="flex justify-between items-center border-b pb-3">
                         <h4 class="font-bold text-sm text-gray-800">Upload Comparison & Conflict Resolution</h4>
@@ -354,7 +348,7 @@
                 </div>
             </div>
 
-            <!-- Tab 4: Customers Tab in Manager Portal -->
+            <!-- Tab 4: Customers Tab in Manager Portal (With Editable Customer Details synced to DB) -->
             <div id="manager-tab-customers" class="space-y-6 hidden">
                 <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm space-y-4">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -368,7 +362,6 @@
             <!-- Tab 5: Comprehensive Reports & Issuance -->
             <div id="manager-tab-reports" class="space-y-6 hidden">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Left Sidebar: Report Categories -->
                     <div class="bg-white border border-gray-200 rounded-xl p-4 space-y-2 shadow-sm">
                         <h4 class="font-bold text-xs text-gray-700 uppercase mb-3">Report Categories</h4>
                         <button onclick="selectReportType('sales')" id="btn-rep-cat-sales" class="w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 transition">Sales Summary & Detail</button>
@@ -376,7 +369,6 @@
                         <button onclick="selectReportType('lowstock')" id="btn-rep-cat-lowstock" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition">Low Stock Alerts</button>
                     </div>
 
-                    <!-- Center & Right: Preview Card Settings & Dynamic Output -->
                     <div class="lg:col-span-2 space-y-4">
                         <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm space-y-4">
                             <h4 id="report-form-title" class="font-bold text-sm text-gray-800 border-b pb-2">Sales Summary Report Configuration</h4>
@@ -402,7 +394,6 @@
                             </div>
                         </div>
 
-                        <!-- Live Report Preview Box -->
                         <div id="report-preview-container" class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm hidden space-y-3">
                             <div class="flex justify-between items-center border-b pb-2">
                                 <h5 id="preview-heading" class="font-bold text-xs text-gray-700 uppercase">Live Preview Output</h5>
@@ -414,6 +405,35 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- EDIT CUSTOMER MODAL -->
+    <div id="edit-customer-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-5 space-y-4 my-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-gray-800">Edit Customer Details</h3>
+                <button onclick="closeEditCustomerModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+            </div>
+            <input type="hidden" id="edit-cust-id">
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="font-bold text-gray-600 block mb-1">Full Name *</label>
+                    <input type="text" id="edit-cust-name-input" class="w-full border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="font-bold text-gray-600 block mb-1">Phone Number *</label>
+                    <input type="text" id="edit-cust-phone-input" class="w-full border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="font-bold text-gray-600 block mb-1">Email Address</label>
+                    <input type="email" id="edit-cust-email-input" class="w-full border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-emerald-500">
+                </div>
+            </div>
+            <div class="pt-2 flex space-x-2">
+                <button onclick="saveCustomerEdits()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs shadow transition">Save Changes</button>
+                <button onclick="closeEditCustomerModal()" class="border border-gray-300 text-gray-700 px-4 py-2 rounded text-xs font-semibold">Cancel</button>
+            </div>
         </div>
     </div>
 
@@ -807,6 +827,7 @@ async function fetchProducts() {
     if (!supabaseClient) {
         products = sortProductsAlphabetically(fallbackProducts);
         renderProducts(products);
+        populateCategoryDropdown();
         return;
     }
 
@@ -821,6 +842,7 @@ async function fetchProducts() {
         products = sortProductsAlphabetically(fallbackProducts);
     }
     renderProducts(products);
+    populateCategoryDropdown();
 }
 
 async function fetchCustomers() {
@@ -831,6 +853,37 @@ async function fetchCustomers() {
             customers = data;
         }
     } catch (err) {}
+}
+
+// Populate product category dropdown dynamically from database products
+function populateCategoryDropdown() {
+    const selectElem = document.getElementById('new-prod-category-select');
+    if (!selectElem) return;
+
+    let catSet = new Set();
+    products.forEach(p => {
+        if (p.category && p.category.trim() !== '') {
+            catSet.add(p.category.trim());
+        }
+    });
+
+    if (catSet.size === 0) {
+        catSet.add('Perfumes');
+        catSet.add('Uncategorized');
+    }
+
+    selectElem.innerHTML = '';
+    catSet.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat;
+        opt.innerText = cat;
+        selectElem.appendChild(opt);
+    });
+
+    const newOpt = document.createElement('option');
+    newOpt.value = 'NEW_CATEGORY';
+    newOpt.innerText = '+ Add New Category';
+    selectElem.appendChild(newOpt);
 }
 
 // ==========================================================
@@ -888,7 +941,10 @@ function switchManagerTab(tab) {
     document.getElementById('tab-btn-' + tab).className = 'px-4 py-2 text-xs font-bold rounded-lg bg-amber-600 text-white transition shadow';
 
     if (tab === 'dashboard') renderManagerDashboard();
-    if (tab === 'products') renderManagerProductList();
+    if (tab === 'products') {
+        populateCategoryDropdown();
+        renderManagerProductList();
+    }
     if (tab === 'customers') renderManagerCustomerDirectory();
 }
 
@@ -1029,6 +1085,9 @@ function renderManagerDashboard() {
     }
 }
 
+// ==========================================================
+// CUSTOMER DIRECTORY & EDITING WORKFLOW (SYNCED TO DB)
+// ==========================================================
 function renderManagerCustomerDirectory() {
     const container = document.getElementById('manager-customer-list');
     const term = document.getElementById('manager-cust-search').value.toLowerCase().trim();
@@ -1046,19 +1105,70 @@ function renderManagerCustomerDirectory() {
 
     filtered.forEach(c => {
         const row = document.createElement('div');
-        row.className = 'py-3 flex justify-between items-center text-xs';
+        row.className = 'py-3 flex justify-between items-center text-xs border-b border-gray-100 last:border-0';
         row.innerHTML = `
-            <div>
+            <div class="flex-1 pr-3">
                 <p class="font-bold text-gray-800 text-sm">${c.name}</p>
                 <p class="text-gray-400">Phone: ${c.phone} | Email: ${c.email || 'N/A'}</p>
             </div>
-            <div class="text-right">
-                <span class="bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">${c.loyalty_points || 0} Pts</span>
-                <p class="text-gray-500 mt-1 font-semibold">Total Spent: ${formatBHD(c.total_spent || 0)}</p>
+            <div class="flex items-center space-x-3">
+                <div class="text-right">
+                    <span class="bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">${c.loyalty_points || 0} Pts</span>
+                    <p class="text-gray-500 mt-1 font-semibold">Total Spent: ${formatBHD(c.total_spent || 0)}</p>
+                </div>
+                <button onclick="openEditCustomerModal('${c.id}')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded transition shadow">Edit</button>
             </div>
         `;
         container.appendChild(row);
     });
+}
+
+function openEditCustomerModal(id) {
+    const cust = customers.find(c => String(c.id) === String(id));
+    if (!cust) return;
+
+    document.getElementById('edit-cust-id').value = cust.id;
+    document.getElementById('edit-cust-name-input').value = cust.name || '';
+    document.getElementById('edit-cust-phone-input').value = cust.phone || '';
+    document.getElementById('edit-cust-email-input').value = cust.email || '';
+
+    document.getElementById('edit-customer-modal').classList.remove('hidden');
+}
+
+function closeEditCustomerModal() {
+    document.getElementById('edit-customer-modal').classList.add('hidden');
+}
+
+async function saveCustomerEdits() {
+    const id = document.getElementById('edit-cust-id').value;
+    const name = document.getElementById('edit-cust-name-input').value.trim();
+    const phone = document.getElementById('edit-cust-phone-input').value.trim();
+    const email = document.getElementById('edit-cust-email-input').value.trim();
+
+    if (!name || !phone) {
+        alert('Customer Name and Phone number are required!');
+        return;
+    }
+
+    const updateData = { name, phone, email: email || null };
+
+    if (supabaseClient && isValidUUID(id)) {
+        const { error } = await supabaseClient.from('contacts').update(updateData).eq('id', id);
+        if (error) {
+            alert('Error updating customer in database: ' + error.message);
+            return;
+        }
+    }
+
+    const idx = customers.findIndex(c => String(c.id) === String(id));
+    if (idx !== -1) {
+        customers[idx] = Object.assign({}, customers[idx], updateData);
+    }
+
+    alert('Customer details updated successfully and synced to database!');
+    closeEditCustomerModal();
+    renderManagerCustomerDirectory();
+    await fetchCustomers();
 }
 
 function onCategorySelectChange() {
