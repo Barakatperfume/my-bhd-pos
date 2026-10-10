@@ -38,8 +38,8 @@
     <!-- Top Navigation Bar -->
     <header class="bg-emerald-700 text-white p-3 flex justify-between items-center shadow-md">
         <div class="flex items-center space-x-3">
-            <span class="font-bold text-xl tracking-wide">Barakat Perfumes POS</span>[cite: 2]
-            <span id="role-badge" class="bg-emerald-900 text-emerald-200 text-xs px-2 py-1 rounded-full uppercase tracking-wider font-semibold">Cashier</span>[cite: 2]
+            <span class="font-bold text-xl tracking-wide">Barakat Perfumes POS</span>
+            <span id="role-badge" class="bg-emerald-900 text-emerald-200 text-xs px-2 py-1 rounded-full uppercase tracking-wider font-semibold">Cashier</span>
         </div>
         <div class="flex items-center space-x-2">
             <!-- Manager Portal Button (Hidden until Admin/Manager PIN is entered) -->
@@ -49,14 +49,14 @@
             </button>
             <button onclick="openSalesHistoryModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition flex items-center space-x-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                <span>View Sales</span>[cite: 2]
+                <span>View Sales</span>
             </button>
             <button onclick="openItemManagerModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition flex items-center space-x-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                <span>Items Manager</span>[cite: 2]
+                <span>Items Manager</span>
             </button>
-            <span id="user-name" class="text-sm font-medium hidden sm:inline ml-2">Cashier 1</span>[cite: 2]
-            <button onclick="switchUser()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition">Switch PIN</button>[cite: 2]
+            <span id="user-name" class="text-sm font-medium hidden sm:inline ml-2">Cashier 1</span>
+            <button onclick="switchUser()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition">Switch PIN</button>
         </div>
     </header>
 
@@ -178,7 +178,7 @@
                 </div>
                 <div>
                     <h2 class="text-xl font-black text-gray-900">Manager & Backoffice Portal</h2>
-                    <p class="text-xs text-gray-500">Full-screen business analytics, product management, and comprehensive reports</p>
+                    <p class="text-xs text-gray-500">Full-screen business analytics, product management, customers, and comprehensive reports</p>
                 </div>
             </div>
             <button onclick="closeManagerPortal()" class="bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg font-bold text-xs shadow flex items-center space-x-1 transition">
@@ -189,9 +189,11 @@
 
         <!-- Portal Sub-Navigation Tabs & Global Date Selector Bar -->
         <div class="bg-white border-b px-6 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
-            <div class="flex space-x-2">
+            <div class="flex space-x-2 flex-wrap gap-y-2">
                 <button onclick="switchManagerTab('dashboard')" id="tab-btn-dashboard" class="px-4 py-2 text-xs font-bold rounded-lg bg-amber-600 text-white transition shadow">Dashboard Analytics</button>
                 <button onclick="switchManagerTab('products')" id="tab-btn-products" class="px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Manage Products</button>
+                <button onclick="switchManagerTab('upload')" id="tab-btn-upload" class="px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Upload Portal</button>
+                <button onclick="switchManagerTab('customers')" id="tab-btn-customers" class="px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Customers</button>
                 <button onclick="switchManagerTab('reports')" id="tab-btn-reports" class="px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Reports & Issuance</button>
             </div>
 
@@ -267,19 +269,44 @@
                 </div>
             </div>
 
-            <!-- Tab 2: Product Management -->
+            <!-- Tab 2: Product Management (Enhanced with Category & Toggles) -->
             <div id="manager-tab-products" class="space-y-6 hidden">
-                <div class="bg-emerald-50/50 border border-emerald-200 p-5 rounded-xl space-y-3">
+                <div class="bg-emerald-50/50 border border-emerald-200 p-5 rounded-xl space-y-3 shadow-sm">
                     <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Add New Product to Catalog</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <input type="text" id="new-prod-name" placeholder="Product Name *" class="border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
                         <input type="text" id="new-prod-sku" placeholder="SKU (e.g. PERF-001)" class="border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
                         <input type="text" id="new-prod-barcode" placeholder="Barcode" class="border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
                     </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <input type="number" id="new-prod-cost" step="0.001" placeholder="Cost Price (BHD)" class="border border-gray-300 rounded-lg px-3 py-2 text-xs text-right font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
-                        <input type="number" id="new-prod-retail" step="0.001" placeholder="Retail Price (BHD) *" class="border border-gray-300 rounded-lg px-3 py-2 text-xs text-right font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-600 block mb-1">Category</label>
+                            <div class="flex space-x-1">
+                                <select id="new-prod-category-select" onchange="onCategorySelectChange()" class="flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white outline-none">
+                                    <option value="Perfumes">Perfumes</option>
+                                    <option value="Oud & Oils">Oud & Oils</option>
+                                    <option value="Gift Sets">Gift Sets</option>
+                                    <option value="Accessories">Accessories</option>
+                                    <option value="NEW_CATEGORY">+ Add New Category</option>
+                                </select>
+                                <input type="text" id="new-prod-category-custom" placeholder="New category name" class="hidden flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white outline-none">
+                            </div>
+                        </div>
+                        <input type="number" id="new-prod-cost" step="0.001" placeholder="Cost Price (BHD)" class="border border-gray-300 rounded-lg px-3 py-2 text-xs text-right font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-white self-end">
+                        <input type="number" id="new-prod-retail" step="0.001" placeholder="Retail Price (BHD) *" class="border border-gray-300 rounded-lg px-3 py-2 text-xs text-right font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-white self-end">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center pt-2">
                         <input type="number" id="new-prod-stock" placeholder="Initial Stock Qty" class="border border-gray-300 rounded-lg px-3 py-2 text-xs text-center font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                        <div class="flex items-center space-x-4 text-xs font-bold text-gray-700">
+                            <label class="flex items-center space-x-1.5 cursor-pointer">
+                                <input type="checkbox" id="new-prod-track" checked class="w-4 h-4 text-emerald-600 rounded">
+                                <span>Track Stock</span>
+                            </label>
+                            <label class="flex items-center space-x-1.5 cursor-pointer">
+                                <input type="checkbox" id="new-prod-available" checked class="w-4 h-4 text-emerald-600 rounded">
+                                <span>Available for Sale</span>
+                            </label>
+                        </div>
                         <button onclick="addNewProductFromManager()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs shadow transition">Add Product</button>
                     </div>
                 </div>
@@ -290,7 +317,55 @@
                 </div>
             </div>
 
-            <!-- Tab 3: Comprehensive Reports & Issuance (Preview Layout matching Screenshot) -->
+            <!-- Tab 3: Upload Portal (Template Download & Comparison Workflow) -->
+            <div id="manager-tab-upload" class="space-y-6 hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm space-y-4">
+                        <h4 class="font-bold text-sm text-gray-800">1. Download Product CSV Template</h4>
+                        <p class="text-xs text-gray-500">Download the standard CSV template formatted with all required columns for bulk uploading items.</p>
+                        <button onclick="downloadProductTemplate()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg font-bold text-xs shadow transition flex items-center space-x-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <span>Download CSV Template</span>
+                        </button>
+                    </div>
+
+                    <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm space-y-4">
+                        <h4 class="font-bold text-sm text-gray-800">2. Upload Filled CSV File</h4>
+                        <p class="text-xs text-gray-500">Upload your completed CSV file. The system will compare items against your existing catalog and prompt for action.</p>
+                        <input type="file" id="csv-file-input" accept=".csv" class="w-full border border-gray-300 rounded-lg p-2 text-xs bg-gray-50 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                        <button onclick="handleCSVUploadPreview()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg text-xs shadow transition">Analyze & Compare Upload</button>
+                    </div>
+                </div>
+
+                <!-- Comparison & Action Modal / Box -->
+                <div id="upload-comparison-box" class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm hidden space-y-4">
+                    <div class="flex justify-between items-center border-b pb-3">
+                        <h4 class="font-bold text-sm text-gray-800">Upload Comparison & Conflict Resolution</h4>
+                        <span id="upload-summary-badge" class="text-xs bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-bold">Review Required</span>
+                    </div>
+                    <p class="text-xs text-gray-500">For items that already exist in your catalog (matched by SKU or Name), choose the action you would like to apply:</p>
+                    <div class="flex space-x-2">
+                        <button onclick="setGlobalUploadAction('skip')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-200 text-gray-700 hover:bg-gray-300">Set All: Skip Existing</button>
+                        <button onclick="setGlobalUploadAction('replace')" class="px-3 py-1.5 text-xs font-bold rounded bg-amber-100 text-amber-800 hover:bg-amber-200">Set All: Replace Details</button>
+                        <button onclick="setGlobalUploadAction('add')" class="px-3 py-1.5 text-xs font-bold rounded bg-emerald-100 text-emerald-800 hover:bg-emerald-200">Set All: Add Stock Quantity</button>
+                    </div>
+                    <div id="upload-comparison-list" class="divide-y divide-gray-100 max-h-80 overflow-y-auto border rounded-lg p-3 bg-gray-50"></div>
+                    <button onclick="executeBatchUploadImport()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg text-xs shadow transition">Confirm & Import Products</button>
+                </div>
+            </div>
+
+            <!-- Tab 4: Customers Tab in Manager Portal -->
+            <div id="manager-tab-customers" class="space-y-6 hidden">
+                <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <h4 class="font-bold text-sm text-gray-800">Customer Directory & Loyalty Audit</h4>
+                        <input type="text" id="manager-cust-search" onkeyup="renderManagerCustomerDirectory()" placeholder="Search customer name or phone..." class="border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-emerald-500 w-full sm:w-72">
+                    </div>
+                    <div id="manager-customer-list" class="divide-y divide-gray-100 max-h-96 overflow-y-auto"></div>
+                </div>
+            </div>
+
+            <!-- Tab 5: Comprehensive Reports & Issuance -->
             <div id="manager-tab-reports" class="space-y-6 hidden">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Left Sidebar: Report Categories -->
@@ -639,6 +714,7 @@ let splitPrimaryMethod = 'CASH';
 let splitSecondaryMethod = 'CARD';
 let selectedPrintFormat = '58mm';
 let activeReportType = 'sales';
+let parsedUploadRows = [];
 
 let currentCustomerPoints = 0;
 let pointsRedeemedCount = 0;
@@ -646,9 +722,9 @@ let userRole = 'CASHIER';
 let currentUser = { id: null, name: 'Cashier 1', role: 'CASHIER' };
 
 const fallbackProducts = [
-    { id: '1', name: 'Aromatix Frost Bite 100ml', retail_price: 22.000, cost_price: 11.200, stock_quantity: 3, barcode: '10003' },
-    { id: '2', name: 'Lattafa Maahir Honor 100ml', retail_price: 14.000, cost_price: 6.500, stock_quantity: 8, barcode: '10002' },
-    { id: '3', name: 'RIIFFS Freeze EDP 100ml', retail_price: 18.500, cost_price: 9.000, stock_quantity: 12, barcode: '10001' }
+    { id: '1', name: 'Aromatix Frost Bite 100ml', retail_price: 22.000, cost_price: 11.200, stock_quantity: 3, barcode: '10003', category: 'Perfumes', track_stock: true, available_for_sale: true },
+    { id: '2', name: 'Lattafa Maahir Honor 100ml', retail_price: 14.000, cost_price: 6.500, stock_quantity: 8, barcode: '10002', category: 'Perfumes', track_stock: true, available_for_sale: true },
+    { id: '3', name: 'RIIFFS Freeze EDP 100ml', retail_price: 18.500, cost_price: 9.000, stock_quantity: 12, barcode: '10001', category: 'Perfumes', track_stock: true, available_for_sale: true }
 ];
 
 const formatBHD = (amount) => {
@@ -669,7 +745,6 @@ window.onload = async () => {
     await loadSalesHistoryLocal();
     updateManagerPortalVisibility();
     
-    // Set default date range inputs to today
     const todayStr = new Date().toISOString().split('T')[0];
     const startDateElem = document.getElementById('report-start-date');
     const endDateElem = document.getElementById('report-end-date');
@@ -759,7 +834,7 @@ async function fetchCustomers() {
 }
 
 // ==========================================================
-// FULL-WINDOW MANAGER PORTAL & ADVANCED ANALYTICS
+// FULL-WINDOW MANAGER PORTAL & ADVANCED TABS
 // ==========================================================
 async function openManagerPortal() {
     if (userRole !== 'ADMIN' && userRole !== 'MANAGER') {
@@ -799,10 +874,14 @@ function closeManagerPortal() {
 function switchManagerTab(tab) {
     document.getElementById('manager-tab-dashboard').classList.add('hidden');
     document.getElementById('manager-tab-products').classList.add('hidden');
+    document.getElementById('manager-tab-upload').classList.add('hidden');
+    document.getElementById('manager-tab-customers').classList.add('hidden');
     document.getElementById('manager-tab-reports').classList.add('hidden');
 
     document.getElementById('tab-btn-dashboard').className = 'px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition';
     document.getElementById('tab-btn-products').className = 'px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition';
+    document.getElementById('tab-btn-upload').className = 'px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition';
+    document.getElementById('tab-btn-customers').className = 'px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition';
     document.getElementById('tab-btn-reports').className = 'px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition';
 
     document.getElementById('manager-tab-' + tab).classList.remove('hidden');
@@ -810,6 +889,7 @@ function switchManagerTab(tab) {
 
     if (tab === 'dashboard') renderManagerDashboard();
     if (tab === 'products') renderManagerProductList();
+    if (tab === 'customers') renderManagerCustomerDirectory();
 }
 
 function onDateFilterChange() {
@@ -880,7 +960,6 @@ function renderManagerDashboard() {
     document.getElementById('dash-total-profit').innerText = formatBHD(estProfit);
     document.getElementById('dash-total-stock').innerText = totalStockCount;
 
-    // Top 5 Best Selling Items calculation
     let productSalesMap = {};
     filteredSales.forEach(s => {
         s.items.forEach(i => {
@@ -904,7 +983,6 @@ function renderManagerDashboard() {
         });
     }
 
-    // Top 5 Customers by Sales Volume calculation
     let customerSalesMap = {};
     filteredSales.forEach(s => {
         const cName = s.custName || 'Walk-in Customer';
@@ -927,7 +1005,6 @@ function renderManagerDashboard() {
         });
     }
 
-    // Recent Sales List
     const recentList = document.getElementById('dash-recent-sales-list');
     recentList.innerHTML = '';
     filteredSales.slice(0, 6).forEach(s => {
@@ -937,7 +1014,6 @@ function renderManagerDashboard() {
         recentList.appendChild(div);
     });
 
-    // Low Stock List
     const lowStockList = document.getElementById('dash-low-stock-list');
     lowStockList.innerHTML = '';
     const lowItems = products.filter(p => (p.stock_quantity ?? 0) <= (p.low_stock_threshold ?? 2));
@@ -953,6 +1029,49 @@ function renderManagerDashboard() {
     }
 }
 
+function renderManagerCustomerDirectory() {
+    const container = document.getElementById('manager-customer-list');
+    const term = document.getElementById('manager-cust-search').value.toLowerCase().trim();
+    container.innerHTML = '';
+
+    const filtered = customers.filter(c => 
+        (c.name && c.name.toLowerCase().includes(term)) ||
+        (c.phone && c.phone.toLowerCase().includes(term))
+    );
+
+    if (filtered.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-400 py-6 text-xs">No registered customers found.</p>';
+        return;
+    }
+
+    filtered.forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'py-3 flex justify-between items-center text-xs';
+        row.innerHTML = `
+            <div>
+                <p class="font-bold text-gray-800 text-sm">${c.name}</p>
+                <p class="text-gray-400">Phone: ${c.phone} | Email: ${c.email || 'N/A'}</p>
+            </div>
+            <div class="text-right">
+                <span class="bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">${c.loyalty_points || 0} Pts</span>
+                <p class="text-gray-500 mt-1 font-semibold">Total Spent: ${formatBHD(c.total_spent || 0)}</p>
+            </div>
+        `;
+        container.appendChild(row);
+    });
+}
+
+function onCategorySelectChange() {
+    const val = document.getElementById('new-prod-category-select').value;
+    const customInput = document.getElementById('new-prod-category-custom');
+    if (val === 'NEW_CATEGORY') {
+        customInput.classList.remove('hidden');
+        customInput.focus();
+    } else {
+        customInput.classList.add('hidden');
+    }
+}
+
 function renderManagerProductList() {
     const container = document.getElementById('manager-products-list');
     container.innerHTML = '';
@@ -963,7 +1082,7 @@ function renderManagerProductList() {
         row.innerHTML = `
             <div class="flex-1 pr-3">
                 <p class="font-bold text-gray-800 text-sm">${p.name}</p>
-                <p class="text-gray-400">SKU: ${p.sku || p.barcode || 'N/A'} | Stock Qty: ${p.stock_quantity}</p>
+                <p class="text-gray-400">SKU: ${p.sku || 'N/A'} | Category: ${p.category || 'Perfumes'} | Stock: ${p.stock_quantity}</p>
             </div>
             <div class="flex items-center space-x-3">
                 <span class="font-bold text-emerald-700 text-sm">${formatBHD(p.retail_price)}</span>
@@ -978,9 +1097,17 @@ async function addNewProductFromManager() {
     const name = document.getElementById('new-prod-name').value.trim();
     const sku = document.getElementById('new-prod-sku').value.trim() || ('SKU-' + Math.floor(1000 + Math.random() * 9000));
     const barcode = document.getElementById('new-prod-barcode').value.trim();
+    
+    let category = document.getElementById('new-prod-category-select').value;
+    if (category === 'NEW_CATEGORY') {
+        category = document.getElementById('new-prod-category-custom').value.trim() || 'Uncategorized';
+    }
+
     const cost = parseFloat(document.getElementById('new-prod-cost').value) || 0;
     const retail = parseFloat(document.getElementById('new-prod-retail').value) || 0;
     const stock = parseInt(document.getElementById('new-prod-stock').value) || 0;
+    const trackStock = document.getElementById('new-prod-track').checked;
+    const available = document.getElementById('new-prod-available').checked;
 
     if (!name || retail <= 0) {
         alert('Please provide Product Name and a valid Retail Price!');
@@ -991,15 +1118,16 @@ async function addNewProductFromManager() {
         name: name,
         sku: sku,
         barcode: barcode || null,
+        category: category,
         cost_price: cost,
         retail_price: retail,
         stock_quantity: stock,
-        track_stock: true,
-        available_for_sale: true
+        track_stock: trackStock,
+        available_for_sale: available
     };
 
     if (supabaseClient) {
-        const { data, error } = await supabaseClient.from('products').insert([newProd]).select();
+        const { error } = await supabaseClient.from('products').insert([newProd]);
         if (error) {
             alert('Error adding product to Supabase: ' + error.message);
             return;
@@ -1036,7 +1164,164 @@ async function deleteProduct(id) {
 }
 
 // ==========================================================
-// REPORTS & ISSUANCE PREVIEW WORKFLOW (MATCHING SCREENSHOT)
+// UPLOAD PORTAL & CSV TEMPLATE COMPARISON WORKFLOW
+// ==========================================================
+function downloadProductTemplate() {
+    const csvContent = "data:text/csv;charset=utf-8,name,sku,barcode,category,cost_price,retail_price,stock_quantity\n" +
+        "Aromatix Frost Bite 100ml,SKU-1001,10003,Perfumes,11.200,22.000,10\n" +
+        "Lattafa Maahir Honor 100ml,SKU-1002,10002,Perfumes,6.500,14.000,15";
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "barakat_products_template.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function handleCSVUploadPreview() {
+    const fileInput = document.getElementById('csv-file-input');
+    if (!fileInput.files || fileInput.files.length === 0) {
+        alert('Please select a CSV file to upload.');
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result;
+        parseCSVText(text);
+    };
+    reader.readAsText(file);
+}
+
+function parseCSVText(text) {
+    const lines = text.split(/\r\n|\n/);
+    if (lines.length < 2) {
+        alert('CSV file appears empty or invalid.');
+        return;
+    }
+
+    parsedUploadRows = [];
+    for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        const cols = line.split(',');
+        if (cols.length >= 6) {
+            const name = cols[0].trim();
+            const sku = cols[1].trim() || ('SKU-' + Math.floor(1000 + Math.random() * 9000));
+            const barcode = cols[2].trim() || null;
+            const category = cols[3].trim() || 'Perfumes';
+            const cost = parseFloat(cols[4]) || 0;
+            const retail = parseFloat(cols[5]) || 0;
+            const stock = parseInt(cols[6]) || 0;
+
+            const existing = products.find(p => (p.sku && p.sku === sku) || (p.name.toLowerCase() === name.toLowerCase()));
+            parsedUploadRows.push({
+                name, sku, barcode, category, cost_price: cost, retail_price: retail, stock_quantity: stock,
+                status: existing ? 'EXISTS' : 'NEW',
+                existingId: existing ? existing.id : null,
+                action: existing ? 'skip' : 'add'
+            });
+        }
+    }
+
+    renderUploadComparisonTable();
+}
+
+function renderUploadComparisonTable() {
+    const container = document.getElementById('upload-comparison-list');
+    container.innerHTML = '';
+    document.getElementById('upload-comparison-box').classList.remove('hidden');
+
+    parsedUploadRows.forEach((row, idx) => {
+        const div = document.createElement('div');
+        div.className = 'py-2.5 flex justify-between items-center text-xs';
+        
+        let statusBadge = row.status === 'NEW' 
+            ? '<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">New Item</span>' 
+            : '<span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold">Already Exists</span>';
+
+        div.innerHTML = `
+            <div class="flex-1 pr-2">
+                <p class="font-bold text-gray-800">${row.name} (${row.sku})</p>
+                <p class="text-gray-400">Retail: ${formatBHD(row.retail_price)} | Qty: ${row.stock_quantity}</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                ${statusBadge}
+                ${row.status === 'EXISTS' ? `
+                    <select onchange="updateUploadRowAction(${idx}, this.value)" class="border border-gray-300 rounded px-2 py-1 font-bold text-xs bg-white">
+                        <option value="skip" ${row.action === 'skip' ? 'selected' : ''}>Skip</option>
+                        <option value="replace" ${row.action === 'replace' ? 'selected' : ''}>Replace Details</option>
+                        <option value="add" ${row.action === 'add' ? 'selected' : ''}>Add Quantity (+${row.stock_quantity})</option>
+                    </select>
+                ` : '<span class="text-gray-400 font-semibold">Will Add New</span>'}
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function updateUploadRowAction(idx, action) {
+    parsedUploadRows[idx].action = action;
+}
+
+function setGlobalUploadAction(action) {
+    parsedUploadRows.forEach(row => {
+        if (row.status === 'EXISTS') {
+            row.action = action;
+        }
+    });
+    renderUploadComparisonTable();
+}
+
+async function executeBatchUploadImport() {
+    let successCount = 0;
+    for (let row of parsedUploadRows) {
+        if (row.status === 'NEW') {
+            const newProd = {
+                name: row.name, sku: row.sku, barcode: row.barcode, category: row.category,
+                cost_price: row.cost_price, retail_price: row.retail_price, stock_quantity: row.stock_quantity,
+                track_stock: true, available_for_sale: true
+            };
+            if (supabaseClient) {
+                await supabaseClient.from('products').insert([newProd]);
+            }
+            successCount++;
+        } else if (row.status === 'EXISTS') {
+            if (row.action === 'skip') continue;
+            const existingProd = products.find(p => p.id === row.existingId);
+            if (!existingProd) continue;
+
+            if (row.action === 'replace') {
+                const updateData = {
+                    retail_price: row.retail_price,
+                    cost_price: row.cost_price,
+                    category: row.category,
+                    stock_quantity: row.stock_quantity
+                };
+                if (supabaseClient && isValidUUID(row.existingId)) {
+                    await supabaseClient.from('products').update(updateData).eq('id', row.existingId);
+                }
+                successCount++;
+            } else if (row.action === 'add') {
+                const newStockQty = (existingProd.stock_quantity || 0) + row.stock_quantity;
+                if (supabaseClient && isValidUUID(row.existingId)) {
+                    await supabaseClient.from('products').update({ stock_quantity: newStockQty }).eq('id', row.existingId);
+                }
+                successCount++;
+            }
+        }
+    }
+
+    alert(`Successfully processed upload import for ${successCount} products!`);
+    document.getElementById('upload-comparison-box').classList.add('hidden');
+    await fetchProducts();
+    switchManagerTab('products');
+}
+
+// ==========================================================
+// REPORTS & ISSUANCE PREVIEW WORKFLOW
 // ==========================================================
 function selectReportType(type) {
     activeReportType = type;
