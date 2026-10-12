@@ -42,6 +42,11 @@
             <span id="role-badge" class="bg-emerald-900 text-emerald-200 text-xs px-2 py-1 rounded-full uppercase tracking-wider font-semibold">Cashier</span>
         </div>
         <div class="flex items-center space-x-2">
+            <!-- NEW TALABAT / JAHEZ BUTTON -->
+            <button onclick="openTalabatModal()" class="bg-orange-600 hover:bg-orange-700 text-white text-xs px-3 py-1.5 rounded transition flex items-center space-x-1 font-bold shadow">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                <span>Talabat / Jahez Order</span>
+            </button>
             <button id="btn-manager-portal" onclick="openManagerPortal()" class="hidden bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1.5 rounded transition flex items-center space-x-1 font-bold shadow">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                 <span>Manager Portal</span>
@@ -161,6 +166,56 @@
                     <span>PAY NOW</span>
                     <span id="btn-total">BHD 0.000</span>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================= -->
+    <!-- TALABAT / JAHEZ ONLINE ORDER MODAL -->
+    <!-- ================================================= -->
+    <div id="talabat-order-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 space-y-4 my-auto max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800">Register Online Order (Talabat / Jahez)</h3>
+                    <p class="text-xs text-gray-500">Separated from physical shop sales reports; deducts unified store stock.</p>
+                </div>
+                <button onclick="closeTalabatModal()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="font-bold text-gray-600 block mb-1">Select Platform *</label>
+                    <select id="talabat-platform" class="w-full border border-gray-300 rounded-lg p-2 bg-white font-bold outline-none focus:ring-1 focus:ring-orange-500">
+                        <option value="TALABAT">Talabat</option>
+                        <option value="JAHEZ">Jahez</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="font-bold text-gray-600 block mb-1">Customer Name *</label>
+                        <input type="text" id="talabat-cust-name" placeholder="Full Name" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:ring-1 focus:ring-orange-500">
+                    </div>
+                    <div>
+                        <label class="font-bold text-gray-600 block mb-1">Contact Number *</label>
+                        <input type="text" id="talabat-cust-phone" placeholder="Phone Number" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:ring-1 focus:ring-orange-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="font-bold text-gray-600 block mb-1">Select Products & Quantities</label>
+                    <div id="talabat-products-select-list" class="border rounded-lg p-2 max-h-48 overflow-y-auto space-y-2 bg-gray-50"></div>
+                </div>
+
+                <div class="bg-orange-50 border border-orange-200 p-3 rounded-lg flex justify-between items-center font-bold text-orange-900">
+                    <span>Order Total:</span>
+                    <span id="talabat-order-total" class="text-sm">BHD 0.000</span>
+                </div>
+            </div>
+
+            <div class="pt-2 flex space-x-2">
+                <button onclick="submitTalabatOrder()" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold py-2.5 rounded-lg text-xs shadow transition">Save Online Order & Update Stock</button>
+                <button onclick="closeTalabatModal()" class="border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg text-xs font-semibold">Cancel</button>
             </div>
         </div>
     </div>
@@ -567,7 +622,6 @@
                 <button id="btn-unlock-manager" onclick="authenticateManagerRole()" class="bg-emerald-600 text-white text-xs px-3 py-1 rounded font-bold hover:bg-emerald-700">Manager Unlock PIN</button>
             </div>
 
-            <!-- Added Search Bar for Item Manager -->
             <div class="relative">
                 <input type="text" id="item-manager-search" onkeyup="renderItemManagerList()" placeholder="Search items by name or barcode..." 
                        class="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs shadow-sm">
@@ -931,7 +985,6 @@ async function fetchCustomers() {
     } catch (err) {}
 }
 
-// Populate product category dropdown dynamically from database products
 function populateCategoryDropdown() {
     const selectElem = document.getElementById('new-prod-category-select');
     if (!selectElem) return;
@@ -960,6 +1013,130 @@ function populateCategoryDropdown() {
     newOpt.value = 'NEW_CATEGORY';
     newOpt.innerText = '+ Add New Category';
     selectElem.appendChild(newOpt);
+}
+
+// ==========================================================
+// TALABAT / JAHEZ ONLINE ORDER WORKFLOW
+// ==========================================================
+function openTalabatModal() {
+    document.getElementById('talabat-order-modal').classList.remove('hidden');
+    document.getElementById('talabat-cust-name').value = '';
+    document.getElementById('talabat-cust-phone').value = '';
+    renderTalabatProductsList();
+}
+
+function closeTalabatModal() {
+    document.getElementById('talabat-order-modal').classList.add('hidden');
+}
+
+function renderTalabatProductsList() {
+    const container = document.getElementById('talabat-products-select-list');
+    container.innerHTML = '';
+
+    products.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'flex justify-between items-center py-1.5 border-b border-gray-200 last:border-0';
+        div.innerHTML = `
+            <div>
+                <span class="font-bold text-gray-800">${p.name}</span>
+                <p class="text-[10px] text-gray-500">${formatBHD(p.retail_price)} | Stock: ${p.stock_quantity}</p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <input type="number" min="0" value="0" id="talabat-qty-${p.id}" oninput="calculateTalabatTotal()" class="w-16 border border-gray-300 rounded p-1 text-center font-bold text-xs outline-none focus:ring-1 focus:ring-orange-500">
+            </div>
+        `;
+        container.appendChild(div);
+    });
+    calculateTalabatTotal();
+}
+
+function calculateTalabatTotal() {
+    let total = 0;
+    products.forEach(p => {
+        const qtyInput = document.getElementById('talabat-qty-' + p.id);
+        if (qtyInput) {
+            const qty = parseInt(qtyInput.value) || 0;
+            total += qty * (p.retail_price || 0);
+        }
+    });
+    document.getElementById('talabat-order-total').innerText = formatBHD(total);
+}
+
+async function submitTalabatOrder() {
+    const platform = document.getElementById('talabat-platform').value;
+    const custName = document.getElementById('talabat-cust-name').value.trim();
+    const custPhone = document.getElementById('talabat-cust-phone').value.trim();
+
+    if (!custName || !custPhone) {
+        alert('Please enter customer name and contact number!');
+        return;
+    }
+
+    let itemsToOrder = [];
+    products.forEach(p => {
+        const qtyInput = document.getElementById('talabat-qty-' + p.id);
+        if (qtyInput) {
+            const qty = parseInt(qtyInput.value) || 0;
+            if (qty > 0) {
+                itemsToOrder.push({
+                    id: p.id,
+                    name: p.name,
+                    price: p.retail_price,
+                    qty: qty
+                });
+            }
+        }
+    });
+
+    if (itemsToOrder.length === 0) {
+        alert('Please select at least one product with quantity!');
+        return;
+    }
+
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient.rpc('process_talabat_jahez_sale', {
+                p_platform: platform,
+                p_customer_name: custName,
+                p_customer_phone: custPhone,
+                p_items: itemsToOrder
+            });
+
+            if (error) {
+                alert('Database Error saving online order: ' + error.message);
+                return;
+            }
+        } catch(e) {
+            alert('Error executing online order RPC: ' + e.message);
+            return;
+        }
+    } else {
+        // Fallback local stock update if offline
+        itemsToOrder.forEach(item => {
+            const prod = products.find(p => String(p.id) === String(item.id));
+            if (prod) {
+                prod.stock_quantity = Math.max(0, prod.stock_quantity - item.qty);
+            }
+        });
+    }
+
+    await fetchProducts();
+    renderProducts();
+
+    // Build single message showing remaining stock and highlighting zero stock items in color
+    let msg = `[${platform} ORDER SUCCESSFUL]\nCustomer: ${custName} (${custPhone})\n\nRemaining Stock Status:\n`;
+    itemsToOrder.forEach(item => {
+        const updatedProd = products.find(p => String(p.id) === String(item.id));
+        const remQty = updatedProd ? updatedProd.stock_quantity : 0;
+        if (remQty === 0) {
+            msg += `• ${item.name}: 0 (OUT OF STOCK!)\n`;
+        } else {
+            msg += `• ${item.name}: ${remQty} remaining\n`;
+        }
+    });
+
+    alert(msg);
+    closeTalabatModal();
 }
 
 // ==========================================================
@@ -1161,9 +1338,6 @@ function renderManagerDashboard() {
     }
 }
 
-// ==========================================================
-// MANAGER PORTAL - MANAGE PRODUCTS & EDIT/DELETE WORKFLOW
-// ==========================================================
 function renderManagerProductList() {
     const container = document.getElementById('manager-products-list');
     const term = document.getElementById('manager-product-search') ? document.getElementById('manager-product-search').value.toLowerCase().trim() : '';
@@ -1341,9 +1515,6 @@ async function deleteProduct(id) {
     renderManagerProductList();
 }
 
-// ==========================================================
-// CUSTOMER DIRECTORY & EDITING WORKFLOW (SYNCED TO DB)
-// ==========================================================
 function renderManagerCustomerDirectory() {
     const container = document.getElementById('manager-customer-list');
     const term = document.getElementById('manager-cust-search').value.toLowerCase().trim();
@@ -1427,9 +1598,6 @@ async function saveCustomerEdits() {
     await fetchCustomers();
 }
 
-// ==========================================================
-// UPLOAD PORTAL & CSV TEMPLATE COMPARISON WORKFLOW
-// ==========================================================
 function downloadProductTemplate() {
     const csvContent = "data:text/csv;charset=utf-8,name,sku,barcode,category,cost_price,retail_price,stock_quantity\n" +
         "Aromatix Frost Bite 100ml,SKU-1001,10003,Perfumes,11.200,22.000,10\n" +
@@ -1584,9 +1752,6 @@ async function executeBatchUploadImport() {
     switchManagerTab('products');
 }
 
-// ==========================================================
-// REPORTS & ISSUANCE PREVIEW WORKFLOW (EXACT SAMPLE MATCH)
-// ==========================================================
 function selectReportType(type) {
     activeReportType = type;
     document.getElementById('btn-rep-cat-sales').className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition';
@@ -1803,9 +1968,6 @@ function executeEmailActiveReport() {
     alert(`Report "${reportData.title}" successfully compiled and dispatched to ${emailTo}!`);
 }
 
-// ==========================================
-// EXISTING POS CODE PRESERVED BELOW
-// ==========================================
 function openCustomerModal() {
     document.getElementById('customer-modal').classList.remove('hidden');
     document.getElementById('cust-modal-search').value = '';
