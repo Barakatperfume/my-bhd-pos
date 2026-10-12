@@ -38,8 +38,8 @@
     <!-- Top Navigation Bar -->
     <header class="bg-emerald-700 text-white p-3 flex justify-between items-center shadow-md">
         <div class="flex items-center space-x-3">
-            <span class="font-bold text-xl tracking-wide">Barakat Perfumes POS</span>
-            <span id="role-badge" class="bg-emerald-900 text-emerald-200 text-xs px-2 py-1 rounded-full uppercase tracking-wider font-semibold">Cashier</span>
+            <span class="font-bold text-xl tracking-wide">Barakat Perfumes POS[cite: 1]</span>
+            <span id="role-badge" class="bg-emerald-900 text-emerald-200 text-xs px-2 py-1 rounded-full uppercase tracking-wider font-semibold">Cashier[cite: 1]</span>
         </div>
         <div class="flex items-center space-x-2">
             <button id="btn-manager-portal" onclick="openManagerPortal()" class="hidden bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1.5 rounded transition flex items-center space-x-1 font-bold shadow">
@@ -48,14 +48,14 @@
             </button>
             <button onclick="openSalesHistoryModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition flex items-center space-x-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                <span>View Sales</span>
+                <span>View Sales[cite: 1]</span>
             </button>
             <button onclick="openItemManagerModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition flex items-center space-x-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                <span>Items Manager</span>
+                <span>Items Manager[cite: 1]</span>
             </button>
-            <span id="user-name" class="text-sm font-medium hidden sm:inline ml-2">Cashier 1</span>
-            <button onclick="switchUser()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition">Switch USER</button>
+            <span id="user-name" class="text-sm font-medium hidden sm:inline ml-2">Cashier 1[cite: 1]</span>
+            <button onclick="switchUser()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition">Switch USER[cite: 1]</button>
         </div>
     </header>
 
@@ -176,35 +176,35 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                 </div>
                 <div>
-                    <h2 class="text-xl font-black text-gray-900">Manager & Backoffice Portal</h2>
-                    <p class="text-xs text-gray-500">Full-screen business analytics, product management, customers, and comprehensive reports</p>
+                    <h2 class="text-xl font-black text-gray-900">Manager & Backoffice Portal[cite: 1]</h2>
+                    <p class="text-xs text-gray-500">Full-screen business analytics, product management, customers, and comprehensive reports[cite: 1]</p>
                 </div>
             </div>
             <button onclick="closeManagerPortal()" class="bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg font-bold text-xs shadow flex items-center space-x-1 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                <span>Back to POS Register</span>
+                <span>Back to POS Register[cite: 1]</span>
             </button>
         </div>
 
         <!-- Portal Sub-Navigation Tabs & Global Date Selector Bar -->
         <div class="bg-white border-b px-6 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
             <div class="flex space-x-2 flex-wrap gap-y-2">
-                <button onclick="switchManagerTab('dashboard')" id="tab-btn-dashboard" class="px-4 py-2 text-xs font-bold rounded-lg bg-amber-600 text-white transition shadow">Dashboard Analytics</button>
-                <button onclick="switchManagerTab('products')" id="tab-btn-products" class="px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Manage Products</button>
-                <button onclick="switchManagerTab('upload')" id="tab-btn-upload" class="px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Upload Portal</button>
-                <button onclick="switchManagerTab('customers')" id="tab-btn-customers" class="px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Customers</button>
-                <button onclick="switchManagerTab('reports')" id="tab-btn-reports" class="px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Reports & Issuance</button>
+                <button onclick="switchManagerTab('dashboard')" id="tab-btn-dashboard" class="px-4 py-2 text-xs font-bold rounded-lg bg-amber-600 text-white transition shadow">Dashboard Analytics[cite: 1]</button>
+                <button onclick="switchManagerTab('products')" id="tab-btn-products" class="px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Manage Products[cite: 1]</button>
+                <button onclick="switchManagerTab('upload')" id="tab-btn-upload" class="px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Upload Portal[cite: 1]</button>
+                <button onclick="switchManagerTab('customers')" id="tab-btn-customers" class="px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Customers[cite: 1]</button>
+                <button onclick="switchManagerTab('reports')" id="tab-btn-reports" class="px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Reports & Issuance[cite: 1]</button>
             </div>
 
             <!-- Date Range Selector Bar -->
             <div class="flex items-center space-x-2 bg-gray-50 p-1.5 rounded-lg border border-gray-200 text-xs">
-                <span class="font-bold text-gray-600 px-1">Date Filter:</span>
+                <span class="font-bold text-gray-600 px-1">Date Filter[cite: 1]:</span>
                 <select id="portal-date-filter" onchange="onDateFilterChange()" class="border border-gray-300 rounded px-2 py-1 bg-white font-medium outline-none focus:ring-1 focus:ring-amber-500">
-                    <option value="today">Today</option>
-                    <option value="yesterday">Yesterday</option>
-                    <option value="last7">Last 7 Days</option>
-                    <option value="thismonth">This Month</option>
-                    <option value="custom">Custom Range</option>
+                    <option value="today">Today[cite: 1]</option>
+                    <option value="yesterday">Yesterday[cite: 1]</option>
+                    <option value="last7">Last 7 Days[cite: 1]</option>
+                    <option value="thismonth">This Month[cite: 1]</option>
+                    <option value="custom">Custom Range[cite: 1]</option>
                 </select>
                 <div id="custom-date-inputs" class="hidden flex items-center space-x-1">
                     <input type="date" id="filter-start-date" onchange="renderManagerDashboard()" class="border border-gray-300 rounded px-1.5 py-0.5">
@@ -271,43 +271,51 @@
             <!-- Tab 2: Product Management (Dynamic Database Categories) -->
             <div id="manager-tab-products" class="space-y-6 hidden">
                 <div class="bg-emerald-50/50 border border-emerald-200 p-5 rounded-xl space-y-3 shadow-sm">
-                    <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Add New Product to Catalog</h4>
+                    <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Add New Product to Catalog[cite: 1]</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <input type="text" id="new-prod-name" placeholder="Product Name *" class="border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
-                        <input type="text" id="new-prod-sku" placeholder="SKU (e.g. PERF-001)" class="border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
-                        <input type="text" id="new-prod-barcode" placeholder="Barcode" class="border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                        <input type="text" id="new-prod-sku" placeholder="SKU (e.g. PERF-001)[cite: 1]" class="border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                        <input type="text" id="new-prod-barcode" placeholder="Barcode[cite: 1]" class="border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
-                            <label class="text-[10px] font-bold text-gray-600 block mb-1">Category</label>
+                            <label class="text-[10px] font-bold text-gray-600 block mb-1">Category[cite: 1]</label>
                             <div class="flex space-x-1">
                                 <select id="new-prod-category-select" onchange="onCategorySelectChange()" class="flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white outline-none">
                                     <!-- Populated dynamically from database products -->
                                 </select>
-                                <input type="text" id="new-prod-category-custom" placeholder="New category name" class="hidden flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white outline-none">
+                                <input type="text" id="new-prod-category-custom" placeholder="New category name[cite: 1]" class="hidden flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white outline-none">
                             </div>
                         </div>
-                        <input type="number" id="new-prod-cost" step="0.001" placeholder="Cost Price (BHD)" class="border border-gray-300 rounded-lg px-3 py-2 text-xs text-right font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-white self-end">
-                        <input type="number" id="new-prod-retail" step="0.001" placeholder="Retail Price (BHD) *" class="border border-gray-300 rounded-lg px-3 py-2 text-xs text-right font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-white self-end">
+                        <input type="number" id="new-prod-cost" step="0.001" placeholder="Cost Price (BHD)[cite: 1]" class="border border-gray-300 rounded-lg px-3 py-2 text-xs text-right font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-white self-end">
+                        <input type="number" id="new-prod-retail" step="0.001" placeholder="Retail Price (BHD) *[cite: 1]" class="border border-gray-300 rounded-lg px-3 py-2 text-xs text-right font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-white self-end">
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center pt-2">
-                        <input type="number" id="new-prod-stock" placeholder="Initial Stock Qty" class="border border-gray-300 rounded-lg px-3 py-2 text-xs text-center font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                        <input type="number" id="new-prod-stock" placeholder="Initial Stock Qty[cite: 1]" class="border border-gray-300 rounded-lg px-3 py-2 text-xs text-center font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
                         <div class="flex items-center space-x-4 text-xs font-bold text-gray-700">
                             <label class="flex items-center space-x-1.5 cursor-pointer">
                                 <input type="checkbox" id="new-prod-track" checked class="w-4 h-4 text-emerald-600 rounded">
-                                <span>Track Stock</span>
+                                <span>Track Stock[cite: 1]</span>
                             </label>
                             <label class="flex items-center space-x-1.5 cursor-pointer">
                                 <input type="checkbox" id="new-prod-available" checked class="w-4 h-4 text-emerald-600 rounded">
-                                <span>Available for Sale</span>
+                                <span>Available for Sale[cite: 1]</span>
                             </label>
                         </div>
-                        <button onclick="addNewProductFromManager()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs shadow transition">Add Product</button>
+                        <button onclick="addNewProductFromManager()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs shadow transition">Add Product[cite: 1]</button>
                     </div>
                 </div>
 
+                <!-- Existing Catalog Items Management with Search Bar -->
                 <div class="border rounded-xl p-4 bg-white space-y-3 shadow-sm">
-                    <h4 class="text-xs font-bold text-gray-700 uppercase">Existing Catalog Items Management</h4>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <h4 class="text-xs font-bold text-gray-700 uppercase">Existing Catalog Items Management[cite: 1]</h4>
+                        <div class="relative w-full sm:w-72">
+                            <input type="text" id="manager-product-search" onkeyup="renderManagerProductList()" placeholder="Search products by name, SKU..." 
+                                   class="w-full pl-8 pr-3 py-1.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs shadow-sm">
+                            <svg class="w-4 h-4 text-gray-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                    </div>
                     <div id="manager-products-list" class="divide-y divide-gray-100 max-h-96 overflow-y-auto"></div>
                 </div>
             </div>
@@ -316,35 +324,35 @@
             <div id="manager-tab-upload" class="space-y-6 hidden">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm space-y-4">
-                        <h4 class="font-bold text-sm text-gray-800">1. Download Product CSV Template</h4>
-                        <p class="text-xs text-gray-500">Download the standard CSV template formatted with all required columns for bulk uploading items.</p>
+                        <h4 class="font-bold text-sm text-gray-800">1. Download Product CSV Template[cite: 1]</h4>
+                        <p class="text-xs text-gray-500">Download the standard CSV template formatted with all required columns for bulk uploading items[cite: 1].</p>
                         <button onclick="downloadProductTemplate()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg font-bold text-xs shadow transition flex items-center space-x-1">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            <span>Download CSV Template</span>
+                            <span>Download CSV Template[cite: 1]</span>
                         </button>
                     </div>
 
                     <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm space-y-4">
-                        <h4 class="font-bold text-sm text-gray-800">2. Upload Filled CSV File</h4>
-                        <p class="text-xs text-gray-500">Upload your completed CSV file. The system will compare items against your existing catalog and prompt for action.</p>
+                        <h4 class="font-bold text-sm text-gray-800">2. Upload Filled CSV File[cite: 1]</h4>
+                        <p class="text-xs text-gray-500">Upload your completed CSV file. The system will compare items against your existing catalog and prompt for action[cite: 1].</p>
                         <input type="file" id="csv-file-input" accept=".csv" class="w-full border border-gray-300 rounded-lg p-2 text-xs bg-gray-50 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
-                        <button onclick="handleCSVUploadPreview()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg text-xs shadow transition">Analyze & Compare Upload</button>
+                        <button onclick="handleCSVUploadPreview()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg text-xs shadow transition">Analyze & Compare Upload[cite: 1]</button>
                     </div>
                 </div>
 
                 <div id="upload-comparison-box" class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm hidden space-y-4">
                     <div class="flex justify-between items-center border-b pb-3">
-                        <h4 class="font-bold text-sm text-gray-800">Upload Comparison & Conflict Resolution</h4>
-                        <span id="upload-summary-badge" class="text-xs bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-bold">Review Required</span>
+                        <h4 class="font-bold text-sm text-gray-800">Upload Comparison & Conflict Resolution[cite: 1]</h4>
+                        <span id="upload-summary-badge" class="text-xs bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-bold">Review Required[cite: 1]</span>
                     </div>
-                    <p class="text-xs text-gray-500">For items that already exist in your catalog (matched by SKU or Name), choose the action you would like to apply:</p>
+                    <p class="text-xs text-gray-500">For items that already exist in your catalog (matched by SKU or Name), choose the action you would like to apply[cite: 1]:</p>
                     <div class="flex space-x-2">
-                        <button onclick="setGlobalUploadAction('skip')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-200 text-gray-700 hover:bg-gray-300">Set All: Skip Existing</button>
-                        <button onclick="setGlobalUploadAction('replace')" class="px-3 py-1.5 text-xs font-bold rounded bg-amber-100 text-amber-800 hover:bg-amber-200">Set All: Replace Details</button>
-                        <button onclick="setGlobalUploadAction('add')" class="px-3 py-1.5 text-xs font-bold rounded bg-emerald-100 text-emerald-800 hover:bg-emerald-200">Set All: Add Stock Quantity</button>
+                        <button onclick="setGlobalUploadAction('skip')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-200 text-gray-700 hover:bg-gray-300">Set All: Skip Existing[cite: 1]</button>
+                        <button onclick="setGlobalUploadAction('replace')" class="px-3 py-1.5 text-xs font-bold rounded bg-amber-100 text-amber-800 hover:bg-amber-200">Set All: Replace Details[cite: 1]</button>
+                        <button onclick="setGlobalUploadAction('add')" class="px-3 py-1.5 text-xs font-bold rounded bg-emerald-100 text-emerald-800 hover:bg-emerald-200">Set All: Add Stock Quantity[cite: 1]</button>
                     </div>
                     <div id="upload-comparison-list" class="divide-y divide-gray-100 max-h-80 overflow-y-auto border rounded-lg p-3 bg-gray-50"></div>
-                    <button onclick="executeBatchUploadImport()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg text-xs shadow transition">Confirm & Import Products</button>
+                    <button onclick="executeBatchUploadImport()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg text-xs shadow transition">Confirm & Import Products[cite: 1]</button>
                 </div>
             </div>
 
@@ -352,8 +360,8 @@
             <div id="manager-tab-customers" class="space-y-6 hidden">
                 <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm space-y-4">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                        <h4 class="font-bold text-sm text-gray-800">Customer Directory & Loyalty Audit</h4>
-                        <input type="text" id="manager-cust-search" onkeyup="renderManagerCustomerDirectory()" placeholder="Search customer name or phone..." class="border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-emerald-500 w-full sm:w-72">
+                        <h4 class="font-bold text-sm text-gray-800">Customer Directory & Loyalty Audit[cite: 1]</h4>
+                        <input type="text" id="manager-cust-search" onkeyup="renderManagerCustomerDirectory()" placeholder="Search customer name or phone...[cite: 1]" class="border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-emerald-500 w-full sm:w-72">
                     </div>
                     <div id="manager-customer-list" class="divide-y divide-gray-100 max-h-96 overflow-y-auto"></div>
                 </div>
@@ -363,23 +371,23 @@
             <div id="manager-tab-reports" class="space-y-6 hidden">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-white border border-gray-200 rounded-xl p-4 space-y-2 shadow-sm">
-                        <h4 class="font-bold text-xs text-gray-700 uppercase mb-3">Report Categories</h4>
-                        <button onclick="selectReportType('sales')" id="btn-rep-cat-sales" class="w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 transition">Sales Summary & Detail</button>
-                        <button onclick="selectReportType('inventory')" id="btn-rep-cat-inventory" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition">Inventory Valuation</button>
-                        <button onclick="selectReportType('lowstock')" id="btn-rep-cat-lowstock" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition">Low Stock Alerts</button>
+                        <h4 class="font-bold text-xs text-gray-700 uppercase mb-3">Report Categories[cite: 1]</h4>
+                        <button onclick="selectReportType('sales')" id="btn-rep-cat-sales" class="w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 transition">Sales Summary & Detail[cite: 1]</button>
+                        <button onclick="selectReportType('inventory')" id="btn-rep-cat-inventory" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition">Inventory Valuation[cite: 1]</button>
+                        <button onclick="selectReportType('lowstock')" id="btn-rep-cat-lowstock" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition">Low Stock Alerts[cite: 1]</button>
                     </div>
 
                     <div class="lg:col-span-2 space-y-4">
                         <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm space-y-4">
-                            <h4 id="report-form-title" class="font-bold text-sm text-gray-800 border-b pb-2">Sales Summary Report Configuration</h4>
+                            <h4 id="report-form-title" class="font-bold text-sm text-gray-800 border-b pb-2">Sales Summary Report Configuration[cite: 1]</h4>
                             
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                                 <div>
-                                    <label class="font-bold text-gray-600 block mb-1">From Date</label>
+                                    <label class="font-bold text-gray-600 block mb-1">From Date[cite: 1]</label>
                                     <input type="date" id="report-start-date" class="w-full border border-gray-300 rounded px-2.5 py-1.5 outline-none focus:ring-1 focus:ring-emerald-500">
                                 </div>
                                 <div>
-                                    <label class="font-bold text-gray-600 block mb-1">To Date</label>
+                                    <label class="font-bold text-gray-600 block mb-1">To Date[cite: 1]</label>
                                     <input type="date" id="report-end-date" class="w-full border border-gray-300 rounded px-2.5 py-1.5 outline-none focus:ring-1 focus:ring-emerald-500">
                                 </div>
                             </div>
@@ -387,17 +395,17 @@
                             <div class="flex space-x-2 pt-2">
                                 <button onclick="previewReport()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-xs shadow transition flex justify-center items-center space-x-1">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                    <span>PREVIEW REPORT</span>
+                                    <span>PREVIEW REPORT[cite: 1]</span>
                                 </button>
-                                <button onclick="executePrintActiveReport()" class="bg-gray-800 hover:bg-black text-white px-4 py-2.5 rounded-lg font-bold text-xs shadow transition">Print</button>
-                                <button onclick="executeEmailActiveReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-bold text-xs shadow transition">Email</button>
+                                <button onclick="executePrintActiveReport()" class="bg-gray-800 hover:bg-black text-white px-4 py-2.5 rounded-lg font-bold text-xs shadow transition">Print[cite: 1]</button>
+                                <button onclick="executeEmailActiveReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-bold text-xs shadow transition">Email[cite: 1]</button>
                             </div>
                         </div>
 
                         <div id="report-preview-container" class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm hidden space-y-3">
                             <div class="flex justify-between items-center border-b pb-2">
-                                <h5 id="preview-heading" class="font-bold text-xs text-gray-700 uppercase">Live Preview Output</h5>
-                                <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Ready</span>
+                                <h5 id="preview-heading" class="font-bold text-xs text-gray-700 uppercase">Live Preview Output[cite: 1]</h5>
+                                <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Ready[cite: 1]</span>
                             </div>
                             <div id="report-preview-body" class="max-h-80 overflow-y-auto text-xs"></div>
                         </div>
@@ -408,31 +416,92 @@
         </div>
     </div>
 
+    <!-- EDIT PRODUCT MODAL (MANAGER PORTAL) -->
+    <div id="edit-product-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-5 space-y-4 my-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-gray-800">Edit Product Details[cite: 1]</h3>
+                <button onclick="closeEditProductModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+            </div>
+            <input type="hidden" id="edit-prod-id">
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="font-bold text-gray-600 block mb-1">Product Name *[cite: 1]</label>
+                    <input type="text" id="edit-prod-name-input" class="w-full border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-emerald-500">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="font-bold text-gray-600 block mb-1">SKU[cite: 1]</label>
+                        <input type="text" id="edit-prod-sku-input" class="w-full border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="font-bold text-gray-600 block mb-1">Barcode[cite: 1]</label>
+                        <input type="text" id="edit-prod-barcode-input" class="w-full border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-emerald-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="font-bold text-gray-600 block mb-1">Category[cite: 1]</label>
+                        <input type="text" id="edit-prod-category-input" class="w-full border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="font-bold text-gray-600 block mb-1">Cost Price (BHD)[cite: 1]</label>
+                        <input type="number" step="0.001" id="edit-prod-cost-input" class="w-full border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-emerald-500 text-right font-bold">
+                    </div>
+                    <div>
+                        <label class="font-bold text-gray-600 block mb-1">Retail Price *[cite: 1]</label>
+                        <input type="number" step="0.001" id="edit-prod-retail-input" class="w-full border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-emerald-500 text-right font-bold">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2 items-center pt-1">
+                    <div>
+                        <label class="font-bold text-gray-600 block mb-1">Stock Qty[cite: 1]</label>
+                        <input type="number" id="edit-prod-stock-input" class="w-full border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-emerald-500 text-center font-bold">
+                    </div>
+                    <div class="col-span-2 flex items-center space-x-3 font-semibold text-gray-700 pt-4">
+                        <label class="flex items-center space-x-1 cursor-pointer">
+                            <input type="checkbox" id="edit-prod-track-input" class="w-4 h-4 text-emerald-600 rounded">
+                            <span>Track Stock[cite: 1]</span>
+                        </label>
+                        <label class="flex items-center space-x-1 cursor-pointer">
+                            <input type="checkbox" id="edit-prod-available-input" class="w-4 h-4 text-emerald-600 rounded">
+                            <span>Available[cite: 1]</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="pt-2 flex space-x-2">
+                <button onclick="saveProductEdits()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs shadow transition">Save Changes[cite: 1]</button>
+                <button onclick="closeEditProductModal()" class="border border-gray-300 text-gray-700 px-4 py-2 rounded text-xs font-semibold">Cancel[cite: 1]</button>
+            </div>
+        </div>
+    </div>
+
     <!-- EDIT CUSTOMER MODAL -->
     <div id="edit-customer-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
         <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-5 space-y-4 my-auto">
             <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-lg font-bold text-gray-800">Edit Customer Details</h3>
+                <h3 class="text-lg font-bold text-gray-800">Edit Customer Details[cite: 1]</h3>
                 <button onclick="closeEditCustomerModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
             </div>
             <input type="hidden" id="edit-cust-id">
             <div class="space-y-3 text-xs">
                 <div>
-                    <label class="font-bold text-gray-600 block mb-1">Full Name *</label>
+                    <label class="font-bold text-gray-600 block mb-1">Full Name *[cite: 1]</label>
                     <input type="text" id="edit-cust-name-input" class="w-full border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-emerald-500">
                 </div>
                 <div>
-                    <label class="font-bold text-gray-600 block mb-1">Phone Number *</label>
+                    <label class="font-bold text-gray-600 block mb-1">Phone Number *[cite: 1]</label>
                     <input type="text" id="edit-cust-phone-input" class="w-full border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-emerald-500">
                 </div>
                 <div>
-                    <label class="font-bold text-gray-600 block mb-1">Email Address</label>
+                    <label class="font-bold text-gray-600 block mb-1">Email Address[cite: 1]</label>
                     <input type="email" id="edit-cust-email-input" class="w-full border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-emerald-500">
                 </div>
             </div>
             <div class="pt-2 flex space-x-2">
-                <button onclick="saveCustomerEdits()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs shadow transition">Save Changes</button>
-                <button onclick="closeEditCustomerModal()" class="border border-gray-300 text-gray-700 px-4 py-2 rounded text-xs font-semibold">Cancel</button>
+                <button onclick="saveCustomerEdits()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs shadow transition">Save Changes[cite: 1]</button>
+                <button onclick="closeEditCustomerModal()" class="border border-gray-300 text-gray-700 px-4 py-2 rounded text-xs font-semibold">Cancel[cite: 1]</button>
             </div>
         </div>
     </div>
@@ -441,26 +510,26 @@
     <div id="customer-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
         <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-5 space-y-4 my-auto max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-lg font-bold text-gray-800">Select or Add Customer</h3>
+                <h3 class="text-lg font-bold text-gray-800">Select or Add Customer[cite: 1]</h3>
                 <button onclick="closeCustomerModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
             </div>
 
             <div>
-                <input type="text" id="cust-modal-search" onkeyup="renderCustomerSearchResults()" placeholder="Search by name or phone..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+                <input type="text" id="cust-modal-search" onkeyup="renderCustomerSearchResults()" placeholder="Search by name or phone...[cite: 1]" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
             </div>
 
             <div id="cust-modal-results" class="flex-1 overflow-y-auto border rounded-lg divide-y divide-gray-100 max-h-48 p-2 bg-gray-50/50"></div>
 
             <div class="border-t pt-3 space-y-2 bg-emerald-50/30 p-3 rounded-lg border border-emerald-100">
-                <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider">Create New Customer</h4>
+                <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider">Create New Customer[cite: 1]</h4>
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="new-cust-name" placeholder="Full Name *" class="border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
-                    <input type="text" id="new-cust-phone" placeholder="Phone Number *" class="border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
+                    <input type="text" id="new-cust-name" placeholder="Full Name *[cite: 1]" class="border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
+                    <input type="text" id="new-cust-phone" placeholder="Phone Number *[cite: 1]" class="border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
                 </div>
-                <input type="email" id="new-cust-email" placeholder="Email Address (Optional)" class="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
+                <input type="email" id="new-cust-email" placeholder="Email Address (Optional)[cite: 1]" class="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
                 
                 <button onclick="addNewCustomerToDatabase()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs transition shadow">
-                    Save & Select Customer
+                    Save & Select Customer[cite: 1]
                 </button>
             </div>
         </div>
@@ -470,12 +539,12 @@
     <div id="sales-history-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
         <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full p-5 space-y-4 my-auto max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-lg font-bold text-gray-800">Previous Sales Receipts & Refunds</h3>
+                <h3 class="text-lg font-bold text-gray-800">Previous Sales Receipts & Refunds[cite: 1]</h3>
                 <button onclick="closeSalesHistoryModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
             </div>
             
             <div class="flex space-x-2">
-                <input type="text" id="sales-search-input" onkeyup="renderSalesHistory()" placeholder="Search by Receipt ID, Customer, or Phone..." class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
+                <input type="text" id="sales-search-input" onkeyup="renderSalesHistory()" placeholder="Search by Receipt ID, Customer, or Phone...[cite: 1]" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
             </div>
 
             <div class="flex-1 overflow-y-auto divide-y divide-gray-200 border rounded-lg p-2 max-h-96" id="sales-history-list"></div>
@@ -487,20 +556,20 @@
         <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-5 space-y-4 my-auto max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center border-b pb-3">
                 <div>
-                    <h3 class="text-lg font-bold text-gray-800">Item Catalog Manager</h3>
-                    <p class="text-xs text-gray-500">Staff can change retail prices. Costs are locked to Manager/Owner PIN.</p>
+                    <h3 class="text-lg font-bold text-gray-800">Item Catalog Manager[cite: 1]</h3>
+                    <p class="text-xs text-gray-500">Staff can change retail prices. Costs are locked to Manager/Owner PIN[cite: 1].</p>
                 </div>
                 <button onclick="closeItemManagerModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
             </div>
 
             <div class="flex justify-between items-center bg-gray-50 p-2 rounded border border-gray-200">
-                <span id="manager-status-text" class="text-xs font-semibold text-gray-600">Current View: Standard Staff</span>
-                <button id="btn-unlock-manager" onclick="authenticateManagerRole()" class="bg-emerald-600 text-white text-xs px-3 py-1 rounded font-bold hover:bg-emerald-700">Manager Unlock PIN</button>
+                <span id="manager-status-text" class="text-xs font-semibold text-gray-600">Current View: Standard Staff[cite: 1]</span>
+                <button id="btn-unlock-manager" onclick="authenticateManagerRole()" class="bg-emerald-600 text-white text-xs px-3 py-1 rounded font-bold hover:bg-emerald-700">Manager Unlock PIN[cite: 1]</button>
             </div>
 
             <!-- Added Search Bar for Item Manager -->
             <div class="relative">
-                <input type="text" id="item-manager-search" onkeyup="renderItemManagerList()" placeholder="Search items by name or barcode..." 
+                <input type="text" id="item-manager-search" onkeyup="renderItemManagerList()" placeholder="Search items by name or barcode...[cite: 1]" 
                        class="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs shadow-sm">
                 <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
@@ -512,36 +581,36 @@
     <!-- Payment & Receipt Modal -->
     <div id="payment-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
         <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-5 space-y-4 my-auto">
-            <h3 class="text-lg font-bold text-gray-800 border-b pb-2">Complete Payment</h3>
+            <h3 class="text-lg font-bold text-gray-800 border-b pb-2">Complete Payment[cite: 1]</h3>
             
             <div class="text-center py-2 bg-emerald-50 rounded-lg">
-                <p class="text-xs text-emerald-800 uppercase font-semibold tracking-wider">Total Amount Due</p>
+                <p class="text-xs text-emerald-800 uppercase font-semibold tracking-wider">Total Amount Due[cite: 1]</p>
                 <p id="modal-total" class="text-2xl font-black text-emerald-700">BHD 0.000</p>
             </div>
 
             <div>
-                <label class="text-xs font-semibold text-gray-600 uppercase">Payment Option</label>
+                <label class="text-xs font-semibold text-gray-600 uppercase">Payment Option[cite: 1]</label>
                 <div class="grid grid-cols-2 gap-2 mt-1">
-                    <button id="mode-single-btn" onclick="setPaymentType('SINGLE')" class="border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">Single Method</button>
-                    <button id="mode-split-btn" onclick="setPaymentType('SPLIT')" class="border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">Split Payment</button>
+                    <button id="mode-single-btn" onclick="setPaymentType('SINGLE')" class="border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">Single Method[cite: 1]</button>
+                    <button id="mode-split-btn" onclick="setPaymentType('SPLIT')" class="border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">Split Payment[cite: 1]</button>
                 </div>
             </div>
 
             <div id="single-payment-container" class="space-y-3">
                 <div>
-                    <label class="text-xs font-semibold text-gray-600 uppercase">Method</label>
+                    <label class="text-xs font-semibold text-gray-600 uppercase">Method[cite: 1]</label>
                     <div class="grid grid-cols-3 gap-2 mt-1">
-                        <button id="btn-single-cash" onclick="setSingleMethod('CASH')" class="pay-method-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">CASH</button>
-                        <button id="btn-single-card" onclick="setSingleMethod('CARD')" class="pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">CARD</button>
-                        <button id="btn-single-benefit" onclick="setSingleMethod('BENEFIT_PAY')" class="pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">BENEFIT</button>
+                        <button id="btn-single-cash" onclick="setSingleMethod('CASH')" class="pay-method-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">CASH[cite: 1]</button>
+                        <button id="btn-single-card" onclick="setSingleMethod('CARD')" class="pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">CARD[cite: 1]</button>
+                        <button id="btn-single-benefit" onclick="setSingleMethod('BENEFIT_PAY')" class="pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">BENEFIT[cite: 1]</button>
                     </div>
                 </div>
 
                 <div id="single-cash-wrapper">
-                    <label class="text-xs font-semibold text-gray-600 uppercase">Cash Tendered (BHD)</label>
+                    <label class="text-xs font-semibold text-gray-600 uppercase">Cash Tendered (BHD)[cite: 1]</label>
                     <input type="number" id="cash-tendered" step="0.001" oninput="calculateSingleChange()" placeholder="0.000" class="w-full mt-1 border border-gray-300 rounded-lg p-2 text-right font-bold text-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                     <div class="flex justify-between text-sm mt-2 text-gray-700">
-                        <span>Change Due:</span>
+                        <span>Change Due:[cite: 1]</span>
                         <span id="change-due" class="font-bold text-blue-600">BHD 0.000</span>
                     </div>
                 </div>
@@ -549,58 +618,58 @@
 
             <div id="split-payment-container" class="hidden space-y-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
                 <div>
-                    <label class="text-xs font-semibold text-gray-600 uppercase">1. Select Primary Payment Method</label>
+                    <label class="text-xs font-semibold text-gray-600 uppercase">1. Select Primary Payment Method[cite: 1]</label>
                     <div class="grid grid-cols-3 gap-2 mt-1">
-                        <button id="btn-split-pri-cash" onclick="setSplitPrimaryMethod('CASH')" class="split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center">CASH</button>
-                        <button id="btn-split-pri-card" onclick="setSplitPrimaryMethod('CARD')" class="split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">CARD</button>
-                        <button id="btn-split-pri-benefit" onclick="setSplitPrimaryMethod('BENEFIT_PAY')" class="split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">BENEFIT</button>
+                        <button id="btn-split-pri-cash" onclick="setSplitPrimaryMethod('CASH')" class="split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center">CASH[cite: 1]</button>
+                        <button id="btn-split-pri-card" onclick="setSplitPrimaryMethod('CARD')" class="split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">CARD[cite: 1]</button>
+                        <button id="btn-split-pri-benefit" onclick="setSplitPrimaryMethod('BENEFIT_PAY')" class="split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">BENEFIT[cite: 1]</button>
                     </div>
                 </div>
 
                 <div>
-                    <label id="label-split-pri-amount" class="text-xs font-semibold text-gray-600 uppercase">Primary Paid Amount (BHD)</label>
+                    <label id="label-split-pri-amount" class="text-xs font-semibold text-gray-600 uppercase">Primary Paid Amount (BHD)[cite: 1]</label>
                     <input type="number" id="split-pri-amount" step="0.001" oninput="calculateSplitBalance()" placeholder="0.000" class="w-full mt-1 border border-gray-300 rounded-lg p-2 text-right font-bold text-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                 </div>
 
                 <div class="p-2.5 bg-blue-50 border border-blue-200 rounded-lg flex justify-between items-center text-sm font-bold text-blue-900">
-                    <span>Remaining Balance:</span>
+                    <span>Remaining Balance:[cite: 1]</span>
                     <span id="split-remaining-balance" class="text-base text-blue-700">BHD 0.000</span>
                 </div>
 
                 <div>
-                    <label class="text-xs font-semibold text-gray-600 uppercase">2. Pay Balance Using</label>
+                    <label class="text-xs font-semibold text-gray-600 uppercase">2. Pay Balance Using[cite: 1]</label>
                     <div class="grid grid-cols-3 gap-2 mt-1">
-                        <button id="btn-split-sec-cash" onclick="setSplitSecondaryMethod('CASH')" class="split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">CASH</button>
-                        <button id="btn-split-sec-card" onclick="setSplitSecondaryMethod('CARD')" class="split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center">CARD</button>
-                        <button id="btn-split-sec-benefit" onclick="setSplitSecondaryMethod('BENEFIT_PAY')" class="split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">BENEFIT</button>
+                        <button id="btn-split-sec-cash" onclick="setSplitSecondaryMethod('CASH')" class="split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">CASH[cite: 1]</button>
+                        <button id="btn-split-sec-card" onclick="setSplitSecondaryMethod('CARD')" class="split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center">CARD[cite: 1]</button>
+                        <button id="btn-split-sec-benefit" onclick="setSplitSecondaryMethod('BENEFIT_PAY')" class="split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">BENEFIT[cite: 1]</button>
                     </div>
                 </div>
             </div>
 
             <div>
-                <label class="text-xs font-semibold text-gray-600 uppercase">Print Format</label>
+                <label class="text-xs font-semibold text-gray-600 uppercase">Print Format[cite: 1]</label>
                 <div class="grid grid-cols-2 gap-2 mt-1">
-                    <button id="btn-print-58mm" onclick="setPrintFormat('58mm')" class="print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">58mm Thermal</button>
-                    <button id="btn-print-a4" onclick="setPrintFormat('A4')" class="print-fmt-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">A4 Invoice</button>
+                    <button id="btn-print-58mm" onclick="setPrintFormat('58mm')" class="print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">58mm Thermal[cite: 1]</button>
+                    <button id="btn-print-a4" onclick="setPrintFormat('A4')" class="print-fmt-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">A4 Invoice[cite: 1]</button>
                 </div>
             </div>
 
             <div class="space-y-2 pt-2 border-t border-gray-200">
                 <button onclick="processSale('PRINT')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-sm shadow flex items-center justify-center space-x-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                    <span>Print Receipt</span>
+                    <span>Print Receipt[cite: 1]</span>
                 </button>
                 
                 <div class="grid grid-cols-2 gap-2">
                     <button onclick="processSale('WHATSAPP')" class="bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold text-xs flex items-center justify-center space-x-1">
-                        <span>Send WhatsApp</span>
+                        <span>Send WhatsApp[cite: 1]</span>
                     </button>
                     <button onclick="processSale('EMAIL')" class="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold text-xs flex items-center justify-center space-x-1">
-                        <span>Send Email</span>
+                        <span>Send Email[cite: 1]</span>
                     </button>
                 </div>
 
-                <button onclick="closePaymentModal()" class="w-full border border-gray-300 text-gray-700 py-2 rounded-lg font-semibold text-xs hover:bg-gray-50">Cancel</button>
+                <button onclick="closePaymentModal()" class="w-full border border-gray-300 text-gray-700 py-2 rounded-lg font-semibold text-xs hover:bg-gray-50">Cancel[cite: 1]</button>
             </div>
         </div>
     </div>
@@ -610,45 +679,45 @@
         <div style="width: 58mm; padding: 4px; font-family: monospace; font-size: 10px; color: black; line-height: 1.2;">
             <div style="text-align: center;">
                 <img src="PCBH_LOGO-BG.png" alt="Logo" style="height: 48px; margin: 0 auto 4px auto; display: block; object-fit: contain;">
-                <div style="font-weight: bold; font-size: 12px; text-transform: uppercase;">BARAKAT PERFUMES</div>
-                <div>District 1, Janabiya</div>
-                <div>CR: 13812-04</div>
-                <div>Tel: 36051011</div>
+                <div style="font-weight: bold; font-size: 12px; text-transform: uppercase;">BARAKAT PERFUMES[cite: 1]</div>
+                <div>District 1, Janabiya[cite: 1]</div>
+                <div>CR: 13812-04[cite: 1]</div>
+                <div>Tel: 36051011[cite: 1]</div>
             </div>
             <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
             <div>
-                <div><strong>Receipt #:</strong> <span class="t-receipt-id">--</span></div>
-                <div><strong>Customer:</strong> <span class="t-cust-name">Walk-in Customer</span></div>
-                <div><strong>Phone:</strong> <span class="t-cust-phone">N/A</span></div>
+                <div><strong>Receipt #:[cite: 1]</strong> <span class="t-receipt-id">--</span></div>
+                <div><strong>Customer:[cite: 1]</strong> <span class="t-cust-name">Walk-in Customer[cite: 1]</span></div>
+                <div><strong>Phone:[cite: 1]</strong> <span class="t-cust-phone">N/A[cite: 1]</span></div>
             </div>
             <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
             <div class="t-items-list" style="display: flex; flex-direction: column; gap: 4px;"></div>
             <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
             <div>
-                <div><span>Points Earned:</span><span class="t-pts-earned" style="float: right;">0</span></div>
-                <div style="font-weight: bold;"><span>Points Balance:</span><span class="t-pts-balance" style="float: right;">0</span></div>
+                <div><span>Points Earned:[cite: 1]</span><span class="t-pts-earned" style="float: right;">0</span></div>
+                <div style="font-weight: bold;"><span>Points Balance:[cite: 1]</span><span class="t-pts-balance" style="float: right;">0</span></div>
             </div>
             <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
             <div style="display: flex; flex-direction: column; gap: 2px;">
-                <div style="display: flex; justify-content: space-between;"><span>Gross Total:</span><span class="t-gross"></span></div>
-                <div class="t-disc-row" style="display: flex; justify-content: space-between; color: black;"><span>Discount:</span><span class="t-disc-val"></span></div>
-                <div style="display: flex; justify-content: space-between;"><span>Subtotal (Excl. VAT):</span><span class="t-subtotal"></span></div>
-                <div style="display: flex; justify-content: space-between;"><span>VAT (10% Incl.):</span><span class="t-vat"></span></div>
-                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 11px; border-top: 1px solid black; padding-top: 2px;"><span>TOTAL BILL:</span><span class="t-total"></span></div>
+                <div style="display: flex; justify-content: space-between;"><span>Gross Total:[cite: 1]</span><span class="t-gross"></span></div>
+                <div class="t-disc-row" style="display: flex; justify-content: space-between; color: black;"><span>Discount:[cite: 1]</span><span class="t-disc-val"></span></div>
+                <div style="display: flex; justify-content: space-between;"><span>Subtotal (Excl. VAT):[cite: 1]</span><span class="t-subtotal"></span></div>
+                <div style="display: flex; justify-content: space-between;"><span>VAT (10% Incl.):[cite: 1]</span><span class="t-vat"></span></div>
+                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 11px; border-top: 1px solid black; padding-top: 2px;"><span>TOTAL BILL:[cite: 1]</span><span class="t-total"></span></div>
             </div>
             <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
             <div>
-                <div style="font-weight: bold; margin-bottom: 2px;">Payment Method(s):</div>
+                <div style="font-weight: bold; margin-bottom: 2px;">Payment Method(s):[cite: 1]</div>
                 <div class="t-payments-breakdown" style="display: flex; flex-direction: column; gap: 2px;"></div>
             </div>
             <div style="border-bottom: 1px dashed black; margin: 6px 0;"></div>
             <div style="text-align: center; display: flex; flex-direction: column; gap: 3px;">
-                <div style="font-weight: bold;">Thank you for shopping!</div>
-                <div>Follow us:</div>
-                <div>Instagram: @perfume_club.bh</div>
-                <div>www.theperfumesclub.com</div>
-                <div>WhatsApp: 36051011</div>
-                <div style="font-size: 8px; margin-top: 4px;">Return Policy: Returns accepted within 3 days with unopened box and original receipt. No returns or exchanges on discounted items.</div>
+                <div style="font-weight: bold;">Thank you for shopping![cite: 1]</div>
+                <div>Follow us:[cite: 1]</div>
+                <div>Instagram: @perfume_club.bh[cite: 1]</div>
+                <div>www.theperfumesclub.com[cite: 1]</div>
+                <div>WhatsApp: 36051011[cite: 1]</div>
+                <div style="font-size: 8px; margin-top: 4px;">Return Policy: Returns accepted within 3 days with unopened box and original receipt. No returns or exchanges on discounted items.[cite: 1]</div>
                 <div style="font-size: 8px; font-weight: bold; margin-top: 4px;" class="t-timestamp"></div>
             </div>
         </div>
@@ -659,20 +728,20 @@
         <div style="width: 100%; max-width: 800px; margin: 0 auto; padding: 12px; font-family: sans-serif; font-size: 11px; color: #111827; background: white; box-sizing: border-box;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #047857; padding-bottom: 8px;">
                 <div>
-                    <h1 style="font-size: 18px; font-weight: 900; color: #065f46; margin: 0;">BARAKAT PERFUMES</h1>
-                    <p style="margin: 1px 0; color: #4b5563; font-size: 10px;">Branch: District 1, Janabiya | CR: 13812-04 | Tel: 36051011</p>
+                    <h1 style="font-size: 18px; font-weight: 900; color: #065f46; margin: 0;">BARAKAT PERFUMES[cite: 1]</h1>
+                    <p style="margin: 1px 0; color: #4b5563; font-size: 10px;">Branch: District 1, Janabiya | CR: 13812-04 | Tel: 36051011[cite: 1]</p>
                 </div>
                 <div style="text-align: right;">
                     <img src="PCBH_LOGO-BG.png" alt="Logo" style="height: 40px; margin-left: auto; object-fit: contain;">
-                    <p style="font-weight: bold; margin: 0; color: #1f2937; font-size: 11px;">TAX INVOICE</p>
+                    <p style="font-weight: bold; margin: 0; color: #1f2937; font-size: 11px;">TAX INVOICE[cite: 1]</p>
                 </div>
             </div>
 
             <div style="display: flex; justify-content: space-between; margin: 8px 0; padding: 8px; background: #f9fafb; border-radius: 6px; font-size: 10px;">
                 <div>
                     <span style="font-weight: bold; color: #374151;">Receipt #: </span><span class="t-receipt-id">--</span><br>
-                    <span style="font-weight: bold; color: #374151;">Customer: </span><strong class="t-cust-name" style="color: #111827;">Walk-in Customer</strong>
-                    <span style="margin-left: 12px; color: #4b5563;">Phone: <span class="t-cust-phone">N/A</span></span>
+                    <span style="font-weight: bold; color: #374151;">Customer: </span><strong class="t-cust-name" style="color: #111827;">Walk-in Customer[cite: 1]</strong>
+                    <span style="margin-left: 12px; color: #4b5563;">Phone: <span class="t-cust-phone">N/A[cite: 1]</span></span>
                 </div>
                 <div style="text-align: right;">
                     <span style="font-weight: bold; color: #374151;">Date: </span>
@@ -683,10 +752,10 @@
             <table style="width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 10px;">
                 <thead>
                     <tr style="background: #047857; color: white; text-align: left;">
-                        <th style="padding: 6px;">Item Description</th>
-                        <th style="padding: 6px; text-align: center;">Qty</th>
-                        <th style="padding: 6px; text-align: right;">Unit Price</th>
-                        <th style="padding: 6px; text-align: right;">Total (BHD)</th>
+                        <th style="padding: 6px;">Item Description[cite: 1]</th>
+                        <th style="padding: 6px; text-align: center;">Qty[cite: 1]</th>
+                        <th style="padding: 6px; text-align: right;">Unit Price[cite: 1]</th>
+                        <th style="padding: 6px; text-align: right;">Total (BHD)[cite: 1]</th>
                     </tr>
                 </thead>
                 <tbody class="t-items-table-body" style="border-bottom: 1px solid #e5e7eb;"></tbody>
@@ -699,22 +768,22 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; padding-top: 6px; border-top: 1px solid #d1d5db; font-size: 10px;">
                 <div>
-                    <p style="font-weight: bold; color: #374151; margin: 0 0 4px 0;">Payment Method(s):</p>
+                    <p style="font-weight: bold; color: #374151; margin: 0 0 4px 0;">Payment Method(s):[cite: 1]</p>
                     <div class="t-payments-breakdown" style="background: #f9fafb; padding: 6px; border-radius: 4px;"></div>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 2px; text-align: right;">
-                    <div style="display: flex; justify-content: space-between;"><span>Gross Total:</span><span class="t-gross font-mono"></span></div>
-                    <div class="t-disc-row" style="display: flex; justify-content: space-between; color: #dc2626;"><span>Discount:</span><span class="t-disc-val font-mono"></span></div>
-                    <div style="display: flex; justify-content: space-between;"><span>Subtotal (Excl. VAT):</span><span class="t-subtotal font-mono"></span></div>
-                    <div style="display: flex; justify-content: space-between;"><span>VAT (10% Incl.):</span><span class="t-vat font-mono"></span></div>
-                    <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: 12px; border-top: 1px solid #9ca3af; padding-top: 2px; color: #065f46;"><span>Total Bill:</span><span class="t-total font-mono"></span></div>
+                    <div style="display: flex; justify-content: space-between;"><span>Gross Total:[cite: 1]</span><span class="t-gross font-mono"></span></div>
+                    <div class="t-disc-row" style="display: flex; justify-content: space-between; color: #dc2626;"><span>Discount:[cite: 1]</span><span class="t-disc-val font-mono"></span></div>
+                    <div style="display: flex; justify-content: space-between;"><span>Subtotal (Excl. VAT):[cite: 1]</span><span class="t-subtotal font-mono"></span></div>
+                    <div style="display: flex; justify-content: space-between;"><span>VAT (10% Incl.):[cite: 1]</span><span class="t-vat font-mono"></span></div>
+                    <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: 12px; border-top: 1px solid #9ca3af; padding-top: 2px; color: #065f46;"><span>Total Bill:[cite: 1]</span><span class="t-total font-mono"></span></div>
                 </div>
             </div>
 
             <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e7eb; text-align: center; color: #4b5563; font-size: 9px;">
-                <p style="font-weight: bold; color: #111827; margin: 0;">Thank you for shopping with us!</p>
-                <p style="margin: 2px 0;">Instagram: <strong>@perfume_club.bh</strong> | Web: <strong>www.theperfumesclub.com</strong> | WhatsApp: <strong>36051011</strong></p>
-                <p style="font-size: 8px; color: #6b7280; margin: 2px 0;">Return Policy: Returns accepted within 3 days with unopened box and original receipt.</p>
+                <p style="font-weight: bold; color: #111827; margin: 0;">Thank you for shopping with us![cite: 1]</p>
+                <p style="margin: 2px 0;">Instagram: <strong>@perfume_club.bh</strong> | Web: <strong>www.theperfumesclub.com</strong> | WhatsApp: <strong>36051011</strong>[cite: 1]</p>
+                <p style="font-size: 8px; color: #6b7280; margin: 2px 0;">Return Policy: Returns accepted within 3 days with unopened box and original receipt.[cite: 1]</p>
             </div>
         </div>
     </template>
@@ -789,7 +858,7 @@ function updateManagerPortalVisibility() {
 }
 
 async function switchUser() {
-    const pin = prompt('Enter User PIN:');
+    const pin = prompt('Enter User PIN:[cite: 1]');
     if (!pin) return;
 
     if (supabaseClient) {
@@ -824,7 +893,7 @@ async function switchUser() {
         document.getElementById('role-badge').innerText = 'Cashier';
         document.getElementById('user-name').innerText = 'Cashier 1';
     } else {
-        alert('Invalid User PIN code!');
+        alert('Invalid User PIN code![cite: 1]');
     }
     updateManagerPortalVisibility();
     renderProducts();
@@ -889,7 +958,7 @@ function populateCategoryDropdown() {
 
     const newOpt = document.createElement('option');
     newOpt.value = 'NEW_CATEGORY';
-    newOpt.innerText = '+ Add New Category';
+    newOpt.innerText = '+ Add New Category[cite: 1]';
     selectElem.appendChild(newOpt);
 }
 
@@ -898,7 +967,7 @@ function populateCategoryDropdown() {
 // ==========================================================
 async function openManagerPortal() {
     if (userRole !== 'ADMIN' && userRole !== 'MANAGER') {
-        const pin = prompt('Enter Manager/Owner PIN to access Full-Window Manager Portal:');
+        const pin = prompt('Enter Manager/Owner PIN to access Full-Window Manager Portal:[cite: 1]');
         if (!pin) return;
         
         let authenticated = false;
@@ -915,7 +984,7 @@ async function openManagerPortal() {
         }
 
         if (!authenticated) {
-            alert('Invalid PIN or insufficient privileges.');
+            alert('Invalid PIN or insufficient privileges.[cite: 1]');
             return;
         }
         updateManagerPortalVisibility();
@@ -1093,6 +1162,186 @@ function renderManagerDashboard() {
 }
 
 // ==========================================================
+// MANAGER PORTAL - MANAGE PRODUCTS & EDIT/DELETE WORKFLOW
+// ==========================================================
+function renderManagerProductList() {
+    const container = document.getElementById('manager-products-list');
+    const term = document.getElementById('manager-product-search') ? document.getElementById('manager-product-search').value.toLowerCase().trim() : '';
+    container.innerHTML = '';
+    
+    const filtered = products.filter(p => 
+        (p.name && p.name.toLowerCase().includes(term)) ||
+        (p.sku && p.sku.toLowerCase().includes(term)) ||
+        (p.barcode && p.barcode.toLowerCase().includes(term))
+    );
+
+    if (filtered.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-400 py-6 text-xs">No products found matching your search.</p>';
+        return;
+    }
+
+    filtered.forEach(p => {
+        const row = document.createElement('div');
+        row.className = 'py-3 flex justify-between items-center text-xs border-b border-gray-100 last:border-0';
+        row.innerHTML = `
+            <div class="flex-1 pr-3">
+                <p class="font-bold text-gray-800 text-sm">${p.name}</p>
+                <p class="text-gray-400">SKU: ${p.sku || 'N/A'} | Category: ${p.category || 'Perfumes'} | Stock: ${p.stock_quantity}</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span class="font-bold text-emerald-700 text-sm">${formatBHD(p.retail_price)}</span>
+                <button onclick="openEditProductModal('${p.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded font-bold transition shadow">Edit</button>
+                <button onclick="deleteProduct('${p.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded font-bold transition shadow">Delete</button>
+            </div>
+        `;
+        container.appendChild(row);
+    });
+}
+
+function openEditProductModal(id) {
+    const prod = products.find(p => String(p.id) === String(id));
+    if (!prod) return;
+
+    document.getElementById('edit-prod-id').value = prod.id;
+    document.getElementById('edit-prod-name-input').value = prod.name || '';
+    document.getElementById('edit-prod-sku-input').value = prod.sku || '';
+    document.getElementById('edit-prod-barcode-input').value = prod.barcode || '';
+    document.getElementById('edit-prod-category-input').value = prod.category || 'Perfumes';
+    document.getElementById('edit-prod-cost-input').value = prod.cost_price ?? 0;
+    document.getElementById('edit-prod-retail-input').value = prod.retail_price ?? 0;
+    document.getElementById('edit-prod-stock-input').value = prod.stock_quantity ?? 0;
+    document.getElementById('edit-prod-track-input').checked = prod.track_stock ?? true;
+    document.getElementById('edit-prod-available-input').checked = prod.available_for_sale ?? true;
+
+    document.getElementById('edit-product-modal').classList.remove('hidden');
+}
+
+function closeEditProductModal() {
+    document.getElementById('edit-product-modal').classList.add('hidden');
+}
+
+async function saveProductEdits() {
+    const id = document.getElementById('edit-prod-id').value;
+    const name = document.getElementById('edit-prod-name-input').value.trim();
+    const sku = document.getElementById('edit-prod-sku-input').value.trim();
+    const barcode = document.getElementById('edit-prod-barcode-input').value.trim();
+    const category = document.getElementById('edit-prod-category-input').value.trim() || 'Perfumes';
+    const cost_price = parseFloat(document.getElementById('edit-prod-cost-input').value) || 0;
+    const retail_price = parseFloat(document.getElementById('edit-prod-retail-input').value) || 0;
+    const stock_quantity = parseInt(document.getElementById('edit-prod-stock-input').value) || 0;
+    const track_stock = document.getElementById('edit-prod-track-input').checked;
+    const available_for_sale = document.getElementById('edit-prod-available-input').checked;
+
+    if (!name || retail_price <= 0) {
+        alert('Product Name and a valid Retail Price are required![cite: 1]');
+        return;
+    }
+
+    const updateData = {
+        name,
+        sku: sku || null,
+        barcode: barcode || null,
+        category,
+        cost_price,
+        retail_price,
+        stock_quantity,
+        track_stock,
+        available_for_sale
+    };
+
+    if (supabaseClient && isValidUUID(id)) {
+        const { error } = await supabaseClient.from('products').update(updateData).eq('id', id);
+        if (error) {
+            alert('Error updating product in database: ' + error.message);
+            return;
+        }
+    }
+
+    const idx = products.findIndex(p => String(p.id) === String(id));
+    if (idx !== -1) {
+        products[idx] = Object.assign({}, products[idx], updateData);
+    }
+    products = sortProductsAlphabetically(products);
+
+    alert('Product details updated successfully and synced to database![cite: 1]');
+    closeEditProductModal();
+    renderProducts();
+    renderManagerProductList();
+    populateCategoryDropdown();
+}
+
+async function addNewProductFromManager() {
+    const name = document.getElementById('new-prod-name').value.trim();
+    const sku = document.getElementById('new-prod-sku').value.trim() || ('SKU-' + Math.floor(1000 + Math.random() * 9000));
+    const barcode = document.getElementById('new-prod-barcode').value.trim();
+    
+    let category = document.getElementById('new-prod-category-select').value;
+    if (category === 'NEW_CATEGORY') {
+        category = document.getElementById('new-prod-category-custom').value.trim() || 'Uncategorized';
+    }
+
+    const cost = parseFloat(document.getElementById('new-prod-cost').value) || 0;
+    const retail = parseFloat(document.getElementById('new-prod-retail').value) || 0;
+    const stock = parseInt(document.getElementById('new-prod-stock').value) || 0;
+    const trackStock = document.getElementById('new-prod-track').checked;
+    const available = document.getElementById('new-prod-available').checked;
+
+    if (!name || retail <= 0) {
+        alert('Please provide Product Name and a valid Retail Price![cite: 1]');
+        return;
+    }
+
+    const newProd = {
+        name: name,
+        sku: sku,
+        barcode: barcode || null,
+        category: category,
+        cost_price: cost,
+        retail_price: retail,
+        stock_quantity: stock,
+        track_stock: trackStock,
+        available_for_sale: available
+    };
+
+    if (supabaseClient) {
+        const { error } = await supabaseClient.from('products').insert([newProd]);
+        if (error) {
+            alert('Error adding product to Supabase: ' + error.message);
+            return;
+        }
+    }
+
+    alert('Product added successfully![cite: 1]');
+    document.getElementById('new-prod-name').value = '';
+    document.getElementById('new-prod-sku').value = '';
+    document.getElementById('new-prod-barcode').value = '';
+    document.getElementById('new-prod-cost').value = '';
+    document.getElementById('new-prod-retail').value = '';
+    document.getElementById('new-prod-stock').value = '';
+
+    await fetchProducts();
+    renderManagerProductList();
+}
+
+async function deleteProduct(id) {
+    if (!confirm('Are you sure you want to delete this product?[cite: 1]')) return;
+
+    if (supabaseClient && isValidUUID(id)) {
+        const { error } = await supabaseClient.from('products').delete().eq('id', id);
+        if (error) {
+            alert('Error deleting product: ' + error.message);
+            return;
+        }
+    }
+
+    products = products.filter(p => String(p.id) !== String(id));
+    alert('Product deleted successfully![cite: 1]');
+    await fetchProducts();
+    renderProducts();
+    renderManagerProductList();
+}
+
+// ==========================================================
 // CUSTOMER DIRECTORY & EDITING WORKFLOW (SYNCED TO DB)
 // ==========================================================
 function renderManagerCustomerDirectory() {
@@ -1123,7 +1372,7 @@ function renderManagerCustomerDirectory() {
                     <span class="bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">${c.loyalty_points || 0} Pts</span>
                     <p class="text-gray-500 mt-1 font-semibold">Total Spent: ${formatBHD(c.total_spent || 0)}</p>
                 </div>
-                <button onclick="openEditCustomerModal('${c.id}')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded transition shadow">Edit</button>
+                <button onclick="openEditCustomerModal('${c.id}')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded transition shadow">Edit[cite: 1]</button>
             </div>
         `;
         container.appendChild(row);
@@ -1153,7 +1402,7 @@ async function saveCustomerEdits() {
     const email = document.getElementById('edit-cust-email-input').value.trim();
 
     if (!name || !phone) {
-        alert('Customer Name and Phone number are required!');
+        alert('Customer Name and Phone number are required![cite: 1]');
         return;
     }
 
@@ -1172,112 +1421,10 @@ async function saveCustomerEdits() {
         customers[idx] = Object.assign({}, customers[idx], updateData);
     }
 
-    alert('Customer details updated successfully and synced to database!');
+    alert('Customer details updated successfully and synced to database![cite: 1]');
     closeEditCustomerModal();
     renderManagerCustomerDirectory();
     await fetchCustomers();
-}
-
-function onCategorySelectChange() {
-    const val = document.getElementById('new-prod-category-select').value;
-    const customInput = document.getElementById('new-prod-category-custom');
-    if (val === 'NEW_CATEGORY') {
-        customInput.classList.remove('hidden');
-        customInput.focus();
-    } else {
-        customInput.classList.add('hidden');
-    }
-}
-
-function renderManagerProductList() {
-    const container = document.getElementById('manager-products-list');
-    container.innerHTML = '';
-    
-    products.forEach(p => {
-        const row = document.createElement('div');
-        row.className = 'py-3 flex justify-between items-center text-xs border-b border-gray-100 last:border-0';
-        row.innerHTML = `
-            <div class="flex-1 pr-3">
-                <p class="font-bold text-gray-800 text-sm">${p.name}</p>
-                <p class="text-gray-400">SKU: ${p.sku || 'N/A'} | Category: ${p.category || 'Perfumes'} | Stock: ${p.stock_quantity}</p>
-            </div>
-            <div class="flex items-center space-x-3">
-                <span class="font-bold text-emerald-700 text-sm">${formatBHD(p.retail_price)}</span>
-                <button onclick="deleteProduct('${p.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded font-bold">Delete</button>
-            </div>
-        `;
-        container.appendChild(row);
-    });
-}
-
-async function addNewProductFromManager() {
-    const name = document.getElementById('new-prod-name').value.trim();
-    const sku = document.getElementById('new-prod-sku').value.trim() || ('SKU-' + Math.floor(1000 + Math.random() * 9000));
-    const barcode = document.getElementById('new-prod-barcode').value.trim();
-    
-    let category = document.getElementById('new-prod-category-select').value;
-    if (category === 'NEW_CATEGORY') {
-        category = document.getElementById('new-prod-category-custom').value.trim() || 'Uncategorized';
-    }
-
-    const cost = parseFloat(document.getElementById('new-prod-cost').value) || 0;
-    const retail = parseFloat(document.getElementById('new-prod-retail').value) || 0;
-    const stock = parseInt(document.getElementById('new-prod-stock').value) || 0;
-    const trackStock = document.getElementById('new-prod-track').checked;
-    const available = document.getElementById('new-prod-available').checked;
-
-    if (!name || retail <= 0) {
-        alert('Please provide Product Name and a valid Retail Price!');
-        return;
-    }
-
-    const newProd = {
-        name: name,
-        sku: sku,
-        barcode: barcode || null,
-        category: category,
-        cost_price: cost,
-        retail_price: retail,
-        stock_quantity: stock,
-        track_stock: trackStock,
-        available_for_sale: available
-    };
-
-    if (supabaseClient) {
-        const { error } = await supabaseClient.from('products').insert([newProd]);
-        if (error) {
-            alert('Error adding product to Supabase: ' + error.message);
-            return;
-        }
-    }
-
-    alert('Product added successfully!');
-    document.getElementById('new-prod-name').value = '';
-    document.getElementById('new-prod-sku').value = '';
-    document.getElementById('new-prod-barcode').value = '';
-    document.getElementById('new-prod-cost').value = '';
-    document.getElementById('new-prod-retail').value = '';
-    document.getElementById('new-prod-stock').value = '';
-
-    await fetchProducts();
-    renderManagerProductList();
-}
-
-async function deleteProduct(id) {
-    if (!confirm('Are you sure you want to delete this product?')) return;
-
-    if (supabaseClient && isValidUUID(id)) {
-        const { error } = await supabaseClient.from('products').delete().eq('id', id);
-        if (error) {
-            alert('Error deleting product: ' + error.message);
-            return;
-        }
-    }
-
-    products = products.filter(p => String(p.id) !== String(id));
-    alert('Product deleted successfully!');
-    await fetchProducts();
-    renderManagerProductList();
 }
 
 // ==========================================================
@@ -1299,7 +1446,7 @@ function downloadProductTemplate() {
 function handleCSVUploadPreview() {
     const fileInput = document.getElementById('csv-file-input');
     if (!fileInput.files || fileInput.files.length === 0) {
-        alert('Please select a CSV file to upload.');
+        alert('Please select a CSV file to upload.[cite: 1]');
         return;
     }
 
@@ -1315,7 +1462,7 @@ function handleCSVUploadPreview() {
 function parseCSVText(text) {
     const lines = text.split(/\r\n|\n/);
     if (lines.length < 2) {
-        alert('CSV file appears empty or invalid.');
+        alert('CSV file appears empty or invalid.[cite: 1]');
         return;
     }
 
@@ -1356,8 +1503,8 @@ function renderUploadComparisonTable() {
         div.className = 'py-2.5 flex justify-between items-center text-xs';
         
         let statusBadge = row.status === 'NEW' 
-            ? '<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">New Item</span>' 
-            : '<span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold">Already Exists</span>';
+            ? '<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">New Item[cite: 1]</span>' 
+            : '<span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold">Already Exists[cite: 1]</span>';
 
         div.innerHTML = `
             <div class="flex-1 pr-2">
@@ -1368,11 +1515,11 @@ function renderUploadComparisonTable() {
                 ${statusBadge}
                 ${row.status === 'EXISTS' ? `
                     <select onchange="updateUploadRowAction(${idx}, this.value)" class="border border-gray-300 rounded px-2 py-1 font-bold text-xs bg-white">
-                        <option value="skip" ${row.action === 'skip' ? 'selected' : ''}>Skip</option>
-                        <option value="replace" ${row.action === 'replace' ? 'selected' : ''}>Replace Details</option>
-                        <option value="add" ${row.action === 'add' ? 'selected' : ''}>Add Quantity (+${row.stock_quantity})</option>
+                        <option value="skip" ${row.action === 'skip' ? 'selected' : ''}>Skip[cite: 1]</option>
+                        <option value="replace" ${row.action === 'replace' ? 'selected' : ''}>Replace Details[cite: 1]</option>
+                        <option value="add" ${row.action === 'add' ? 'selected' : ''}>Add Quantity (+${row.stock_quantity})[cite: 1]</option>
                     </select>
-                ` : '<span class="text-gray-400 font-semibold">Will Add New</span>'}
+                ` : '<span class="text-gray-400 font-semibold">Will Add New[cite: 1]</span>'}
             </div>
         `;
         container.appendChild(div);
@@ -1431,7 +1578,7 @@ async function executeBatchUploadImport() {
         }
     }
 
-    alert(`Successfully processed upload import for ${successCount} products!`);
+    alert(`Successfully processed upload import for ${successCount} products![cite: 1]`);
     document.getElementById('upload-comparison-box').classList.add('hidden');
     await fetchProducts();
     switchManagerTab('products');
@@ -1448,13 +1595,13 @@ function selectReportType(type) {
 
     if (type === 'sales') {
         document.getElementById('btn-rep-cat-sales').className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 transition';
-        document.getElementById('report-form-title').innerText = 'Sales Summary Report Configuration';
+        document.getElementById('report-form-title').innerText = 'Sales Summary Report Configuration[cite: 1]';
     } else if (type === 'inventory') {
         document.getElementById('btn-rep-cat-inventory').className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 transition';
-        document.getElementById('report-form-title').innerText = 'Inventory Valuation Report Configuration';
+        document.getElementById('report-form-title').innerText = 'Inventory Valuation Report Configuration[cite: 1]';
     } else if (type === 'lowstock') {
         document.getElementById('btn-rep-cat-lowstock').className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 transition';
-        document.getElementById('report-form-title').innerText = 'Low Stock Alert Report Configuration';
+        document.getElementById('report-form-title').innerText = 'Low Stock Alert Report Configuration[cite: 1]';
     }
 }
 
@@ -1493,9 +1640,9 @@ function getActiveReportContentHtml() {
                     <tr>
                         <td style="padding: 5px; border: 1px solid #d1d5db; text-align: center;">${srNo++}</td>
                         <td style="padding: 5px; border: 1px solid #d1d5db;">${s.receiptId}</td>
-                        <td style="padding: 5px; border: 1px solid #d1d5db;">BARAKAT PERFUMES</td>
+                        <td style="padding: 5px; border: 1px solid #d1d5db;">BARAKAT PERFUMES[cite: 1]</td>
                         <td style="padding: 5px; border: 1px solid #d1d5db;">${s.timestamp}</td>
-                        <td style="padding: 5px; border: 1px solid #d1d5db;">Store Retail</td>
+                        <td style="padding: 5px; border: 1px solid #d1d5db;">Store Retail[cite: 1]</td>
                         <td style="padding: 5px; border: 1px solid #d1d5db;">${item.qty > 1 ? item.qty + 'x ' : ''}${item.name}</td>
                         <td style="padding: 5px; border: 1px solid #d1d5db;">${payType}</td>
                         <td style="padding: 5px; border: 1px solid #d1d5db; text-align: right;">${(totalAmountExclTax).toFixed(3)}</td>
@@ -1505,44 +1652,44 @@ function getActiveReportContentHtml() {
                         <td style="padding: 5px; border: 1px solid #d1d5db; text-align: center;">0</td>
                         <td style="padding: 5px; border: 1px solid #d1d5db; text-align: center;">0</td>
                         <td style="padding: 5px; border: 1px solid #d1d5db; text-align: right; font-weight: bold;">${(lineTotal).toFixed(3)}</td>
-                        <td style="padding: 5px; border: 1px solid #d1d5db; text-align: center;">Paid</td>
-                        <td style="padding: 5px; border: 1px solid #d1d5db;">Store Retail</td>
+                        <td style="padding: 5px; border: 1px solid #d1d5db; text-align: center;">Paid[cite: 1]</td>
+                        <td style="padding: 5px; border: 1px solid #d1d5db;">Store Retail[cite: 1]</td>
                     </tr>
                 `;
             });
         });
 
         if (filteredSales.length === 0) {
-            rowsHtml = `<tr><td colspan="16" style="text-align: center; padding: 15px; color: #6b7280;">No sales transactions found for the selected date range.</td></tr>`;
+            rowsHtml = `<tr><td colspan="16" style="text-align: center; padding: 15px; color: #6b7280;">No sales transactions found for the selected date range.[cite: 1]</td></tr>`;
         }
 
         return {
-            title: `Sales Detail Report (${startStr} to ${endStr})`,
+            title: `Sales Detail Report (${startStr} to ${endStr})[cite: 1]`,
             html: `
                 <div style="margin-bottom: 10px; font-size: 11px; display: flex; justify-content: space-between;">
-                    <div><strong>Date From:</strong> ${startStr} &nbsp;&nbsp;|&nbsp;&nbsp; <strong>To Date:</strong> ${endStr}</div>
-                    <div><strong>Generated by:</strong> Barakat POS &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Print Date:</strong> ${new Date().toLocaleDateString()}</div>
+                    <div><strong>Date From:[cite: 1]</strong> ${startStr} &nbsp;&nbsp;|&nbsp;&nbsp; <strong>To Date:[cite: 1]</strong> ${endStr}</div>
+                    <div><strong>Generated by:[cite: 1]</strong> Barakat POS &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Print Date:[cite: 1]</strong> ${new Date().toLocaleDateString()}</div>
                 </div>
                 <div style="overflow-x: auto;">
                     <table style="width: 100%; border-collapse: collapse; font-size: 9px; font-family: sans-serif; white-space: nowrap;">
                         <thead>
                             <tr style="background: #047857; color: white; text-align: left;">
-                                <th style="padding: 6px; border: 1px solid #047857;">Sr No.</th>
-                                <th style="padding: 6px; border: 1px solid #047857;">Order No.</th>
-                                <th style="padding: 6px; border: 1px solid #047857;">Outlet Name</th>
-                                <th style="padding: 6px; border: 1px solid #047857;">Order Date</th>
-                                <th style="padding: 6px; border: 1px solid #047857;">Order Type</th>
-                                <th style="padding: 6px; border: 1px solid #047857;">Product Name</th>
-                                <th style="padding: 6px; border: 1px solid #047857;">Pay Type</th>
-                                <th style="padding: 6px; border: 1px solid #047857; text-align: right;">TotalAmount</th>
-                                <th style="padding: 6px; border: 1px solid #047857; text-align: center;">Loyalty Disc.</th>
-                                <th style="padding: 6px; border: 1px solid #047857; text-align: right;">DiscountAmount</th>
-                                <th style="padding: 6px; border: 1px solid #047857; text-align: right;">TaxAmount</th>
-                                <th style="padding: 6px; border: 1px solid #047857; text-align: center;">DeliveryCharges</th>
-                                <th style="padding: 6px; border: 1px solid #047857; text-align: center;">ExtraChargeAmount</th>
-                                <th style="padding: 6px; border: 1px solid #047857; text-align: right;">NetAmount</th>
-                                <th style="padding: 6px; border: 1px solid #047857; text-align: center;">Order Perp. Status</th>
-                                <th style="padding: 6px; border: 1px solid #047857;">OrderType</th>
+                                <th style="padding: 6px; border: 1px solid #047857;">Sr No.[cite: 1]</th>
+                                <th style="padding: 6px; border: 1px solid #047857;">Order No.[cite: 1]</th>
+                                <th style="padding: 6px; border: 1px solid #047857;">Outlet Name[cite: 1]</th>
+                                <th style="padding: 6px; border: 1px solid #047857;">Order Date[cite: 1]</th>
+                                <th style="padding: 6px; border: 1px solid #047857;">Order Type[cite: 1]</th>
+                                <th style="padding: 6px; border: 1px solid #047857;">Product Name[cite: 1]</th>
+                                <th style="padding: 6px; border: 1px solid #047857;">Pay Type[cite: 1]</th>
+                                <th style="padding: 6px; border: 1px solid #047857; text-align: right;">TotalAmount[cite: 1]</th>
+                                <th style="padding: 6px; border: 1px solid #047857; text-align: center;">Loyalty Disc.[cite: 1]</th>
+                                <th style="padding: 6px; border: 1px solid #047857; text-align: right;">DiscountAmount[cite: 1]</th>
+                                <th style="padding: 6px; border: 1px solid #047857; text-align: right;">TaxAmount[cite: 1]</th>
+                                <th style="padding: 6px; border: 1px solid #047857; text-align: center;">DeliveryCharges[cite: 1]</th>
+                                <th style="padding: 6px; border: 1px solid #047857; text-align: center;">ExtraChargeAmount[cite: 1]</th>
+                                <th style="padding: 6px; border: 1px solid #047857; text-align: right;">NetAmount[cite: 1]</th>
+                                <th style="padding: 6px; border: 1px solid #047857; text-align: center;">Order Perp. Status[cite: 1]</th>
+                                <th style="padding: 6px; border: 1px solid #047857;">OrderType[cite: 1]</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1556,22 +1703,22 @@ function getActiveReportContentHtml() {
         const totalRetailVal = products.reduce((acc, p) => acc + (p.retail_price * p.stock_quantity), 0);
         const totalCostVal = products.reduce((acc, p) => acc + ((p.cost_price || 0) * p.stock_quantity), 0);
         return {
-            title: 'Inventory Valuation Report',
+            title: 'Inventory Valuation Report[cite: 1]',
             html: `
                 <div style="margin-bottom: 8px; font-size: 11px;">
-                    <strong>Total Items:</strong> ${products.length} | 
-                    <strong>Total Retail Value:</strong> ${formatBHD(totalRetailVal)} | 
-                    <strong>Total Cost Capital:</strong> ${formatBHD(totalCostVal)} | 
-                    <strong>Projected Profit:</strong> ${formatBHD(totalRetailVal - totalCostVal)}
+                    <strong>Total Items:[cite: 1]</strong> ${products.length} | 
+                    <strong>Total Retail Value:[cite: 1]</strong> ${formatBHD(totalRetailVal)} | 
+                    <strong>Total Cost Capital:[cite: 1]</strong> ${formatBHD(totalCostVal)} | 
+                    <strong>Projected Profit:[cite: 1]</strong> ${formatBHD(totalRetailVal - totalCostVal)}
                 </div>
                 <table border="1" width="100%" style="border-collapse:collapse; font-size:10px;">
                     <thead>
                         <tr style="background:#f3f4f6;">
-                            <th style="padding:6px;">Product Name</th>
-                            <th style="padding:6px; text-align:center;">Stock Qty</th>
-                            <th style="padding:6px; text-align:right;">Cost Price</th>
-                            <th style="padding:6px; text-align:right;">Retail Price</th>
-                            <th style="padding:6px; text-align:right;">Total Retail Value</th>
+                            <th style="padding:6px;">Product Name[cite: 1]</th>
+                            <th style="padding:6px; text-align:center;">Stock Qty[cite: 1]</th>
+                            <th style="padding:6px; text-align:right;">Cost Price[cite: 1]</th>
+                            <th style="padding:6px; text-align:right;">Retail Price[cite: 1]</th>
+                            <th style="padding:6px; text-align:right;">Total Retail Value[cite: 1]</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1591,18 +1738,18 @@ function getActiveReportContentHtml() {
     } else {
         const low = products.filter(p => (p.stock_quantity ?? 0) <= (p.low_stock_threshold ?? 2));
         return {
-            title: 'Low Stock & Reorder Alert Report',
+            title: 'Low Stock & Reorder Alert Report[cite: 1]',
             html: `
                 <div style="margin-bottom: 8px; font-size: 11px;">
-                    <strong>Items Needing Restock:</strong> ${low.length}
+                    <strong>Items Needing Restock:[cite: 1]</strong> ${low.length}
                 </div>
                 <table border="1" width="100%" style="border-collapse:collapse; font-size:10px;">
                     <thead>
                         <tr style="background:#f3f4f6;">
-                            <th style="padding:6px;">Product Name</th>
-                            <th style="padding:6px; text-align:center;">Current Stock</th>
-                            <th style="padding:6px; text-align:center;">Threshold Limit</th>
-                            <th style="padding:6px; text-align:right;">Retail Price</th>
+                            <th style="padding:6px;">Product Name[cite: 1]</th>
+                            <th style="padding:6px; text-align:center;">Current Stock[cite: 1]</th>
+                            <th style="padding:6px; text-align:center;">Threshold Limit[cite: 1]</th>
+                            <th style="padding:6px; text-align:right;">Retail Price[cite: 1]</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1637,7 +1784,7 @@ function executePrintActiveReport() {
     const printContainer = document.getElementById('print-container');
     printContainer.innerHTML = `
         <div style="padding: 24px; font-family: sans-serif; color: black;">
-            <h1 style="text-align: center; color: #065f46; margin: 0;">BARAKAT PERFUMES</h1>
+            <h1 style="text-align: center; color: #065f46; margin: 0;">BARAKAT PERFUMES[cite: 1]</h1>
             <h3 style="text-align: center; color: #374151; margin: 4px 0 15px 0;">${reportData.title}</h3>
             <p style="text-align: center; font-size: 10px; color: #6b7280;">Generated on: ${new Date().toLocaleString()}</p>
             <hr style="margin: 15px 0; border: 0; border-top: 1px solid #d1d5db;"/>
@@ -1651,13 +1798,13 @@ function executePrintActiveReport() {
 
 function executeEmailActiveReport() {
     const reportData = getActiveReportContentHtml();
-    const emailTo = prompt('Enter recipient email address:');
+    const emailTo = prompt('Enter recipient email address:[cite: 1]');
     if (!emailTo) return;
-    alert(`Report "${reportData.title}" successfully compiled and dispatched to ${emailTo}!`);
+    alert(`Report "${reportData.title}" successfully compiled and dispatched to ${emailTo}![cite: 1]`);
 }
 
 // ==========================================
-// EXISTING CODE PRESERVED BELOW
+// EXISTING POS CODE PRESERVED BELOW
 // ==========================================
 function openCustomerModal() {
     document.getElementById('customer-modal').classList.remove('hidden');
@@ -1716,8 +1863,8 @@ function clearSelectedCustomer() {
     currentCustomerPoints = 0;
     pointsRedeemedCount = 0;
 
-    document.getElementById('disp-cust-name').innerText = 'Walk-in Customer';
-    document.getElementById('disp-cust-phone').innerText = 'No phone attached';
+    document.getElementById('disp-cust-name').innerText = 'Walk-in Customer[cite: 1]';
+    document.getElementById('disp-cust-phone').innerText = 'No phone attached[cite: 1]';
     document.getElementById('btn-clear-cust').classList.add('hidden');
 
     updateLoyaltyUI();
@@ -1729,7 +1876,7 @@ async function addNewCustomerToDatabase() {
     const email = document.getElementById('new-cust-email').value.trim();
 
     if (!name || !phone) {
-        alert('Please provide both Name and Phone number!');
+        alert('Please provide both Name and Phone number![cite: 1]');
         return;
     }
 
@@ -1756,7 +1903,7 @@ async function addNewCustomerToDatabase() {
                 document.getElementById('new-cust-phone').value = '';
                 document.getElementById('new-cust-email').value = '';
                 
-                alert(`Customer ${newCust.name} added successfully!`);
+                alert(`Customer ${newCust.name} added successfully![cite: 1]`);
             }
         } catch(err) {}
     } else {
@@ -1783,7 +1930,7 @@ function updateLoyaltyUI() {
     } else {
         redeemBtn.disabled = true;
         redeemBtn.className = 'bg-gray-300 text-gray-500 text-[10px] font-bold px-2 py-1 rounded cursor-not-allowed';
-        redeemBtn.innerText = 'Redeem (Min 100 pts)';
+        redeemBtn.innerText = 'Redeem (Min 100 pts)[cite: 1]';
     }
 }
 
@@ -1798,7 +1945,7 @@ function redeemLoyaltyPoints() {
     document.getElementById('discount-val').value = discountBHD.toFixed(3);
     
     updateCartUI();
-    alert(`Applied ${formatBHD(discountBHD)} loyalty discount! ${pointsRedeemedCount} points will be deducted.`);
+    alert(`Applied ${formatBHD(discountBHD)} loyalty discount! ${pointsRedeemedCount} points will be deducted.[cite: 1]`);
 }
 
 function renderProducts(list = products) {
@@ -1966,7 +2113,7 @@ function openItemManagerModal() {
         userRole = 'CASHIER';
     }
 
-    document.getElementById('manager-status-text').innerText = `Current View: ${userRole}`;
+    document.getElementById('manager-status-text').innerText = `Current View: ${userRole}[cite: 1]`;
     if (userRole === 'ADMIN' || userRole === 'MANAGER') {
         document.getElementById('btn-unlock-manager').classList.add('hidden');
     } else {
@@ -1984,7 +2131,7 @@ function closeItemManagerModal() {
 }
 
 async function authenticateManagerRole() {
-    const pin = prompt('Enter Manager/Owner PIN to view and edit Cost Prices:');
+    const pin = prompt('Enter Manager/Owner PIN to view and edit Cost Prices:[cite: 1]');
     if (!pin) return;
 
     if (supabaseClient) {
@@ -1998,7 +2145,7 @@ async function authenticateManagerRole() {
             if (data && !error && (data.role === 'ADMIN' || data.role === 'MANAGER')) {
                 userRole = data.role;
                 currentUser = data;
-                document.getElementById('manager-status-text').innerText = `Current View: ${data.role} Access`;
+                document.getElementById('manager-status-text').innerText = `Current View: ${data.role} Access[cite: 1]`;
                 document.getElementById('btn-unlock-manager').classList.add('hidden');
                 updateManagerPortalVisibility();
                 renderItemManagerList();
@@ -2009,12 +2156,12 @@ async function authenticateManagerRole() {
 
     if (pin === '1234' || pin === '9999') {
         userRole = 'MANAGER';
-        document.getElementById('manager-status-text').innerText = 'Current View: Manager Access';
+        document.getElementById('manager-status-text').innerText = 'Current View: Manager Access[cite: 1]';
         document.getElementById('btn-unlock-manager').classList.add('hidden');
         updateManagerPortalVisibility();
         renderItemManagerList();
     } else {
-        alert('Invalid Manager PIN or insufficient privileges!');
+        alert('Invalid Manager PIN or insufficient privileges![cite: 1]');
     }
 }
 
@@ -2044,11 +2191,11 @@ function renderItemManagerList() {
         
         const costInputHtml = isManager 
             ? `<div>
-                <label class="text-[9px] uppercase font-bold text-blue-600 block">Cost Price (BHD)</label>
+                <label class="text-[9px] uppercase font-bold text-blue-600 block">Cost Price (BHD)[cite: 1]</label>
                 <input type="number" id="edit-cost-${p.id}" step="0.001" value="${p.cost_price ?? 0}" class="w-24 border border-blue-300 rounded px-2 py-1 font-bold text-right outline-none focus:ring-1 focus:ring-blue-500 bg-blue-50/30">
                </div>`
             : `<div>
-                <label class="text-[9px] uppercase font-bold text-gray-400 block">Cost Price</label>
+                <label class="text-[9px] uppercase font-bold text-gray-400 block">Cost Price[cite: 1]</label>
                 <input type="text" disabled value="*** BHD" class="w-24 border border-gray-200 bg-gray-100 rounded px-2 py-1 font-bold text-center text-gray-400 cursor-not-allowed">
                </div>`;
 
@@ -2060,14 +2207,14 @@ function renderItemManagerList() {
             <div class="flex items-center space-x-2">
                 ${costInputHtml}
                 <div>
-                    <label class="text-[9px] uppercase font-bold text-gray-500 block">Retail Price (BHD)</label>
+                    <label class="text-[9px] uppercase font-bold text-gray-500 block">Retail Price (BHD)[cite: 1]</label>
                     <input type="number" id="edit-price-${p.id}" step="0.001" value="${p.retail_price}" class="w-24 border border-gray-300 rounded px-2 py-1 font-bold text-right outline-none focus:ring-1 focus:ring-emerald-500">
                 </div>
                 <div>
-                    <label class="text-[9px] uppercase font-bold text-gray-500 block">Stock Qty</label>
+                    <label class="text-[9px] uppercase font-bold text-gray-500 block">Stock Qty[cite: 1]</label>
                     <input type="number" id="edit-stock-${p.id}" value="${p.stock_quantity ?? 0}" class="w-16 border border-gray-300 rounded px-2 py-1 font-bold text-center outline-none focus:ring-1 focus:ring-emerald-500">
                 </div>
-                <button onclick="saveItemChanges('${p.id}')" class="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1 rounded">Save</button>
+                <button onclick="saveItemChanges('${p.id}')" class="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1 rounded">Save[cite: 1]</button>
             </div>
         `;
         listContainer.appendChild(row);
@@ -2101,7 +2248,7 @@ async function saveItemChanges(id) {
 
         products[itemIndex] = Object.assign({}, products[itemIndex], updateData);
         products = sortProductsAlphabetically(products);
-        alert("Updated " + products[itemIndex].name + " successfully!");
+        alert("Updated " + products[itemIndex].name + " successfully![cite: 1]");
 
         renderProducts();
         renderItemManagerList();
@@ -2153,13 +2300,13 @@ async function loadSalesHistoryLocal() {
                     receiptId: 'BP-' + String(order.receipt_number).padStart(6, '0'),
                     timestamp: new Date(order.created_at).toLocaleString(),
                     created_at: order.created_at,
-                    custName: order.customer_name || 'Walk-in Customer',
-                    custPhone: order.customer_phone || 'N/A',
+                    custName: order.customer_name || 'Walk-in Customer[cite: 1]',
+                    custPhone: order.customer_phone || 'N/A[cite: 1]',
                     items: (order.order_items || []).map(item => ({
                         id: item.product_id,
                         qty: item.quantity,
                         price: item.unit_price,
-                        name: item.products ? item.products.name : 'Unknown Product'
+                        name: item.products ? item.products.name : 'Unknown Product[cite: 1]'
                     })),
                     grossTotal: order.gross_total || order.total_amount,
                     discountAmount: order.discount_amount || 0,
@@ -2208,8 +2355,8 @@ function renderSalesHistory() {
         
         const isRefunded = s.status === 'REFUNDED';
         const statusBadge = isRefunded 
-            ? '<span class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-0.5 rounded">REFUNDED</span>' 
-            : '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">COMPLETED</span>';
+            ? '<span class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-0.5 rounded">REFUNDED[cite: 1]</span>' 
+            : '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">COMPLETED[cite: 1]</span>';
 
         row.innerHTML = `
             <div>
@@ -2222,9 +2369,9 @@ function renderSalesHistory() {
             </div>
             <div class="flex items-center space-x-2">
                 <span class="font-bold text-gray-900 mr-2 text-sm">${formatBHD(s.netTotal)}</span>
-                <button onclick="reprintReceipt('${s.receiptId}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded font-bold text-[10px]">Print</button>
-                <button onclick="resendWhatsApp('${s.receiptId}')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-bold text-[10px]">WhatsApp</button>
-                ${!isRefunded ? `<button onclick="processRefund('${s.receiptId}')" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded font-bold text-[10px]">Refund</button>` : ''}
+                <button onclick="reprintReceipt('${s.receiptId}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded font-bold text-[10px]">Print[cite: 1]</button>
+                <button onclick="resendWhatsApp('${s.receiptId}')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-bold text-[10px]">WhatsApp[cite: 1]</button>
+                ${!isRefunded ? `<button onclick="processRefund('${s.receiptId}')" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded font-bold text-[10px]">Refund[cite: 1]</button>` : ''}
             </div>
         `;
         container.appendChild(row);
@@ -2235,7 +2382,7 @@ async function processRefund(receiptId) {
     const sale = salesHistory.find(s => s.receiptId === receiptId);
     if (!sale) return;
 
-    if (!confirm(`Are you sure you want to refund Receipt #${receiptId} for ${formatBHD(sale.netTotal)}?`)) return;
+    if (!confirm(`Are you sure you want to refund Receipt #${receiptId} for ${formatBHD(sale.netTotal)}?[cite: 1]`)) return;
 
     if (supabaseClient) {
         try {
@@ -2256,7 +2403,7 @@ async function processRefund(receiptId) {
     });
 
     sale.status = 'REFUNDED';
-    alert(`Refund Processed successfully for Receipt #${receiptId}!`);
+    alert(`Refund Processed successfully for Receipt #${receiptId}![cite: 1]`);
 
     saveSalesHistoryLocal();
     await fetchProducts();
@@ -2276,7 +2423,7 @@ function resendWhatsApp(receiptId) {
 
     let phone = sale.custPhone;
     if (!phone || phone === 'N/A') {
-        phone = prompt('Enter WhatsApp Phone Number (with country code, e.g. 973...):');
+        phone = prompt('Enter WhatsApp Phone Number (with country code, e.g. 973...):[cite: 1]');
     }
     if (!phone) return;
 
@@ -2286,7 +2433,7 @@ function resendWhatsApp(receiptId) {
 
 function openPaymentModal() {
     if (cart.length === 0) {
-        alert('Cart is empty!');
+        alert('Cart is empty![cite: 1]');
         return;
     }
     document.getElementById('modal-total').innerText = formatBHD(netTotalInclusive);
@@ -2374,8 +2521,8 @@ function setPrintFormat(fmt) {
 }
 
 async function processSale(action) {
-    const custName = selectedCustomer ? selectedCustomer.name : 'Walk-in Customer';
-    const custPhone = selectedCustomer ? selectedCustomer.phone : 'N/A';
+    const custName = selectedCustomer ? selectedCustomer.name : 'Walk-in Customer[cite: 1]';
+    const custPhone = selectedCustomer ? selectedCustomer.phone : 'N/A[cite: 1]';
 
     const pointsEarned = Math.floor(netTotalInclusive);
     let updatedBalance = (currentCustomerPoints - pointsRedeemedCount + pointsEarned);
@@ -2459,7 +2606,7 @@ async function processSale(action) {
     } else if (action === 'WHATSAPP') {
         resendWhatsApp(receiptId);
     } else if (action === 'EMAIL') {
-        alert(`Receipt emailed to customer profile!`);
+        alert(`Receipt emailed to customer profile![cite: 1]`);
     }
 
     closePaymentModal();
