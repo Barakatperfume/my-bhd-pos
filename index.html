@@ -21,11 +21,14 @@
                 top: 0;
                 width: 100%;
                 margin: 0;
-                padding: 0;
+                padding: 10px;
+                background: white;
             }
+            table { width: 100% !important; border-collapse: collapse !important; font-size: 10px !important; }
+            th, td { border: 1px solid #9ca3af !important; padding: 5px !important; }
             @page {
-                size: A4 portrait;
-                margin: 8mm;
+                size: A4 landscape;
+                margin: 10mm;
             }
         }
     </style>
@@ -392,12 +395,13 @@
                                 </div>
                             </div>
 
-                            <div class="flex space-x-2 pt-2">
+                            <div class="flex space-x-2 pt-2 flex-wrap gap-y-2">
                                 <button onclick="previewReport()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-xs shadow transition flex justify-center items-center space-x-1">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                     <span>PREVIEW REPORT</span>
                                 </button>
                                 <button onclick="executePrintActiveReport()" class="bg-gray-800 hover:bg-black text-white px-4 py-2.5 rounded-lg font-bold text-xs shadow transition">Print</button>
+                                <button onclick="executeExcelActiveReport()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-lg font-bold text-xs shadow transition">Export Excel</button>
                                 <button onclick="executeEmailActiveReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-bold text-xs shadow transition">Email</button>
                             </div>
                         </div>
@@ -1796,11 +1800,118 @@ function executePrintActiveReport() {
     printContainer.classList.add('hidden');
 }
 
+// 1. EXCEL EXPORT IMPLEMENTATION
+function executeExcelActiveReport() {
+    const reportData = getActiveReportContentHtml();
+    const startStr = document.getElementById('report-start-date').value;
+    const endStr = document.getElementById('report-end-date').value;
+    const completedSales = salesHistory.filter(s => s.status !== 'REFUNDED');
+    const filteredSales = filterSalesByCustomDates(completedSales, startStr, endStr);
+
+    let csvRows = [];
+    if (activeReportType === 'sales') {
+        csvRows.push(['Sr No.', 'Order No.', 'Outlet Name', 'Order Date', 'Order Type', 'Product Name', 'Pay Type', 'TotalAmount', 'Loyalty Disc.', 'DiscountAmount', 'TaxAmount', 'DeliveryCharges', 'ExtraChargeAmount', 'NetAmount', 'Order Status']);
+        let sr = 1;
+        filteredSales.forEach(s => {
+            s.items.forEach(item => {
+                const lineTotal = item.price * item.qty;
+                const taxAmount = lineTotal - (lineTotal / 1.10);
+                const totalAmountExclTax = lineTotal - taxAmount;
+                const payType = (s.paymentDetails && s.paymentDetails.method) ? s.paymentDetails.method : (s.paymentType || 'CASH');
+                csvRows.push([
+                    sr++,
+                    s.receiptId,
+                    'BARAKAT PERFUMES',
+                    s.timestamp,
+                    'Store Retail',
+                    `"${item.name}"`,
+                    payType,
+                    totalAmountExclTax.toFixed(3),
+                    0,
+                    (s.discountAmount || 0).toFixed(3),
+                    taxAmount.toFixed(3),
+                    0,
+                    0,
+                    lineTotal.toFixed(3),
+                    'Paid'
+                ]);
+            });
+        });
+    } else if (activeReportType === 'inventory') {
+        csvRows.push(['Product Name', 'Stock Qty', 'Cost Price (BHD)', 'Retail Price (BHD)', 'Total Retail Value (BHD)']);
+        products.forEach(p => {
+            csvRows.push([
+                `"${p.name}"`,
+                p.stock_quantity,
+                (p.cost_price || 0).toFixed(3),
+                p.retail_price.toFixed(3),
+                (p.retail_price * p.stock_quantity).toFixed(3)
+            ]);
+        });
+    } else {
+        csvRows.push(['Product Name', 'Current Stock', 'Threshold Limit', 'Retail Price (BHD)']);
+        const low = products.filter(p => (p.stock_quantity ?? 0) <= (p.low_stock_threshold ?? 2));
+        low.forEach(p => {
+            csvRows.push([
+                `"${p.name}"`,
+                p.stock_quantity,
+                p.low_stock_threshold ?? 2,
+                p.retail_price.toFixed(3)
+            ]);
+        });
+    }
+
+    let csvContent = "data:text/csv;charset=utf-8," + csvRows.map(e => e.join(",")).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `${reportData.title.replace(/[^a-zA-Z0-9]/g, '_')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// 3. RELIABLE EMAIL DISPATCH IMPLEMENTATION VIA MAILTO & COMPILED SUMMARY
 function executeEmailActiveReport() {
     const reportData = getActiveReportContentHtml();
     const emailTo = prompt('Enter recipient email address:');
     if (!emailTo) return;
-    alert(`Report "${reportData.title}" successfully compiled and dispatched to ${emailTo}!`);
+
+    const startStr = document.getElementById('report-start-date').value;
+    const endStr = document.getElementById('report-end-date').value;
+    const completedSales = salesHistory.filter(s => s.status !== 'REFUNDED');
+    const filteredSales = filterSalesByCustomDates(completedSales, startStr, endStr);
+
+    let bodyText = `BARAKAT PERFUMES REPORT\nReport: ${reportData.title}\nDate Range: ${startStr} to ${endStr}\nGenerated on: ${new Date().toLocaleString()}\n\n`;
+
+    if (activeReportType === 'sales') {
+        let totalRev = filteredSales.reduce((acc, s) => acc + s.netTotal, 0);
+        bodyText += `Total Completed Orders: ${filteredSales.length}\n`;
+        bodyText += `Total Revenue: ${formatBHD(totalRev)}\n\n`;
+        bodyText += `Transactions:\n`;
+        filteredSales.forEach(s => {
+            bodyText += `- ${s.receiptId} | ${s.custName} | ${formatBHD(s.netTotal)} | ${s.timestamp}\n`;
+        });
+    } else if (activeReportType === 'inventory') {
+        bodyText += `Total Catalog Items: ${products.length}\n`;
+        products.forEach(p => {
+            bodyText += `- ${p.name} | Stock: ${p.stock_quantity} | Price: ${formatBHD(p.retail_price)}\n`;
+        });
+    } else {
+        const low = products.filter(p => (p.stock_quantity ?? 0) <= (p.low_stock_threshold ?? 2));
+        bodyText += `Low Stock Items Count: ${low.length}\n`;
+        low.forEach(p => {
+            bodyText += `- ${p.name} | Stock: ${p.stock_quantity}\n`;
+        });
+    }
+
+    bodyText += `\nGenerated via Barakat POS Backoffice`;
+
+    const subject = encodeURIComponent(`Barakat Perfumes Report: ${reportData.title}`);
+    const mailtoLink = `mailto:${emailTo}?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
+    
+    window.location.href = mailtoLink;
+    alert(`Email client successfully opened with compiled report for ${emailTo}!`);
 }
 
 // ==========================================
