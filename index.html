@@ -411,7 +411,7 @@
                                 <h5 id="preview-heading" class="font-bold text-xs text-gray-700 uppercase">Live Preview Output</h5>
                                 <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Ready</span>
                             </div>
-                            <div id="report-preview-body" class="max-h-80 overflow-y-auto text-xs"></div>
+                            <div id="report-preview-body" class="max-h-96 overflow-y-auto text-xs"></div>
                         </div>
                     </div>
                 </div>
@@ -935,7 +935,6 @@ async function fetchCustomers() {
     } catch (err) {}
 }
 
-// Populate product category dropdown dynamically from database products
 function populateCategoryDropdown() {
     const selectElem = document.getElementById('new-prod-category-select');
     if (!selectElem) return;
@@ -966,9 +965,6 @@ function populateCategoryDropdown() {
     selectElem.appendChild(newOpt);
 }
 
-// ==========================================================
-// FULL-WINDOW MANAGER PORTAL & ADVANCED TABS
-// ==========================================================
 async function openManagerPortal() {
     if (userRole !== 'ADMIN' && userRole !== 'MANAGER') {
         const pin = prompt('Enter Manager/Owner PIN to access Full-Window Manager Portal:');
@@ -1165,9 +1161,6 @@ function renderManagerDashboard() {
     }
 }
 
-// ==========================================================
-// MANAGER PORTAL - MANAGE PRODUCTS & EDIT/DELETE WORKFLOW
-// ==========================================================
 function renderManagerProductList() {
     const container = document.getElementById('manager-products-list');
     const term = document.getElementById('manager-product-search') ? document.getElementById('manager-product-search').value.toLowerCase().trim() : '';
@@ -1345,9 +1338,6 @@ async function deleteProduct(id) {
     renderManagerProductList();
 }
 
-// ==========================================================
-// CUSTOMER DIRECTORY & EDITING WORKFLOW (SYNCED TO DB)
-// ==========================================================
 function renderManagerCustomerDirectory() {
     const container = document.getElementById('manager-customer-list');
     const term = document.getElementById('manager-cust-search').value.toLowerCase().trim();
@@ -1431,9 +1421,6 @@ async function saveCustomerEdits() {
     await fetchCustomers();
 }
 
-// ==========================================================
-// UPLOAD PORTAL & CSV TEMPLATE COMPARISON WORKFLOW
-// ==========================================================
 function downloadProductTemplate() {
     const csvContent = "data:text/csv;charset=utf-8,name,sku,barcode,category,cost_price,retail_price,stock_quantity\n" +
         "Aromatix Frost Bite 100ml,SKU-1001,10003,Perfumes,11.200,22.000,10\n" +
@@ -1588,9 +1575,6 @@ async function executeBatchUploadImport() {
     switchManagerTab('products');
 }
 
-// ==========================================================
-// REPORTS & ISSUANCE PREVIEW WORKFLOW (EXACT SAMPLE MATCH)
-// ==========================================================
 function selectReportType(type) {
     activeReportType = type;
     document.getElementById('btn-rep-cat-sales').className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition';
@@ -1632,6 +1616,13 @@ function getActiveReportContentHtml() {
     if (activeReportType === 'sales') {
         let rowsHtml = '';
         let srNo = 1;
+        let sumTotalAmount = 0;
+        let sumLoyaltyDisc = 0;
+        let sumDiscAmount = 0;
+        let sumTaxAmount = 0;
+        let sumDeliveryCharges = 0;
+        let sumExtraCharge = 0;
+        let sumNetAmount = 0;
 
         filteredSales.forEach(s => {
             s.items.forEach(item => {
@@ -1639,67 +1630,94 @@ function getActiveReportContentHtml() {
                 const taxAmount = lineTotal - (lineTotal / 1.10);
                 const totalAmountExclTax = lineTotal - taxAmount;
                 const payType = (s.paymentDetails && s.paymentDetails.method) ? s.paymentDetails.method : (s.paymentType || 'CASH');
+                const discAmt = s.discountAmount || 0;
+
+                sumTotalAmount += totalAmountExclTax;
+                sumDiscAmount += discAmt;
+                sumTaxAmount += taxAmount;
+                sumNetAmount += lineTotal;
 
                 rowsHtml += `
-                    <tr>
-                        <td style="padding: 5px; border: 1px solid #d1d5db; text-align: center;">${srNo++}</td>
-                        <td style="padding: 5px; border: 1px solid #d1d5db;">${s.receiptId}</td>
-                        <td style="padding: 5px; border: 1px solid #d1d5db;">BARAKAT PERFUMES</td>
-                        <td style="padding: 5px; border: 1px solid #d1d5db;">${s.timestamp}</td>
-                        <td style="padding: 5px; border: 1px solid #d1d5db;">Store Retail</td>
-                        <td style="padding: 5px; border: 1px solid #d1d5db;">${item.qty > 1 ? item.qty + 'x ' : ''}${item.name}</td>
-                        <td style="padding: 5px; border: 1px solid #d1d5db;">${payType}</td>
-                        <td style="padding: 5px; border: 1px solid #d1d5db; text-align: right;">${(totalAmountExclTax).toFixed(3)}</td>
-                        <td style="padding: 5px; border: 1px solid #d1d5db; text-align: center;">0</td>
-                        <td style="padding: 5px; border: 1px solid #d1d5db; text-align: right;">${(s.discountAmount || 0).toFixed(3)}</td>
-                        <td style="padding: 5px; border: 1px solid #d1d5db; text-align: right;">${(taxAmount).toFixed(3)}</td>
-                        <td style="padding: 5px; border: 1px solid #d1d5db; text-align: center;">0</td>
-                        <td style="padding: 5px; border: 1px solid #d1d5db; text-align: center;">0</td>
-                        <td style="padding: 5px; border: 1px solid #d1d5db; text-align: right; font-weight: bold;">${(lineTotal).toFixed(3)}</td>
-                        <td style="padding: 5px; border: 1px solid #d1d5db; text-align: center;">Paid</td>
-                        <td style="padding: 5px; border: 1px solid #d1d5db;">Store Retail</td>
+                    <tr class="hover:bg-gray-50 border-b border-gray-100">
+                        <td style="padding: 8px 6px; text-align: center; color: #374151;">${srNo++}</td>
+                        <td style="padding: 8px 6px; color: #374151; font-weight: 500;">${s.receiptId}</td>
+                        <td style="padding: 8px 6px; color: #374151; white-space: nowrap;">${s.timestamp}</td>
+                        <td style="padding: 8px 6px; color: #374151;">Store Retail</td>
+                        <td style="padding: 8px 6px; color: #111827; font-weight: 500;">${item.qty > 1 ? item.qty + 'x ' : ''}${item.name}</td>
+                        <td style="padding: 8px 6px; color: #374151;">${payType}</td>
+                        <td style="padding: 8px 6px; text-align: right; color: #374151;">${totalAmountExclTax.toFixed(3)}</td>
+                        <td style="padding: 8px 6px; text-align: center; color: #374151;">0.000</td>
+                        <td style="padding: 8px 6px; text-align: right; color: #374151;">${discAmt.toFixed(3)}</td>
+                        <td style="padding: 8px 6px; text-align: right; color: #374151;">${taxAmount.toFixed(3)}</td>
+                        <td style="padding: 8px 6px; text-align: center; color: #374151;">0.000</td>
+                        <td style="padding: 8px 6px; text-align: center; color: #374151;">0.000</td>
+                        <td style="padding: 8px 6px; text-align: right; color: #047857; font-weight: bold;">${lineTotal.toFixed(3)}</td>
+                        <td style="padding: 8px 6px; text-align: center;"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold text-[9px]">Paid</span></td>
+                        <td style="padding: 8px 6px; color: #374151;">Store Retail</td>
                     </tr>
                 `;
             });
         });
 
         if (filteredSales.length === 0) {
-            rowsHtml = `<tr><td colspan="16" style="text-align: center; padding: 15px; color: #6b7280;">No sales transactions found for the selected date range.</td></tr>`;
+            rowsHtml = `<tr><td colspan="15" style="text-align: center; padding: 20px; color: #6b7280;">No sales transactions found for the selected date range.</td></tr>`;
         }
 
         return {
-            title: `Sales Detail Report (${startStr} to ${endStr})`,
+            title: `Sales Detail Day Wise Report`,
             html: `
-                <div style="margin-bottom: 10px; font-size: 11px; display: flex; justify-content: space-between;">
-                    <div><strong>Date From:</strong> ${startStr} &nbsp;&nbsp;|&nbsp;&nbsp; <strong>To Date:</strong> ${endStr}</div>
-                    <div><strong>Generated by:</strong> Barakat POS &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Print Date:</strong> ${new Date().toLocaleDateString()}</div>
-                </div>
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 9px; font-family: sans-serif; white-space: nowrap;">
-                        <thead>
-                            <tr style="background: #047857; color: white; text-align: left;">
-                                <th style="padding: 6px; border: 1px solid #047857;">Sr No.</th>
-                                <th style="padding: 6px; border: 1px solid #047857;">Order No.</th>
-                                <th style="padding: 6px; border: 1px solid #047857;">Outlet Name</th>
-                                <th style="padding: 6px; border: 1px solid #047857;">Order Date</th>
-                                <th style="padding: 6px; border: 1px solid #047857;">Order Type</th>
-                                <th style="padding: 6px; border: 1px solid #047857;">Product Name</th>
-                                <th style="padding: 6px; border: 1px solid #047857;">Pay Type</th>
-                                <th style="padding: 6px; border: 1px solid #047857; text-align: right;">TotalAmount</th>
-                                <th style="padding: 6px; border: 1px solid #047857; text-align: center;">Loyalty Disc.</th>
-                                <th style="padding: 6px; border: 1px solid #047857; text-align: right;">DiscountAmount</th>
-                                <th style="padding: 6px; border: 1px solid #047857; text-align: right;">TaxAmount</th>
-                                <th style="padding: 6px; border: 1px solid #047857; text-align: center;">DeliveryCharges</th>
-                                <th style="padding: 6px; border: 1px solid #047857; text-align: center;">ExtraChargeAmount</th>
-                                <th style="padding: 6px; border: 1px solid #047857; text-align: right;">NetAmount</th>
-                                <th style="padding: 6px; border: 1px solid #047857; text-align: center;">Order Perp. Status</th>
-                                <th style="padding: 6px; border: 1px solid #047857;">OrderType</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${rowsHtml}
-                        </tbody>
-                    </table>
+                <div style="background: white; border-radius: 8px; padding: 16px; font-family: sans-serif; box-sizing: border-box;">
+                    <div style="text-align: center; margin-bottom: 12px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">
+                        <h2 style="color: #6b21a8; font-size: 16px; font-weight: 900; letter-spacing: 0.5px; margin: 0;">BARAKAT PERFUMES</h2>
+                        <p style="font-size: 11px; font-weight: bold; color: #4b5563; margin: 2px 0 0 0;">Sales Detail Day Wise Report</p>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 11px; background: #f9fafb; padding: 8px 12px; border-radius: 6px; border: 1px solid #f3f4f6;">
+                        <div><strong style="color: #4b5563;">FROM DATE :</strong> <span style="color: #111827; font-weight: bold;">${startStr}</span></div>
+                        <div><strong style="color: #4b5563;">TO DATE :</strong> <span style="color: #111827; font-weight: bold;">${endStr}</span></div>
+                        <div><strong style="color: #4b5563;">USER NAME :</strong> <span style="color: #111827; font-weight: bold;">${currentUser ? currentUser.name.toUpperCase() : 'KAEM IT'}</span></div>
+                        <div><strong style="color: #4b5563;">PRINT DATE :</strong> <span style="color: #111827; font-weight: bold;">${new Date().toLocaleDateString('en-GB')}</span></div>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 10px; white-space: nowrap;">
+                            <thead>
+                                <tr style="background: #f9fafb; color: #6b21a8; border-bottom: 2px solid #e5e7eb; border-top: 1px solid #e5e7eb; text-align: left;">
+                                    <th style="padding: 8px 6px; font-weight: bold;">S NO.</th>
+                                    <th style="padding: 8px 6px; font-weight: bold;">ORDER NO.</th>
+                                    <th style="padding: 8px 6px; font-weight: bold;">INVOICE DATE</th>
+                                    <th style="padding: 8px 6px; font-weight: bold;">OUTLET NAME</th>
+                                    <th style="padding: 8px 6px; font-weight: bold; min-width: 180px;">PRODUCT NAME</th>
+                                    <th style="padding: 8px 6px; font-weight: bold;">PAY TYPE</th>
+                                    <th style="padding: 8px 6px; font-weight: bold; text-align: right;">NET TOTAL</th>
+                                    <th style="padding: 8px 6px; font-weight: bold; text-align: center;">LOYALTY DISC.</th>
+                                    <th style="padding: 8px 6px; font-weight: bold; text-align: right;">DIS. AMOUNT</th>
+                                    <th style="padding: 8px 6px; font-weight: bold; text-align: right;">TAX AMOUNT</th>
+                                    <th style="padding: 8px 6px; font-weight: bold; text-align: center;">CHARGE (LEVY TAX)</th>
+                                    <th style="padding: 8px 6px; font-weight: bold; text-align: center;">EXTRA CHARGE AMOUNT</th>
+                                    <th style="padding: 8px 6px; font-weight: bold; text-align: right;">FINAL TOTAL</th>
+                                    <th style="padding: 8px 6px; font-weight: bold; text-align: center;">ORDER STATUS</th>
+                                    <th style="padding: 8px 6px; font-weight: bold;">ORDER TYPES</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rowsHtml}
+                            </tbody>
+                            <tfoot>
+                                <tr style="border-top: 2px solid #e5e7eb; border-bottom: 2px solid #e5e7eb; font-weight: bold; color: #6b21a8; background: #faf5ff;">
+                                    <td colspan="6" style="padding: 10px 6px; text-align: center;">Total</td>
+                                    <td style="padding: 10px 6px; text-align: right;">${sumTotalAmount.toFixed(3)}</td>
+                                    <td style="padding: 10px 6px; text-align: center;">${sumLoyaltyDisc.toFixed(3)}</td>
+                                    <td style="padding: 10px 6px; text-align: right;">${sumDiscAmount.toFixed(3)}</td>
+                                    <td style="padding: 10px 6px; text-align: right;">${sumTaxAmount.toFixed(3)}</td>
+                                    <td style="padding: 10px 6px; text-align: center;">${sumDeliveryCharges.toFixed(3)}</td>
+                                    <td style="padding: 10px 6px; text-align: center;">${sumExtraCharge.toFixed(3)}</td>
+                                    <td style="padding: 10px 6px; text-align: right;">${sumNetAmount.toFixed(3)}</td>
+                                    <td colspan="2"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             `
         };
@@ -1800,9 +1818,8 @@ function executePrintActiveReport() {
     printContainer.classList.add('hidden');
 }
 
-// 1. EXCEL EXPORT IMPLEMENTATION
+// EXCEL EXPORT MATCHED TO ATTACHED REPORT SAMPLE
 function executeExcelActiveReport() {
-    const reportData = getActiveReportContentHtml();
     const startStr = document.getElementById('report-start-date').value;
     const endStr = document.getElementById('report-end-date').value;
     const completedSales = salesHistory.filter(s => s.status !== 'REFUNDED');
@@ -1810,7 +1827,14 @@ function executeExcelActiveReport() {
 
     let csvRows = [];
     if (activeReportType === 'sales') {
-        csvRows.push(['Sr No.', 'Order No.', 'Outlet Name', 'Order Date', 'Order Type', 'Product Name', 'Pay Type', 'TotalAmount', 'Loyalty Disc.', 'DiscountAmount', 'TaxAmount', 'DeliveryCharges', 'ExtraChargeAmount', 'NetAmount', 'Order Status']);
+        csvRows.push(['BARAKAT PERFUMES', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+        csvRows.push(['Sales Detail Report', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+        csvRows.push([`Date From:,${startStr}`, '', '', `To Date:,${endStr}`, '', '', '', `Generated by:,${currentUser ? currentUser.name : 'KAEM IT'}`, '', '', '', '', '', '', '']);
+        csvRows.push([`Print Date:,${new Date().toLocaleDateString('en-GB')}`, '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+        csvRows.push([]);
+        
+        csvRows.push(['Sr No.', 'Order No.', 'OutletName', 'Order Date', 'Order Type', 'Product Name', 'Pay Type', 'TotalAmount', 'Loyalty Disc.', 'DiscountAmount', 'TaxAmount', 'DeliveryCharges', 'ExtraChargeAmount', 'NetAmount', 'Order Perp. Status']);
+        
         let sr = 1;
         filteredSales.forEach(s => {
             s.items.forEach(item => {
@@ -1865,13 +1889,12 @@ function executeExcelActiveReport() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${reportData.title.replace(/[^a-zA-Z0-9]/g, '_')}.csv`);
+    link.setAttribute("download", `Sales Detail Report.xlsx`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 }
 
-// 3. RELIABLE EMAIL DISPATCH IMPLEMENTATION VIA MAILTO & COMPILED SUMMARY
 function executeEmailActiveReport() {
     const reportData = getActiveReportContentHtml();
     const emailTo = prompt('Enter recipient email address:');
@@ -1914,9 +1937,6 @@ function executeEmailActiveReport() {
     alert(`Email client successfully opened with compiled report for ${emailTo}!`);
 }
 
-// ==========================================
-// EXISTING POS CODE PRESERVED BELOW
-// ==========================================
 function openCustomerModal() {
     document.getElementById('customer-modal').classList.remove('hidden');
     document.getElementById('cust-modal-search').value = '';
