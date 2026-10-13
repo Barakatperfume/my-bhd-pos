@@ -398,25 +398,33 @@
                             <div class="flex space-x-2 pt-2 flex-wrap gap-y-2">
                                 <button onclick="previewReport()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-xs shadow transition flex justify-center items-center space-x-1">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                    <span>PREVIEW REPORT</span>
+                                    <span>PREVIEW REPORT (POPUP)</span>
                                 </button>
                                 <button onclick="executePrintActiveReport()" class="bg-gray-800 hover:bg-black text-white px-4 py-2.5 rounded-lg font-bold text-xs shadow transition">Print</button>
                                 <button onclick="executeExcelActiveReport()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-lg font-bold text-xs shadow transition">Export Excel</button>
                                 <button onclick="executeEmailActiveReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-bold text-xs shadow transition">Email</button>
                             </div>
                         </div>
-
-                        <div id="report-preview-container" class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm hidden space-y-3">
-                            <div class="flex justify-between items-center border-b pb-2">
-                                <h5 id="preview-heading" class="font-bold text-xs text-gray-700 uppercase">Live Preview Output</h5>
-                                <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Ready</span>
-                            </div>
-                            <div id="report-preview-body" class="max-h-96 overflow-y-auto text-xs"></div>
-                        </div>
                     </div>
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- REPORT PREVIEW POPUP MODAL -->
+    <div id="report-preview-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-6xl w-full p-6 space-y-4 my-auto max-h-[92vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 id="preview-popup-heading" class="text-base font-black text-gray-800 uppercase tracking-wide">Report Preview</h3>
+                <button onclick="closeReportPreviewModal()" class="text-gray-400 hover:text-gray-700 font-bold text-2xl px-2">&times;</button>
+            </div>
+            <div id="report-preview-popup-body" class="flex-1 overflow-y-auto text-xs border rounded-lg p-3 bg-gray-50/50"></div>
+            <div class="flex justify-end space-x-2 pt-2 border-t">
+                <button onclick="executePrintActiveReport()" class="bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg font-bold text-xs shadow">Print</button>
+                <button onclick="executeExcelActiveReport()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-bold text-xs shadow">Export Excel</button>
+                <button onclick="closeReportPreviewModal()" class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-xs font-semibold">Close</button>
+            </div>
         </div>
     </div>
 
@@ -1791,14 +1799,14 @@ function getActiveReportContentHtml() {
 }
 
 function previewReport() {
-    const container = document.getElementById('report-preview-container');
-    const bodyElem = document.getElementById('report-preview-body');
-    const headingElem = document.getElementById('preview-heading');
-
     const reportData = getActiveReportContentHtml();
-    headingElem.innerText = reportData.title;
-    bodyElem.innerHTML = reportData.html;
-    container.classList.remove('hidden');
+    document.getElementById('preview-popup-heading').innerText = reportData.title;
+    document.getElementById('report-preview-popup-body').innerHTML = reportData.html;
+    document.getElementById('report-preview-modal').classList.remove('hidden');
+}
+
+function closeReportPreviewModal() {
+    document.getElementById('report-preview-modal').classList.add('hidden');
 }
 
 function executePrintActiveReport() {
@@ -1818,7 +1826,7 @@ function executePrintActiveReport() {
     printContainer.classList.add('hidden');
 }
 
-// EXCEL EXPORT MATCHED TO ATTACHED REPORT SAMPLE
+// FIXED EXCEL EXPORT (CSV format with .csv extension to prevent Excel file-extension warning)
 function executeExcelActiveReport() {
     const startStr = document.getElementById('report-start-date').value;
     const endStr = document.getElementById('report-end-date').value;
@@ -1889,7 +1897,7 @@ function executeExcelActiveReport() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Sales Detail Report.xlsx`);
+    link.setAttribute("download", `Sales Detail Report.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
