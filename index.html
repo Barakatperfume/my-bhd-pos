@@ -910,7 +910,7 @@ async function submitStartupPin() {
     }
 
     // Local fallback check (0000 removed completely)
-    if (pin === '1234' || pin === '9999') {
+    if (pin === '4321' || pin === '9999') {
         userRole = 'ADMIN';
         currentUser = { id: null, name: 'Owner', role: 'ADMIN' };
         document.getElementById('role-badge').innerText = 'Admin';
@@ -997,7 +997,7 @@ async function switchUser() {
     }
 
     // Local fallback check (0000 removed completely)
-    if (pin === '1234' || pin === '9999') {
+    if (pin === '4321' || pin === '9999') {
         userRole = 'ADMIN';
         currentUser = { id: null, name: 'Owner', role: 'ADMIN' };
         document.getElementById('role-badge').innerText = 'Admin';
@@ -1092,7 +1092,7 @@ async function openManagerPortal() {
         if (!pin) return;
         
         let authenticated = false;
-        if (pin === '1234' || pin === '9999') {
+        if (pin === '4321' || pin === '9999') {
             authenticated = true;
             userRole = 'MANAGER';
         } else if (supabaseClient) {
@@ -2296,7 +2296,7 @@ async function authenticateManagerRole() {
         } catch (err) {}
     }
 
-    if (pin === '1234' || pin === '9999') {
+    if (pin === '4321' || pin === '9999') {
         userRole = 'MANAGER';
         document.getElementById('manager-status-text').innerText = 'View: Manager';
         document.getElementById('btn-unlock-manager').classList.add('hidden');
