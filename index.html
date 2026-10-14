@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#047857">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
 <head>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#047857">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co;">
     <title>Barakat Perfumes POS</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -45,71 +43,80 @@
     <div id="print-container" class="hidden"></div>
 
     <!-- Top Navigation Bar -->
-    <header class="bg-emerald-700 text-white p-3 flex justify-between items-center shadow-md">
-        <div class="flex items-center space-x-3">
-            <span class="font-bold text-xl tracking-wide">Barakat Perfumes POS</span>
-            <span id="role-badge" class="bg-emerald-900 text-emerald-200 text-xs px-2 py-1 rounded-full uppercase tracking-wider font-semibold">Cashier</span>
-        </div>
+    <header class="bg-emerald-700 text-white p-3 flex justify-between items-center shadow-md shrink-0">
         <div class="flex items-center space-x-2">
-            <button id="btn-manager-portal" onclick="openManagerPortal()" class="hidden bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1.5 rounded transition flex items-center space-x-1 font-bold shadow">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                <span>Manager Portal</span>
+            <span class="font-bold text-base sm:text-xl tracking-wide">Barakat POS</span>
+            <span id="role-badge" class="bg-emerald-900 text-emerald-200 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Cashier</span>
+        </div>
+        <div class="flex items-center space-x-1.5 sm:space-x-2">
+            <button id="btn-manager-portal" onclick="openManagerPortal()" class="hidden bg-amber-600 hover:bg-amber-700 text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded transition flex items-center space-x-1 font-bold shadow">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                <span class="hidden sm:inline">Manager Portal</span>
             </button>
-            <button onclick="openSalesHistoryModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition flex items-center space-x-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                <span>View Sales</span>
+            <button onclick="openSalesHistoryModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded transition flex items-center space-x-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                <span class="hidden sm:inline">View Sales</span>
             </button>
-            <button onclick="openItemManagerModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition flex items-center space-x-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                <span>Items Manager</span>
+            <button onclick="openItemManagerModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded transition flex items-center space-x-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                <span class="hidden sm:inline">Items</span>
             </button>
-            <span id="user-name" class="text-sm font-medium hidden sm:inline ml-2">Cashier 1</span>
-            <button onclick="switchUser()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3 py-1.5 rounded transition">Switch USER</button>
+            <span id="user-name" class="text-xs font-medium hidden md:inline ml-1">Cashier 1</span>
+            <button onclick="switchUser()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded transition">USER</button>
         </div>
     </header>
 
-    <!-- Main POS Interface Split View -->
-    <div id="pos-main-container" class="flex-1 flex flex-col md:flex-row overflow-hidden">
+    <!-- Main POS Interface Split View / Mobile Tabs -->
+    <div id="pos-main-container" class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
         
-        <!-- Left Panel: Product Search, Scanner & Catalog -->
-        <div class="w-full md:w-3/5 lg:w-2/3 p-4 flex flex-col h-full overflow-hidden">
-            <div class="flex space-x-2 mb-4">
+        <!-- Left Panel: Product Search, Scanner & Catalog (Visible on Desktop OR when Mobile 'Products' tab active) -->
+        <div id="panel-products" class="w-full md:w-3/5 lg:w-2/3 p-3 sm:p-4 flex flex-col h-full overflow-hidden flex-1">
+            <div class="flex space-x-2 mb-3">
                 <div class="relative flex-1">
                     <input type="text" id="search-input" onkeyup="filterProducts()" placeholder="Search name or scan barcode..." 
-                           class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm shadow-sm">
-                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                           class="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs sm:text-sm shadow-sm">
+                    <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
-                <button onclick="toggleCameraScanner()" class="bg-gray-800 hover:bg-black text-white px-4 py-2.5 rounded-lg flex items-center space-x-1 shadow text-sm">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h0.93a2 2 0 001.664-.89l0.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l0.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    <span class="hidden sm:inline">Scan</span>
+                <button onclick="toggleCameraScanner()" class="bg-gray-800 hover:bg-black text-white px-3 sm:px-4 py-2 rounded-lg flex items-center space-x-1 shadow text-xs sm:text-sm font-semibold">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h0.93a2 2 0 001.664-.89l0.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l0.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                    <span>Scan</span>
                 </button>
             </div>
 
-            <div id="camera-reader-wrapper" class="hidden mb-4 bg-black rounded-lg overflow-hidden relative max-h-48">
+            <div id="camera-reader-wrapper" class="hidden mb-3 bg-black rounded-lg overflow-hidden relative max-h-48">
                 <div id="reader" class="w-full"></div>
                 <button onclick="toggleCameraScanner()" class="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 text-xs rounded shadow z-10">Close Camera</button>
             </div>
 
-            <div id="product-grid" class="flex-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 overflow-y-auto no-scrollbar pr-1"></div>
+            <div id="product-grid" class="flex-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3 overflow-y-auto no-scrollbar pr-0.5 pb-16 md:pb-0"></div>
+
+            <!-- Floating Mobile Cart Bar (Shows when items in cart) -->
+            <div id="floating-cart-bar" onclick="switchMobileTab('cart')" class="md:hidden fixed bottom-14 left-3 right-3 bg-emerald-700 text-white p-3 rounded-xl shadow-xl flex justify-between items-center cursor-pointer z-30 transform transition-transform duration-200 translate-y-24">
+                <div class="flex items-center space-x-2">
+                    <span id="floating-cart-count" class="bg-amber-500 text-gray-900 font-black text-xs px-2 py-0.5 rounded-full">0</span>
+                    <span class="font-bold text-xs">View Cart Order</span>
+                </div>
+                <span id="floating-cart-total" class="font-black text-sm">BHD 0.000</span>
+            </div>
         </div>
 
-        <!-- Right Panel: Cart Register & Checkout -->
-        <div class="w-full md:w-2/5 lg:w-1/3 bg-white border-l border-gray-200 flex flex-col h-full shadow-lg">
-            <div class="p-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
-                <h2 class="font-bold text-gray-700">Current Order</h2>
+        <!-- Right Panel: Cart Register & Checkout (Visible on Desktop OR when Mobile 'Cart' tab active) -->
+        <div id="panel-cart" class="w-full md:w-2/5 lg:w-1/3 bg-white border-l border-gray-200 flex flex-col h-full shadow-lg hidden md:flex pb-14 md:pb-0">
+            <div class="p-2.5 bg-gray-50 border-b border-gray-200 flex justify-between items-center shrink-0">
+                <h2 class="font-bold text-gray-700 text-xs sm:text-sm">Current Order</h2>
                 <button onclick="clearCart()" class="text-xs text-red-600 hover:text-red-800 font-medium">Clear All</button>
             </div>
 
-            <div class="p-3 border-b border-gray-200 bg-emerald-50/50 space-y-2">
+            <div class="p-2.5 border-b border-gray-200 bg-emerald-50/50 space-y-1.5 shrink-0">
                 <div class="flex justify-between items-center">
-                    <label class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Customer Profile</label>
-                    <button onclick="openCustomerModal()" class="text-xs text-emerald-700 font-bold hover:underline flex items-center space-x-1">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        <span>Search / Add Customer</span>
+                    <label class="text-[9px] font-bold text-emerald-800 uppercase tracking-wider">Customer Profile</label>
+                    <button onclick="openCustomerModal()" class="text-[11px] text-emerald-700 font-bold hover:underline flex items-center space-x-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <span>Search / Add</span>
                     </button>
                 </div>
 
-                <div id="active-customer-box" class="bg-white p-2.5 rounded-lg border border-emerald-200 flex justify-between items-center shadow-sm">
+                <div id="active-customer-box" class="bg-white p-2 rounded-lg border border-emerald-200 flex justify-between items-center shadow-sm">
                     <div>
                         <p id="disp-cust-name" class="font-bold text-xs text-gray-800">Walk-in Customer</p>
                         <p id="disp-cust-phone" class="text-[10px] text-gray-500">No phone attached</p>
@@ -119,54 +126,54 @@
 
                 <div id="loyalty-widget" class="bg-white p-2 rounded border border-emerald-200 flex justify-between items-center text-xs">
                     <div>
-                        <span class="text-gray-500">Points Balance:</span>
-                        <strong id="cust-pts-balance" class="text-emerald-700 font-bold ml-1">0 Pts</strong>
+                        <span class="text-gray-500 text-[10px]">Points:</span>
+                        <strong id="cust-pts-balance" class="text-emerald-700 font-bold ml-1 text-xs">0 Pts</strong>
                     </div>
                     <button id="btn-redeem-pts" onclick="redeemLoyaltyPoints()" disabled class="bg-gray-300 text-gray-500 text-[10px] font-bold px-2 py-1 rounded cursor-not-allowed">
-                        Redeem (100 pts = 1 BHD)
+                        Redeem (Min 100)
                     </button>
                 </div>
             </div>
 
-            <div id="cart-items" class="flex-1 overflow-y-auto p-3 space-y-3 no-scrollbar divide-y divide-gray-100"></div>
+            <div id="cart-items" class="flex-1 overflow-y-auto p-2.5 space-y-2 no-scrollbar divide-y divide-gray-100"></div>
 
-            <div class="p-4 bg-gray-50 border-t border-gray-200 space-y-2">
-                <div class="bg-white p-2 rounded-lg border border-gray-200 space-y-1.5 shadow-sm">
+            <div class="p-3 bg-gray-50 border-t border-gray-200 space-y-1.5 shrink-0">
+                <div class="bg-white p-2 rounded-lg border border-gray-200 space-y-1 shadow-sm">
                     <div class="flex justify-between items-center">
-                        <label class="text-[11px] font-bold text-gray-700 uppercase">Apply Discount</label>
+                        <label class="text-[10px] font-bold text-gray-700 uppercase">Apply Discount</label>
                         <div class="flex space-x-1">
-                            <button id="disc-type-bhd" onclick="setDiscountType('FIXED')" class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-600 text-white">BHD</button>
-                            <button id="disc-type-pct" onclick="setDiscountType('PERCENT')" class="px-2 py-0.5 text-[10px] font-bold rounded bg-gray-200 text-gray-700">%</button>
+                            <button id="disc-type-bhd" onclick="setDiscountType('FIXED')" class="px-2 py-0.5 text-[9px] font-bold rounded bg-emerald-600 text-white">BHD</button>
+                            <button id="disc-type-pct" onclick="setDiscountType('PERCENT')" class="px-2 py-0.5 text-[9px] font-bold rounded bg-gray-200 text-gray-700">%</button>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-2">
+                    <div class="grid grid-cols-2 gap-1.5">
                         <input type="text" id="discount-title" placeholder="Title (e.g. Promo)" class="border border-gray-300 rounded px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
                         <input type="number" id="discount-val" step="0.001" oninput="updateCartUI()" placeholder="Amount / %" class="border border-gray-300 rounded px-2 py-1 text-xs text-right font-bold outline-none focus:ring-1 focus:ring-emerald-500">
                     </div>
                 </div>
 
-                <div class="flex justify-between text-xs text-gray-600">
+                <div class="flex justify-between text-[11px] text-gray-600">
                     <span>Gross Total</span>
                     <span id="summary-gross" class="font-semibold">BHD 0.000</span>
                 </div>
-                <div id="row-discount" class="flex justify-between text-xs text-red-600 hidden">
+                <div id="row-discount" class="flex justify-between text-[11px] text-red-600 hidden">
                     <span id="label-discount-title">Discount</span>
                     <span id="summary-discount" class="font-semibold">-BHD 0.000</span>
                 </div>
-                <div class="flex justify-between text-xs text-gray-600">
+                <div class="flex justify-between text-[11px] text-gray-600">
                     <span>Subtotal (Excl. VAT)</span>
                     <span id="summary-subtotal" class="font-semibold">BHD 0.000</span>
                 </div>
-                <div class="flex justify-between text-xs text-gray-600">
+                <div class="flex justify-between text-[11px] text-gray-600">
                     <span>VAT (10% Incl.)</span>
                     <span id="summary-vat" class="font-semibold">BHD 0.000</span>
                 </div>
-                <div class="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-200">
+                <div class="flex justify-between text-base font-bold text-gray-900 pt-1.5 border-t border-gray-200">
                     <span>Total Amount</span>
                     <span id="summary-total" class="text-emerald-700">BHD 0.000</span>
                 </div>
 
-                <button onclick="openPaymentModal()" class="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow-md transition text-center flex justify-between px-4">
+                <button onclick="openPaymentModal()" class="w-full mt-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg shadow-md transition text-center flex justify-between px-4 text-xs sm:text-sm">
                     <span>PAY NOW</span>
                     <span id="btn-total">BHD 0.000</span>
                 </button>
@@ -174,41 +181,52 @@
         </div>
     </div>
 
-    <!-- ================================================= -->
-    <!-- FULL WINDOW VIEW: MANAGER & BACKOFFICE PORTAL -->
-    <!-- ================================================= -->
+    <!-- Mobile Bottom Tab Navigation Bar (Visible only on mobile screens) -->
+    <nav class="md:hidden bg-white border-t border-gray-200 flex justify-around items-center h-14 fixed bottom-0 left-0 right-0 z-40 shadow-lg">
+        <button onclick="switchMobileTab('products')" id="m-tab-products" class="flex-1 flex flex-col items-center justify-center py-1 text-emerald-700 font-bold">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 12H4L5 11z"></path></svg>
+            <span class="text-[10px] mt-0.5">Catalog</span>
+        </button>
+        <button onclick="switchMobileTab('cart')" id="m-tab-cart" class="flex-1 flex flex-col items-center justify-center py-1 text-gray-400 font-semibold relative">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            <span class="text-[10px] mt-0.5">Cart</span>
+            <span id="m-tab-badge" class="hidden absolute top-1 right-8 bg-red-600 text-white text-[9px] font-bold px-1.5 rounded-full">0</span>
+        </button>
+    </nav>
+
+    <!-- FULL WINDOW VIEW: MANAGER PORTAL -->
     <div id="manager-portal-window" class="hidden flex-1 bg-gray-50 flex flex-col overflow-hidden z-40">
         <!-- Portal Header -->
-        <div class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center shadow-sm">
-            <div class="flex items-center space-x-3">
-                <div class="bg-amber-100 p-2 rounded-lg text-amber-800">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+        <div class="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center shadow-sm">
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <div class="bg-amber-100 p-1.5 sm:p-2 rounded-lg text-amber-800">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                 </div>
                 <div>
-                    <h2 class="text-xl font-black text-gray-900">Manager & Backoffice Portal</h2>
-                    <p class="text-xs text-gray-500">Full-screen business analytics, product management, customers, and comprehensive reports</p>
+                    <h2 class="text-base sm:text-xl font-black text-gray-900">Manager Portal</h2>
+                    <p class="text-[10px] sm:text-xs text-gray-500">Business analytics & catalog backoffice</p>
                 </div>
             </div>
-            <button onclick="closeManagerPortal()" class="bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg font-bold text-xs shadow flex items-center space-x-1 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                <span>Back to POS Register</span>
+            <button onclick="closeManagerPortal()" class="bg-gray-800 hover:bg-black text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-bold text-xs shadow flex items-center space-x-1 transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                <span>POS Register</span>
             </button>
         </div>
 
         <!-- Portal Sub-Navigation Tabs & Global Date Selector Bar -->
-        <div class="bg-white border-b px-6 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
-            <div class="flex space-x-2 flex-wrap gap-y-2">
-                <button onclick="switchManagerTab('dashboard')" id="tab-btn-dashboard" class="px-4 py-2 text-xs font-bold rounded-lg bg-amber-600 text-white transition shadow">Dashboard Analytics</button>
-                <button onclick="switchManagerTab('products')" id="tab-btn-products" class="px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Manage Products</button>
-                <button onclick="switchManagerTab('upload')" id="tab-btn-upload" class="px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Upload Portal</button>
-                <button onclick="switchManagerTab('customers')" id="tab-btn-customers" class="px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Customers</button>
-                <button onclick="switchManagerTab('reports')" id="tab-btn-reports" class="px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Reports & Issuance</button>
+        <div class="bg-white border-b px-4 sm:px-6 py-2.5 flex flex-col md:flex-row justify-between items-center gap-2">
+            <div class="flex space-x-1.5 overflow-x-auto w-full md:w-auto no-scrollbar pb-1 md:pb-0">
+                <button onclick="switchManagerTab('dashboard')" id="tab-btn-dashboard" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-amber-600 text-white transition shadow whitespace-nowrap">Dashboard</button>
+                <button onclick="switchManagerTab('products')" id="tab-btn-products" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition whitespace-nowrap">Manage Products</button>
+                <button onclick="switchManagerTab('upload')" id="tab-btn-upload" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition whitespace-nowrap">Upload Portal</button>
+                <button onclick="switchManagerTab('customers')" id="tab-btn-customers" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition whitespace-nowrap">Customers</button>
+                <button onclick="switchManagerTab('reports')" id="tab-btn-reports" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition whitespace-nowrap">Reports</button>
             </div>
 
             <!-- Date Range Selector Bar -->
-            <div class="flex items-center space-x-2 bg-gray-50 p-1.5 rounded-lg border border-gray-200 text-xs">
-                <span class="font-bold text-gray-600 px-1">Date Filter:</span>
-                <select id="portal-date-filter" onchange="onDateFilterChange()" class="border border-gray-300 rounded px-2 py-1 bg-white font-medium outline-none focus:ring-1 focus:ring-amber-500">
+            <div class="flex items-center space-x-1.5 bg-gray-50 p-1 rounded-lg border border-gray-200 text-xs w-full md:w-auto justify-between">
+                <span class="font-bold text-gray-600 px-1 text-[11px]">Filter:</span>
+                <select id="portal-date-filter" onchange="onDateFilterChange()" class="border border-gray-300 rounded px-2 py-0.5 bg-white font-medium outline-none focus:ring-1 focus:ring-amber-500 text-xs">
                     <option value="today">Today</option>
                     <option value="yesterday">Yesterday</option>
                     <option value="last7">Last 7 Days</option>
@@ -216,90 +234,89 @@
                     <option value="custom">Custom Range</option>
                 </select>
                 <div id="custom-date-inputs" class="hidden flex items-center space-x-1">
-                    <input type="date" id="filter-start-date" onchange="renderManagerDashboard()" class="border border-gray-300 rounded px-1.5 py-0.5">
+                    <input type="date" id="filter-start-date" onchange="renderManagerDashboard()" class="border border-gray-300 rounded px-1 py-0.5 text-[10px]">
                     <span>to</span>
-                    <input type="date" id="filter-end-date" onchange="renderManagerDashboard()" class="border border-gray-300 rounded px-1.5 py-0.5">
+                    <input type="date" id="filter-end-date" onchange="renderManagerDashboard()" class="border border-gray-300 rounded px-1 py-0.5 text-[10px]">
                 </div>
             </div>
         </div>
 
         <!-- Portal Content Area -->
-        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
             
             <!-- Tab 1: Dashboard Analytics -->
             <div id="manager-tab-dashboard" class="space-y-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl shadow-sm">
-                        <p class="text-xs font-bold text-emerald-800 uppercase">Total Revenue (Selected Range)</p>
-                        <h4 id="dash-total-revenue" class="text-2xl font-black text-emerald-700 mt-1">BHD 0.000</h4>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                    <div class="bg-emerald-50 border border-emerald-200 p-3 sm:p-4 rounded-xl shadow-sm">
+                        <p class="text-[10px] sm:text-xs font-bold text-emerald-800 uppercase">Total Revenue</p>
+                        <h4 id="dash-total-revenue" class="text-lg sm:text-2xl font-black text-emerald-700 mt-0.5">BHD 0.000</h4>
                     </div>
-                    <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl shadow-sm">
-                        <p class="text-xs font-bold text-blue-800 uppercase">Completed Orders</p>
-                        <h4 id="dash-total-orders" class="text-2xl font-black text-blue-700 mt-1">0</h4>
+                    <div class="bg-blue-50 border border-blue-200 p-3 sm:p-4 rounded-xl shadow-sm">
+                        <p class="text-[10px] sm:text-xs font-bold text-blue-800 uppercase">Completed Orders</p>
+                        <h4 id="dash-total-orders" class="text-lg sm:text-2xl font-black text-blue-700 mt-0.5">0</h4>
                     </div>
-                    <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl shadow-sm">
-                        <p class="text-xs font-bold text-amber-800 uppercase">Est. Gross Profit</p>
-                        <h4 id="dash-total-profit" class="text-2xl font-black text-amber-700 mt-1">BHD 0.000</h4>
+                    <div class="bg-amber-50 border border-amber-200 p-3 sm:p-4 rounded-xl shadow-sm">
+                        <p class="text-[10px] sm:text-xs font-bold text-amber-800 uppercase">Est. Gross Profit</p>
+                        <h4 id="dash-total-profit" class="text-lg sm:text-2xl font-black text-amber-700 mt-0.5">BHD 0.000</h4>
                     </div>
-                    <div class="bg-purple-50 border border-purple-200 p-4 rounded-xl shadow-sm">
-                        <p class="text-xs font-bold text-purple-800 uppercase">Total Items in Stock</p>
-                        <h4 id="dash-total-stock" class="text-2xl font-black text-purple-700 mt-1">0</h4>
+                    <div class="bg-purple-50 border border-purple-200 p-3 sm:p-4 rounded-xl shadow-sm">
+                        <p class="text-[10px] sm:text-xs font-bold text-purple-800 uppercase">Total Stock</p>
+                        <h4 id="dash-total-stock" class="text-lg sm:text-2xl font-black text-purple-700 mt-0.5">0</h4>
                     </div>
                 </div>
 
                 <!-- Best Sellers & Top Customers Section -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <div class="bg-white border border-gray-200 p-4 rounded-xl shadow-sm">
-                        <h4 class="font-bold text-sm text-gray-800 mb-3 flex items-center space-x-2">
+                        <h4 class="font-bold text-xs sm:text-sm text-gray-800 mb-3 flex items-center space-x-2">
                             <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
                             <span>Top 5 Best-Selling Items</span>
                         </h4>
                         <div id="dash-top-products" class="space-y-2 text-xs divide-y divide-gray-100"></div>
                     </div>
                     <div class="bg-white border border-gray-200 p-4 rounded-xl shadow-sm">
-                        <h4 class="font-bold text-sm text-gray-800 mb-3 flex items-center space-x-2">
+                        <h4 class="font-bold text-xs sm:text-sm text-gray-800 mb-3 flex items-center space-x-2">
                             <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                            <span>Top 5 Customers by Sales Volume</span>
+                            <span>Top 5 Customers</span>
                         </h4>
                         <div id="dash-top-customers" class="space-y-2 text-xs divide-y divide-gray-100"></div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <div class="bg-white border border-gray-200 p-4 rounded-xl shadow-sm">
-                        <h4 class="font-bold text-sm text-gray-800 mb-3">Recent Sales Breakdown</h4>
+                        <h4 class="font-bold text-xs sm:text-sm text-gray-800 mb-3">Recent Sales</h4>
                         <div id="dash-recent-sales-list" class="space-y-2 max-h-56 overflow-y-auto text-xs divide-y divide-gray-100"></div>
                     </div>
                     <div class="bg-white border border-gray-200 p-4 rounded-xl shadow-sm">
-                        <h4 class="font-bold text-sm text-gray-800 mb-3">Low Stock Alerts</h4>
+                        <h4 class="font-bold text-xs sm:text-sm text-gray-800 mb-3">Low Stock Alerts</h4>
                         <div id="dash-low-stock-list" class="space-y-2 max-h-56 overflow-y-auto text-xs divide-y divide-gray-100"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab 2: Product Management (Dynamic Database Categories) -->
+            <!-- Tab 2: Product Management -->
             <div id="manager-tab-products" class="space-y-6 hidden">
-                <div class="bg-emerald-50/50 border border-emerald-200 p-5 rounded-xl space-y-3 shadow-sm">
-                    <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Add New Product to Catalog</h4>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-emerald-50/50 border border-emerald-200 p-4 sm:p-5 rounded-xl space-y-3 shadow-sm">
+                    <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Add New Product</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                         <input type="text" id="new-prod-name" placeholder="Product Name *" class="border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
                         <input type="text" id="new-prod-sku" placeholder="SKU (e.g. PERF-001)" class="border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
                         <input type="text" id="new-prod-barcode" placeholder="Barcode" class="border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                         <div>
                             <label class="text-[10px] font-bold text-gray-600 block mb-1">Category</label>
                             <div class="flex space-x-1">
                                 <select id="new-prod-category-select" onchange="onCategorySelectChange()" class="flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white outline-none">
-                                    <!-- Populated dynamically from database products -->
                                 </select>
-                                <input type="text" id="new-prod-category-custom" placeholder="New category name" class="hidden flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white outline-none">
+                                <input type="text" id="new-prod-category-custom" placeholder="New category" class="hidden flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white outline-none">
                             </div>
                         </div>
                         <input type="number" id="new-prod-cost" step="0.001" placeholder="Cost Price (BHD)" class="border border-gray-300 rounded-lg px-3 py-2 text-xs text-right font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-white self-end">
                         <input type="number" id="new-prod-retail" step="0.001" placeholder="Retail Price (BHD) *" class="border border-gray-300 rounded-lg px-3 py-2 text-xs text-right font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-white self-end">
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center pt-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 items-center pt-1">
                         <input type="number" id="new-prod-stock" placeholder="Initial Stock Qty" class="border border-gray-300 rounded-lg px-3 py-2 text-xs text-center font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
                         <div class="flex items-center space-x-4 text-xs font-bold text-gray-700">
                             <label class="flex items-center space-x-1.5 cursor-pointer">
@@ -308,19 +325,18 @@
                             </label>
                             <label class="flex items-center space-x-1.5 cursor-pointer">
                                 <input type="checkbox" id="new-prod-available" checked class="w-4 h-4 text-emerald-600 rounded">
-                                <span>Available for Sale</span>
+                                <span>Available</span>
                             </label>
                         </div>
                         <button onclick="addNewProductFromManager()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs shadow transition">Add Product</button>
                     </div>
                 </div>
 
-                <!-- Existing Catalog Items Management with Search Bar -->
                 <div class="border rounded-xl p-4 bg-white space-y-3 shadow-sm">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                        <h4 class="text-xs font-bold text-gray-700 uppercase">Existing Catalog Items Management</h4>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <h4 class="text-xs font-bold text-gray-700 uppercase">Catalog Items</h4>
                         <div class="relative w-full sm:w-72">
-                            <input type="text" id="manager-product-search" onkeyup="renderManagerProductList()" placeholder="Search products by name, SKU..." 
+                            <input type="text" id="manager-product-search" onkeyup="renderManagerProductList()" placeholder="Search catalog..." 
                                    class="w-full pl-8 pr-3 py-1.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs shadow-sm">
                             <svg class="w-4 h-4 text-gray-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                         </div>
@@ -331,84 +347,82 @@
 
             <!-- Tab 3: Upload Portal -->
             <div id="manager-tab-upload" class="space-y-6 hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm space-y-4">
-                        <h4 class="font-bold text-sm text-gray-800">1. Download Product CSV Template</h4>
-                        <p class="text-xs text-gray-500">Download the standard CSV template formatted with all required columns for bulk uploading items.</p>
-                        <button onclick="downloadProductTemplate()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg font-bold text-xs shadow transition flex items-center space-x-1">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    <div class="bg-white border border-gray-200 p-4 sm:p-5 rounded-xl shadow-sm space-y-3">
+                        <h4 class="font-bold text-xs sm:text-sm text-gray-800">1. Download CSV Template</h4>
+                        <p class="text-xs text-gray-500">Download the formatted CSV template for bulk catalog uploading.</p>
+                        <button onclick="downloadProductTemplate()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold text-xs shadow transition flex items-center space-x-1">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            <span>Download CSV Template</span>
+                            <span>Download Template</span>
                         </button>
                     </div>
 
-                    <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm space-y-4">
-                        <h4 class="font-bold text-sm text-gray-800">2. Upload Filled CSV File</h4>
-                        <p class="text-xs text-gray-500">Upload your completed CSV file. The system will compare items against your existing catalog and prompt for action.</p>
-                        <input type="file" id="csv-file-input" accept=".csv" class="w-full border border-gray-300 rounded-lg p-2 text-xs bg-gray-50 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
-                        <button onclick="handleCSVUploadPreview()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg text-xs shadow transition">Analyze & Compare Upload</button>
+                    <div class="bg-white border border-gray-200 p-4 sm:p-5 rounded-xl shadow-sm space-y-3">
+                        <h4 class="font-bold text-xs sm:text-sm text-gray-800">2. Upload Filled CSV</h4>
+                        <p class="text-xs text-gray-500">Upload your completed CSV file to sync products.</p>
+                        <input type="file" id="csv-file-input" accept=".csv" class="w-full border border-gray-300 rounded-lg p-1.5 text-xs bg-gray-50 file:mr-3 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700">
+                        <button onclick="handleCSVUploadPreview()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-xs shadow transition">Analyze & Compare</button>
                     </div>
                 </div>
 
-                <div id="upload-comparison-box" class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm hidden space-y-4">
-                    <div class="flex justify-between items-center border-b pb-3">
-                        <h4 class="font-bold text-sm text-gray-800">Upload Comparison & Conflict Resolution</h4>
-                        <span id="upload-summary-badge" class="text-xs bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-bold">Review Required</span>
+                <div id="upload-comparison-box" class="bg-white border border-gray-200 p-4 sm:p-5 rounded-xl shadow-sm hidden space-y-3">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h4 class="font-bold text-xs sm:text-sm text-gray-800">Upload Review</h4>
+                        <span id="upload-summary-badge" class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">Review Required</span>
                     </div>
-                    <p class="text-xs text-gray-500">For items that already exist in your catalog (matched by SKU or Name), choose the action you would like to apply:</p>
-                    <div class="flex space-x-2">
-                        <button onclick="setGlobalUploadAction('skip')" class="px-3 py-1.5 text-xs font-bold rounded bg-gray-200 text-gray-700 hover:bg-gray-300">Set All: Skip Existing</button>
-                        <button onclick="setGlobalUploadAction('replace')" class="px-3 py-1.5 text-xs font-bold rounded bg-amber-100 text-amber-800 hover:bg-amber-200">Set All: Replace Details</button>
-                        <button onclick="setGlobalUploadAction('add')" class="px-3 py-1.5 text-xs font-bold rounded bg-emerald-100 text-emerald-800 hover:bg-emerald-200">Set All: Add Stock Quantity</button>
+                    <div class="flex space-x-1.5 flex-wrap gap-y-1">
+                        <button onclick="setGlobalUploadAction('skip')" class="px-2.5 py-1 text-[11px] font-bold rounded bg-gray-200 text-gray-700">Skip Existing</button>
+                        <button onclick="setGlobalUploadAction('replace')" class="px-2.5 py-1 text-[11px] font-bold rounded bg-amber-100 text-amber-800">Replace Details</button>
+                        <button onclick="setGlobalUploadAction('add')" class="px-2.5 py-1 text-[11px] font-bold rounded bg-emerald-100 text-emerald-800">Add Quantity</button>
                     </div>
-                    <div id="upload-comparison-list" class="divide-y divide-gray-100 max-h-80 overflow-y-auto border rounded-lg p-3 bg-gray-50"></div>
-                    <button onclick="executeBatchUploadImport()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg text-xs shadow transition">Confirm & Import Products</button>
+                    <div id="upload-comparison-list" class="divide-y divide-gray-100 max-h-80 overflow-y-auto border rounded-lg p-2.5 bg-gray-50"></div>
+                    <button onclick="executeBatchUploadImport()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-xs shadow transition">Import Products</button>
                 </div>
             </div>
 
-            <!-- Tab 4: Customers Tab in Manager Portal (With Editable Customer Details synced to DB) -->
+            <!-- Tab 4: Customers Tab -->
             <div id="manager-tab-customers" class="space-y-6 hidden">
-                <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm space-y-4">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                        <h4 class="font-bold text-sm text-gray-800">Customer Directory & Loyalty Audit</h4>
-                        <input type="text" id="manager-cust-search" onkeyup="renderManagerCustomerDirectory()" placeholder="Search customer name or phone..." class="border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-emerald-500 w-full sm:w-72">
+                <div class="bg-white border border-gray-200 p-4 sm:p-5 rounded-xl shadow-sm space-y-3">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <h4 class="font-bold text-xs sm:text-sm text-gray-800">Customer Directory</h4>
+                        <input type="text" id="manager-cust-search" onkeyup="renderManagerCustomerDirectory()" placeholder="Search name or phone..." class="border border-gray-300 rounded-lg px-3 py-1.5 text-xs outline-none focus:ring-1 focus:ring-emerald-500 w-full sm:w-72">
                     </div>
                     <div id="manager-customer-list" class="divide-y divide-gray-100 max-h-96 overflow-y-auto"></div>
                 </div>
             </div>
 
-            <!-- Tab 5: Comprehensive Reports & Issuance -->
+            <!-- Tab 5: Reports -->
             <div id="manager-tab-reports" class="space-y-6 hidden">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="bg-white border border-gray-200 rounded-xl p-4 space-y-2 shadow-sm">
-                        <h4 class="font-bold text-xs text-gray-700 uppercase mb-3">Report Categories</h4>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                    <div class="bg-white border border-gray-200 rounded-xl p-3 sm:p-4 space-y-1.5 shadow-sm">
+                        <h4 class="font-bold text-[11px] text-gray-700 uppercase mb-2">Reports</h4>
                         <button onclick="selectReportType('sales')" id="btn-rep-cat-sales" class="w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 transition">Sales Summary & Detail</button>
                         <button onclick="selectReportType('inventory')" id="btn-rep-cat-inventory" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition">Inventory Valuation</button>
                         <button onclick="selectReportType('lowstock')" id="btn-rep-cat-lowstock" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition">Low Stock Alerts</button>
                     </div>
 
                     <div class="lg:col-span-2 space-y-4">
-                        <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm space-y-4">
-                            <h4 id="report-form-title" class="font-bold text-sm text-gray-800 border-b pb-2">Sales Summary Report Configuration</h4>
+                        <div class="bg-white border border-gray-200 p-4 sm:p-5 rounded-xl shadow-sm space-y-3">
+                            <h4 id="report-form-title" class="font-bold text-xs sm:text-sm text-gray-800 border-b pb-2">Sales Summary Report</h4>
                             
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                            <div class="grid grid-cols-2 gap-3 text-xs">
                                 <div>
                                     <label class="font-bold text-gray-600 block mb-1">From Date</label>
-                                    <input type="date" id="report-start-date" class="w-full border border-gray-300 rounded px-2.5 py-1.5 outline-none focus:ring-1 focus:ring-emerald-500">
+                                    <input type="date" id="report-start-date" class="w-full border border-gray-300 rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-emerald-500 text-xs">
                                 </div>
                                 <div>
                                     <label class="font-bold text-gray-600 block mb-1">To Date</label>
-                                    <input type="date" id="report-end-date" class="w-full border border-gray-300 rounded px-2.5 py-1.5 outline-none focus:ring-1 focus:ring-emerald-500">
+                                    <input type="date" id="report-end-date" class="w-full border border-gray-300 rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-emerald-500 text-xs">
                                 </div>
                             </div>
 
-                            <div class="flex space-x-2 pt-2 flex-wrap gap-y-2">
-                                <button onclick="previewReport()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-xs shadow transition flex justify-center items-center space-x-1">
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
+                                <button onclick="previewReport()" class="col-span-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs shadow transition flex justify-center items-center space-x-1">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                    <span>PREVIEW REPORT</span>
+                                    <span>PREVIEW</span>
                                 </button>
-                                <button onclick="executePrintActiveReport()" class="bg-gray-800 hover:bg-black text-white px-4 py-2.5 rounded-lg font-bold text-xs shadow transition">Print</button>
-                                <button onclick="executeExcelActiveReport()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-lg font-bold text-xs shadow transition">Export Excel</button>
-                                <button onclick="executeEmailActiveReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-bold text-xs shadow transition">Email</button>
+                                <button onclick="executePrintActiveReport()" class="bg-gray-800 hover:bg-black text-white py-2 rounded-lg font-bold text-xs shadow">Print</button>
+                                <button onclick="executeExcelActiveReport()" class="bg-amber-600 hover:bg-amber-700 text-white py-2 rounded-lg font-bold text-xs shadow">Export (.CSV)</button>
                             </div>
                         </div>
                     </div>
@@ -419,30 +433,30 @@
     </div>
 
     <!-- REPORT PREVIEW POPUP MODAL -->
-    <div id="report-preview-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-6xl w-full p-6 space-y-4 my-auto max-h-[92vh] flex flex-col">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 id="preview-popup-heading" class="text-base font-black text-gray-800 uppercase tracking-wide">Report Preview</h3>
+    <div id="report-preview-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full p-4 sm:p-6 space-y-3 my-auto max-h-[92vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 id="preview-popup-heading" class="text-xs sm:text-base font-black text-gray-800 uppercase tracking-wide">Report Preview</h3>
                 <button onclick="closeReportPreviewModal()" class="text-gray-400 hover:text-gray-700 font-bold text-2xl px-2">&times;</button>
             </div>
-            <div id="report-preview-popup-body" class="flex-1 overflow-y-auto text-xs border rounded-lg p-3 bg-gray-50/50"></div>
+            <div id="report-preview-popup-body" class="flex-1 overflow-y-auto text-xs border rounded-lg p-2.5 bg-gray-50/50"></div>
             <div class="flex justify-end space-x-2 pt-2 border-t">
-                <button onclick="executePrintActiveReport()" class="bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg font-bold text-xs shadow">Print</button>
-                <button onclick="executeExcelActiveReport()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-bold text-xs shadow">Export Excel</button>
-                <button onclick="closeReportPreviewModal()" class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-xs font-semibold">Close</button>
+                <button onclick="executePrintActiveReport()" class="bg-gray-800 text-white px-3 py-1.5 rounded-lg font-bold text-xs">Print</button>
+                <button onclick="executeExcelActiveReport()" class="bg-amber-600 text-white px-3 py-1.5 rounded-lg font-bold text-xs">Export CSV</button>
+                <button onclick="closeReportPreviewModal()" class="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-semibold">Close</button>
             </div>
         </div>
     </div>
 
-    <!-- EDIT PRODUCT MODAL (MANAGER PORTAL) -->
-    <div id="edit-product-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-5 space-y-4 my-auto">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-lg font-bold text-gray-800">Edit Product Details</h3>
-                <button onclick="closeEditProductModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+    <!-- EDIT PRODUCT MODAL -->
+    <div id="edit-product-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-4 sm:p-5 space-y-3 my-auto">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-base font-bold text-gray-800">Edit Product</h3>
+                <button onclick="closeEditProductModal()" class="text-gray-400 font-bold text-lg">&times;</button>
             </div>
             <input type="hidden" id="edit-prod-id">
-            <div class="space-y-3 text-xs">
+            <div class="space-y-2.5 text-xs">
                 <div>
                     <label class="font-bold text-gray-600 block mb-1">Product Name *</label>
                     <input type="text" id="edit-prod-name-input" class="w-full border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-emerald-500">
@@ -463,20 +477,20 @@
                         <input type="text" id="edit-prod-category-input" class="w-full border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-emerald-500">
                     </div>
                     <div>
-                        <label class="font-bold text-gray-600 block mb-1">Cost Price (BHD)</label>
-                        <input type="number" step="0.001" id="edit-prod-cost-input" class="w-full border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-emerald-500 text-right font-bold">
+                        <label class="font-bold text-gray-600 block mb-1">Cost Price</label>
+                        <input type="number" step="0.001" id="edit-prod-cost-input" class="w-full border border-gray-300 rounded p-2 text-right font-bold">
                     </div>
                     <div>
                         <label class="font-bold text-gray-600 block mb-1">Retail Price *</label>
-                        <input type="number" step="0.001" id="edit-prod-retail-input" class="w-full border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-emerald-500 text-right font-bold">
+                        <input type="number" step="0.001" id="edit-prod-retail-input" class="w-full border border-gray-300 rounded p-2 text-right font-bold">
                     </div>
                 </div>
                 <div class="grid grid-cols-3 gap-2 items-center pt-1">
                     <div>
                         <label class="font-bold text-gray-600 block mb-1">Stock Qty</label>
-                        <input type="number" id="edit-prod-stock-input" class="w-full border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-emerald-500 text-center font-bold">
+                        <input type="number" id="edit-prod-stock-input" class="w-full border border-gray-300 rounded p-2 text-center font-bold">
                     </div>
-                    <div class="col-span-2 flex items-center space-x-3 font-semibold text-gray-700 pt-4">
+                    <div class="col-span-2 flex items-center space-x-3 font-semibold text-gray-700 pt-3">
                         <label class="flex items-center space-x-1 cursor-pointer">
                             <input type="checkbox" id="edit-prod-track-input" class="w-4 h-4 text-emerald-600 rounded">
                             <span>Track Stock</span>
@@ -489,21 +503,21 @@
                 </div>
             </div>
             <div class="pt-2 flex space-x-2">
-                <button onclick="saveProductEdits()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs shadow transition">Save Changes</button>
-                <button onclick="closeEditProductModal()" class="border border-gray-300 text-gray-700 px-4 py-2 rounded text-xs font-semibold">Cancel</button>
+                <button onclick="saveProductEdits()" class="flex-1 bg-emerald-600 text-white font-bold py-2 rounded text-xs shadow">Save</button>
+                <button onclick="closeEditProductModal()" class="border border-gray-300 text-gray-700 px-3 py-2 rounded text-xs font-semibold">Cancel</button>
             </div>
         </div>
     </div>
 
     <!-- EDIT CUSTOMER MODAL -->
-    <div id="edit-customer-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-5 space-y-4 my-auto">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-lg font-bold text-gray-800">Edit Customer Details</h3>
-                <button onclick="closeEditCustomerModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+    <div id="edit-customer-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-4 sm:p-5 space-y-3 my-auto">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-base font-bold text-gray-800">Edit Customer</h3>
+                <button onclick="closeEditCustomerModal()" class="text-gray-400 font-bold text-lg">&times;</button>
             </div>
             <input type="hidden" id="edit-cust-id">
-            <div class="space-y-3 text-xs">
+            <div class="space-y-2.5 text-xs">
                 <div>
                     <label class="font-bold text-gray-600 block mb-1">Full Name *</label>
                     <input type="text" id="edit-cust-name-input" class="w-full border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-emerald-500">
@@ -518,106 +532,105 @@
                 </div>
             </div>
             <div class="pt-2 flex space-x-2">
-                <button onclick="saveCustomerEdits()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs shadow transition">Save Changes</button>
-                <button onclick="closeEditCustomerModal()" class="border border-gray-300 text-gray-700 px-4 py-2 rounded text-xs font-semibold">Cancel</button>
+                <button onclick="saveCustomerEdits()" class="flex-1 bg-emerald-600 text-white font-bold py-2 rounded text-xs shadow">Save</button>
+                <button onclick="closeEditCustomerModal()" class="border border-gray-300 text-gray-700 px-3 py-2 rounded text-xs font-semibold">Cancel</button>
             </div>
         </div>
     </div>
 
     <!-- CUSTOMER SEARCH & CREATION MODAL -->
-    <div id="customer-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-5 space-y-4 my-auto max-h-[90vh] flex flex-col">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-lg font-bold text-gray-800">Select or Add Customer</h3>
-                <button onclick="closeCustomerModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+    <div id="customer-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-4 sm:p-5 space-y-3 my-auto max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-base font-bold text-gray-800">Select or Add Customer</h3>
+                <button onclick="closeCustomerModal()" class="text-gray-400 font-bold text-lg">&times;</button>
             </div>
 
             <div>
-                <input type="text" id="cust-modal-search" onkeyup="renderCustomerSearchResults()" placeholder="Search by name or phone..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+                <input type="text" id="cust-modal-search" onkeyup="renderCustomerSearchResults()" placeholder="Search name or phone..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
             </div>
 
-            <div id="cust-modal-results" class="flex-1 overflow-y-auto border rounded-lg divide-y divide-gray-100 max-h-48 p-2 bg-gray-50/50"></div>
+            <div id="cust-modal-results" class="flex-1 overflow-y-auto border rounded-lg divide-y divide-gray-100 max-h-40 p-2 bg-gray-50/50"></div>
 
-            <div class="border-t pt-3 space-y-2 bg-emerald-50/30 p-3 rounded-lg border border-emerald-100">
-                <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider">Create New Customer</h4>
+            <div class="border-t pt-2 space-y-2 bg-emerald-50/30 p-2.5 rounded-lg border border-emerald-100">
+                <h4 class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">New Customer</h4>
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="new-cust-name" placeholder="Full Name *" class="border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
-                    <input type="text" id="new-cust-phone" placeholder="Phone Number *" class="border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
+                    <input type="text" id="new-cust-name" placeholder="Full Name *" class="border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none">
+                    <input type="text" id="new-cust-phone" placeholder="Phone Number *" class="border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none">
                 </div>
-                <input type="email" id="new-cust-email" placeholder="Email Address (Optional)" class="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-emerald-500">
+                <input type="email" id="new-cust-email" placeholder="Email Address (Optional)" class="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none">
                 
-                <button onclick="addNewCustomerToDatabase()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs transition shadow">
-                    Save & Select Customer
+                <button onclick="addNewCustomerToDatabase()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs shadow">
+                    Save & Select
                 </button>
             </div>
         </div>
     </div>
 
     <!-- Sales History & Refunds Modal -->
-    <div id="sales-history-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full p-5 space-y-4 my-auto max-h-[90vh] flex flex-col">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-lg font-bold text-gray-800">Previous Sales Receipts & Refunds</h3>
-                <button onclick="closeSalesHistoryModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+    <div id="sales-history-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full p-4 sm:p-5 space-y-3 my-auto max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-base font-bold text-gray-800">Previous Sales</h3>
+                <button onclick="closeSalesHistoryModal()" class="text-gray-400 font-bold text-lg">&times;</button>
             </div>
             
-            <div class="flex space-x-2">
-                <input type="text" id="sales-search-input" onkeyup="renderSalesHistory()" placeholder="Search by Receipt ID, Customer, or Phone..." class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
+            <div>
+                <input type="text" id="sales-search-input" onkeyup="renderSalesHistory()" placeholder="Search Receipt ID, Customer, or Phone..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
             </div>
 
-            <div class="flex-1 overflow-y-auto divide-y divide-gray-200 border rounded-lg p-2 max-h-96" id="sales-history-list"></div>
+            <div class="flex-1 overflow-y-auto divide-y divide-gray-200 border rounded-lg p-2 max-h-80" id="sales-history-list"></div>
         </div>
     </div>
 
     <!-- Item Manager & Price Edit Modal -->
-    <div id="item-manager-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-5 space-y-4 my-auto max-h-[90vh] flex flex-col">
-            <div class="flex justify-between items-center border-b pb-3">
+    <div id="item-manager-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-4 sm:p-5 space-y-3 my-auto max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-2">
                 <div>
-                    <h3 class="text-lg font-bold text-gray-800">Item Catalog Manager</h3>
-                    <p class="text-xs text-gray-500">Staff can change retail prices & quantity.</p>
+                    <h3 class="text-base font-bold text-gray-800">Item Catalog Manager</h3>
+                    <p class="text-[10px] text-gray-500">Retail price edit open. Cost locked to Manager PIN.</p>
                 </div>
-                <button onclick="closeItemManagerModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+                <button onclick="closeItemManagerModal()" class="text-gray-400 font-bold text-lg">&times;</button>
             </div>
 
             <div class="flex justify-between items-center bg-gray-50 p-2 rounded border border-gray-200">
-                <span id="manager-status-text" class="text-xs font-semibold text-gray-600">Current View: Standard Staff</span>
-                <button id="btn-unlock-manager" onclick="authenticateManagerRole()" class="bg-emerald-600 text-white text-xs px-3 py-1 rounded font-bold hover:bg-emerald-700">Manager Unlock PIN</button>
+                <span id="manager-status-text" class="text-xs font-semibold text-gray-600">View: Standard Staff</span>
+                <button id="btn-unlock-manager" onclick="authenticateManagerRole()" class="bg-emerald-600 text-white text-[11px] px-2.5 py-1 rounded font-bold">Manager Unlock</button>
             </div>
 
-            <!-- Added Search Bar for Item Manager -->
             <div class="relative">
-                <input type="text" id="item-manager-search" onkeyup="renderItemManagerList()" placeholder="Search items by name or barcode..." 
-                       class="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs shadow-sm">
-                <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <input type="text" id="item-manager-search" onkeyup="renderItemManagerList()" placeholder="Search catalog..." 
+                       class="w-full pl-8 pr-3 py-1.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs shadow-sm">
+                <svg class="w-4 h-4 text-gray-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
 
-            <div class="flex-1 overflow-y-auto border rounded-lg p-2 max-h-96 divide-y divide-gray-100" id="item-manager-list"></div>
+            <div class="flex-1 overflow-y-auto border rounded-lg p-2 max-h-80 divide-y divide-gray-100" id="item-manager-list"></div>
         </div>
     </div>
 
     <!-- Payment & Receipt Modal -->
-    <div id="payment-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-5 space-y-4 my-auto">
-            <h3 class="text-lg font-bold text-gray-800 border-b pb-2">Complete Payment</h3>
+    <div id="payment-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-4 sm:p-5 space-y-3 my-auto">
+            <h3 class="text-base font-bold text-gray-800 border-b pb-2">Complete Payment</h3>
             
             <div class="text-center py-2 bg-emerald-50 rounded-lg">
-                <p class="text-xs text-emerald-800 uppercase font-semibold tracking-wider">Total Amount Due</p>
-                <p id="modal-total" class="text-2xl font-black text-emerald-700">BHD 0.000</p>
+                <p class="text-[10px] text-emerald-800 uppercase font-semibold tracking-wider">Total Amount Due</p>
+                <p id="modal-total" class="text-xl sm:text-2xl font-black text-emerald-700">BHD 0.000</p>
             </div>
 
             <div>
-                <label class="text-xs font-semibold text-gray-600 uppercase">Payment Option</label>
+                <label class="text-[10px] font-semibold text-gray-600 uppercase">Payment Option</label>
                 <div class="grid grid-cols-2 gap-2 mt-1">
-                    <button id="mode-single-btn" onclick="setPaymentType('SINGLE')" class="border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">Single Method</button>
-                    <button id="mode-split-btn" onclick="setPaymentType('SPLIT')" class="border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">Split Payment</button>
+                    <button id="mode-single-btn" onclick="setPaymentType('SINGLE')" class="border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center">Single Method</button>
+                    <button id="mode-split-btn" onclick="setPaymentType('SPLIT')" class="border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">Split Payment</button>
                 </div>
             </div>
 
-            <div id="single-payment-container" class="space-y-3">
+            <div id="single-payment-container" class="space-y-2.5">
                 <div>
-                    <label class="text-xs font-semibold text-gray-600 uppercase">Method</label>
-                    <div class="grid grid-cols-3 gap-2 mt-1">
+                    <label class="text-[10px] font-semibold text-gray-600 uppercase">Method</label>
+                    <div class="grid grid-cols-3 gap-1.5 mt-1">
                         <button id="btn-single-cash" onclick="setSingleMethod('CASH')" class="pay-method-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">CASH</button>
                         <button id="btn-single-card" onclick="setSingleMethod('CARD')" class="pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">CARD</button>
                         <button id="btn-single-benefit" onclick="setSingleMethod('BENEFIT_PAY')" class="pay-method-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">BENEFIT</button>
@@ -625,69 +638,69 @@
                 </div>
 
                 <div id="single-cash-wrapper">
-                    <label class="text-xs font-semibold text-gray-600 uppercase">Cash Tendered (BHD)</label>
-                    <input type="number" id="cash-tendered" step="0.001" oninput="calculateSingleChange()" placeholder="0.000" class="w-full mt-1 border border-gray-300 rounded-lg p-2 text-right font-bold text-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    <div class="flex justify-between text-sm mt-2 text-gray-700">
+                    <label class="text-[10px] font-semibold text-gray-600 uppercase">Cash Tendered (BHD)</label>
+                    <input type="number" id="cash-tendered" step="0.001" oninput="calculateSingleChange()" placeholder="0.000" class="w-full mt-1 border border-gray-300 rounded-lg p-2 text-right font-bold text-base focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <div class="flex justify-between text-xs mt-1.5 text-gray-700">
                         <span>Change Due:</span>
                         <span id="change-due" class="font-bold text-blue-600">BHD 0.000</span>
                     </div>
                 </div>
             </div>
 
-            <div id="split-payment-container" class="hidden space-y-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
+            <div id="split-payment-container" class="hidden space-y-2 bg-gray-50 p-2.5 rounded-lg border border-gray-200">
                 <div>
-                    <label class="text-xs font-semibold text-gray-600 uppercase">1. Select Primary Payment Method</label>
-                    <div class="grid grid-cols-3 gap-2 mt-1">
-                        <button id="btn-split-pri-cash" onclick="setSplitPrimaryMethod('CASH')" class="split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center">CASH</button>
-                        <button id="btn-split-pri-card" onclick="setSplitPrimaryMethod('CARD')" class="split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">CARD</button>
-                        <button id="btn-split-pri-benefit" onclick="setSplitPrimaryMethod('BENEFIT_PAY')" class="split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">BENEFIT</button>
+                    <label class="text-[10px] font-semibold text-gray-600 uppercase">1. Primary Method</label>
+                    <div class="grid grid-cols-3 gap-1.5 mt-1">
+                        <button id="btn-split-pri-cash" onclick="setSplitPrimaryMethod('CASH')" class="split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1 text-xs rounded-lg text-center">CASH</button>
+                        <button id="btn-split-pri-card" onclick="setSplitPrimaryMethod('CARD')" class="split-pri-btn border border-gray-300 text-gray-700 font-bold py-1 text-xs rounded-lg text-center">CARD</button>
+                        <button id="btn-split-pri-benefit" onclick="setSplitPrimaryMethod('BENEFIT_PAY')" class="split-pri-btn border border-gray-300 text-gray-700 font-bold py-1 text-xs rounded-lg text-center">BENEFIT</button>
                     </div>
                 </div>
 
                 <div>
-                    <label id="label-split-pri-amount" class="text-xs font-semibold text-gray-600 uppercase">Primary Paid Amount (BHD)</label>
-                    <input type="number" id="split-pri-amount" step="0.001" oninput="calculateSplitBalance()" placeholder="0.000" class="w-full mt-1 border border-gray-300 rounded-lg p-2 text-right font-bold text-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <label id="label-split-pri-amount" class="text-[10px] font-semibold text-gray-600 uppercase">Primary Amount (BHD)</label>
+                    <input type="number" id="split-pri-amount" step="0.001" oninput="calculateSplitBalance()" placeholder="0.000" class="w-full mt-0.5 border border-gray-300 rounded-lg p-1.5 text-right font-bold text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                 </div>
 
-                <div class="p-2.5 bg-blue-50 border border-blue-200 rounded-lg flex justify-between items-center text-sm font-bold text-blue-900">
-                    <span>Remaining Balance:</span>
-                    <span id="split-remaining-balance" class="text-base text-blue-700">BHD 0.000</span>
+                <div class="p-2 bg-blue-50 border border-blue-200 rounded-lg flex justify-between items-center text-xs font-bold text-blue-900">
+                    <span>Remaining:</span>
+                    <span id="split-remaining-balance" class="text-sm text-blue-700">BHD 0.000</span>
                 </div>
 
                 <div>
-                    <label class="text-xs font-semibold text-gray-600 uppercase">2. Pay Balance Using</label>
-                    <div class="grid grid-cols-3 gap-2 mt-1">
-                        <button id="btn-split-sec-cash" onclick="setSplitSecondaryMethod('CASH')" class="split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">CASH</button>
-                        <button id="btn-split-sec-card" onclick="setSplitSecondaryMethod('CARD')" class="split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center">CARD</button>
-                        <button id="btn-split-sec-benefit" onclick="setSplitSecondaryMethod('BENEFIT_PAY')" class="split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">BENEFIT</button>
+                    <label class="text-[10px] font-semibold text-gray-600 uppercase">2. Secondary Method</label>
+                    <div class="grid grid-cols-3 gap-1.5 mt-1">
+                        <button id="btn-split-sec-cash" onclick="setSplitSecondaryMethod('CASH')" class="split-sec-btn border border-gray-300 text-gray-700 font-bold py-1 text-xs rounded-lg text-center">CASH</button>
+                        <button id="btn-split-sec-card" onclick="setSplitSecondaryMethod('CARD')" class="split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1 text-xs rounded-lg text-center">CARD</button>
+                        <button id="btn-split-sec-benefit" onclick="setSplitSecondaryMethod('BENEFIT_PAY')" class="split-sec-btn border border-gray-300 text-gray-700 font-bold py-1 text-xs rounded-lg text-center">BENEFIT</button>
                     </div>
                 </div>
             </div>
 
             <div>
-                <label class="text-xs font-semibold text-gray-600 uppercase">Print Format</label>
+                <label class="text-[10px] font-semibold text-gray-600 uppercase">Print Format</label>
                 <div class="grid grid-cols-2 gap-2 mt-1">
-                    <button id="btn-print-58mm" onclick="setPrintFormat('58mm')" class="print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center">58mm Thermal</button>
-                    <button id="btn-print-a4" onclick="setPrintFormat('A4')" class="print-fmt-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center">A4 Invoice</button>
+                    <button id="btn-print-58mm" onclick="setPrintFormat('58mm')" class="print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center">58mm Thermal</button>
+                    <button id="btn-print-a4" onclick="setPrintFormat('A4')" class="print-fmt-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center">A4 Invoice</button>
                 </div>
             </div>
 
-            <div class="space-y-2 pt-2 border-t border-gray-200">
-                <button onclick="processSale('PRINT')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-sm shadow flex items-center justify-center space-x-2">
+            <div class="space-y-1.5 pt-2 border-t border-gray-200">
+                <button onclick="processSale('PRINT')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-xs sm:text-sm shadow flex items-center justify-center space-x-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                     <span>Print Receipt</span>
                 </button>
                 
                 <div class="grid grid-cols-2 gap-2">
                     <button onclick="processSale('WHATSAPP')" class="bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold text-xs flex items-center justify-center space-x-1">
-                        <span>Send WhatsApp</span>
+                        <span>WhatsApp</span>
                     </button>
                     <button onclick="processSale('EMAIL')" class="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold text-xs flex items-center justify-center space-x-1">
-                        <span>Send Email</span>
+                        <span>Email</span>
                     </button>
                 </div>
 
-                <button onclick="closePaymentModal()" class="w-full border border-gray-300 text-gray-700 py-2 rounded-lg font-semibold text-xs hover:bg-gray-50">Cancel</button>
+                <button onclick="closePaymentModal()" class="w-full border border-gray-300 text-gray-700 py-1.5 rounded-lg font-semibold text-xs hover:bg-gray-50">Cancel</button>
             </div>
         </div>
     </div>
@@ -866,6 +879,26 @@ window.onload = async () => {
     if (endDateElem) endDateElem.value = todayStr;
 };
 
+// --- MOBILE TAB SWITCHING LOGIC ---
+function switchMobileTab(tab) {
+    const prodPanel = document.getElementById('panel-products');
+    const cartPanel = document.getElementById('panel-cart');
+    const btnProd = document.getElementById('m-tab-products');
+    const btnCart = document.getElementById('m-tab-cart');
+
+    if (tab === 'products') {
+        prodPanel.classList.remove('hidden');
+        cartPanel.classList.add('hidden');
+        btnProd.className = 'flex-1 flex flex-col items-center justify-center py-1 text-emerald-700 font-bold';
+        btnCart.className = 'flex-1 flex flex-col items-center justify-center py-1 text-gray-400 font-semibold relative';
+    } else {
+        cartPanel.classList.remove('hidden');
+        prodPanel.classList.add('hidden');
+        btnCart.className = 'flex-1 flex flex-col items-center justify-center py-1 text-emerald-700 font-bold relative';
+        btnProd.className = 'flex-1 flex flex-col items-center justify-center py-1 text-gray-400 font-semibold';
+    }
+}
+
 function updateManagerPortalVisibility() {
     const btn = document.getElementById('btn-manager-portal');
     if (userRole === 'ADMIN' || userRole === 'MANAGER') {
@@ -981,7 +1014,7 @@ function populateCategoryDropdown() {
 
 async function openManagerPortal() {
     if (userRole !== 'ADMIN' && userRole !== 'MANAGER') {
-        const pin = prompt('Enter Manager/Owner PIN to access Full-Window Manager Portal:');
+        const pin = prompt('Enter Manager/Owner PIN:');
         if (!pin) return;
         
         let authenticated = false;
@@ -1021,14 +1054,14 @@ function switchManagerTab(tab) {
     document.getElementById('manager-tab-customers').classList.add('hidden');
     document.getElementById('manager-tab-reports').classList.add('hidden');
 
-    document.getElementById('tab-btn-dashboard').className = 'px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition';
-    document.getElementById('tab-btn-products').className = 'px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition';
-    document.getElementById('tab-btn-upload').className = 'px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition';
-    document.getElementById('tab-btn-customers').className = 'px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition';
-    document.getElementById('tab-btn-reports').className = 'px-4 py-2 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition';
+    document.getElementById('tab-btn-dashboard').className = 'px-3 py-1.5 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition whitespace-nowrap';
+    document.getElementById('tab-btn-products').className = 'px-3 py-1.5 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition whitespace-nowrap';
+    document.getElementById('tab-btn-upload').className = 'px-3 py-1.5 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition whitespace-nowrap';
+    document.getElementById('tab-btn-customers').className = 'px-3 py-1.5 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition whitespace-nowrap';
+    document.getElementById('tab-btn-reports').className = 'px-3 py-1.5 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition whitespace-nowrap';
 
     document.getElementById('manager-tab-' + tab).classList.remove('hidden');
-    document.getElementById('tab-btn-' + tab).className = 'px-4 py-2 text-xs font-bold rounded-lg bg-amber-600 text-white transition shadow';
+    document.getElementById('tab-btn-' + tab).className = 'px-3 py-1.5 text-xs font-bold rounded-lg bg-amber-600 text-white transition shadow whitespace-nowrap';
 
     if (tab === 'dashboard') renderManagerDashboard();
     if (tab === 'products') {
@@ -1119,12 +1152,12 @@ function renderManagerDashboard() {
     const topProdContainer = document.getElementById('dash-top-products');
     topProdContainer.innerHTML = '';
     if (sortedProducts.length === 0) {
-        topProdContainer.innerHTML = '<p class="text-gray-400 py-2">No sales data in range.</p>';
+        topProdContainer.innerHTML = '<p class="text-gray-400 py-2 text-xs">No sales data in range.</p>';
     } else {
         sortedProducts.forEach(([name, data], idx) => {
             const div = document.createElement('div');
             div.className = 'flex justify-between items-center py-1';
-            div.innerHTML = `<div><span class="font-bold text-amber-600 mr-2">#${idx+1}</span><strong class="text-gray-800">${name}</strong></div><div class="text-right"><span class="font-bold text-gray-900">${data.qty} sold</span> <span class="text-gray-400 text-[10px]">(${formatBHD(data.revenue)})</span></div>`;
+            div.innerHTML = `<div><span class="font-bold text-amber-600 mr-1.5">#${idx+1}</span><strong class="text-gray-800">${name}</strong></div><div class="text-right"><span class="font-bold text-gray-900">${data.qty} sold</span> <span class="text-gray-400 text-[10px]">(${formatBHD(data.revenue)})</span></div>`;
             topProdContainer.appendChild(div);
         });
     }
@@ -1141,12 +1174,12 @@ function renderManagerDashboard() {
     const topCustContainer = document.getElementById('dash-top-customers');
     topCustContainer.innerHTML = '';
     if (sortedCustomers.length === 0) {
-        topCustContainer.innerHTML = '<p class="text-gray-400 py-2">No customer data in range.</p>';
+        topCustContainer.innerHTML = '<p class="text-gray-400 py-2 text-xs">No customer data in range.</p>';
     } else {
         sortedCustomers.forEach(([name, data], idx) => {
             const div = document.createElement('div');
             div.className = 'flex justify-between items-center py-1';
-            div.innerHTML = `<div><span class="font-bold text-emerald-600 mr-2">#${idx+1}</span><strong class="text-gray-800">${name}</strong></div><div class="text-right"><span class="font-bold text-emerald-700">${formatBHD(data.total)}</span> <span class="text-gray-400 text-[10px]">(${data.count} orders)</span></div>`;
+            div.innerHTML = `<div><span class="font-bold text-emerald-600 mr-1.5">#${idx+1}</span><strong class="text-gray-800">${name}</strong></div><div class="text-right"><span class="font-bold text-emerald-700">${formatBHD(data.total)}</span> <span class="text-gray-400 text-[10px]">(${data.count} orders)</span></div>`;
             topCustContainer.appendChild(div);
         });
     }
@@ -1164,7 +1197,7 @@ function renderManagerDashboard() {
     lowStockList.innerHTML = '';
     const lowItems = products.filter(p => (p.stock_quantity ?? 0) <= (p.low_stock_threshold ?? 2));
     if (lowItems.length === 0) {
-        lowStockList.innerHTML = '<p class="text-gray-400 py-2">No low stock items.</p>';
+        lowStockList.innerHTML = '<p class="text-gray-400 py-2 text-xs">No low stock items.</p>';
     } else {
         lowItems.forEach(p => {
             const div = document.createElement('div');
@@ -1187,22 +1220,22 @@ function renderManagerProductList() {
     );
 
     if (filtered.length === 0) {
-        container.innerHTML = '<p class="text-center text-gray-400 py-6 text-xs">No products found matching your search.</p>';
+        container.innerHTML = '<p class="text-center text-gray-400 py-6 text-xs">No products found.</p>';
         return;
     }
 
     filtered.forEach(p => {
         const row = document.createElement('div');
-        row.className = 'py-3 flex justify-between items-center text-xs border-b border-gray-100 last:border-0';
+        row.className = 'py-2.5 flex justify-between items-center text-xs border-b border-gray-100 last:border-0';
         row.innerHTML = `
-            <div class="flex-1 pr-3">
-                <p class="font-bold text-gray-800 text-sm">${p.name}</p>
-                <p class="text-gray-400">SKU: ${p.sku || 'N/A'} | Category: ${p.category || 'Perfumes'} | Stock: ${p.stock_quantity}</p>
+            <div class="flex-1 pr-2">
+                <p class="font-bold text-gray-800 text-xs sm:text-sm">${p.name}</p>
+                <p class="text-gray-400 text-[10px]">SKU: ${p.sku || 'N/A'} | Category: ${p.category || 'Perfumes'} | Stock: ${p.stock_quantity}</p>
             </div>
-            <div class="flex items-center space-x-3">
-                <span class="font-bold text-emerald-700 text-sm">${formatBHD(p.retail_price)}</span>
-                <button onclick="openEditProductModal('${p.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded font-bold transition shadow">Edit</button>
-                <button onclick="deleteProduct('${p.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded font-bold transition shadow">Delete</button>
+            <div class="flex items-center space-x-2">
+                <span class="font-bold text-emerald-700 text-xs">${formatBHD(p.retail_price)}</span>
+                <button onclick="openEditProductModal('${p.id}')" class="bg-blue-600 text-white px-2.5 py-1 rounded font-bold text-[11px] shadow">Edit</button>
+                <button onclick="deleteProduct('${p.id}')" class="bg-red-600 text-white px-2.5 py-1 rounded font-bold text-[11px] shadow">Delete</button>
             </div>
         `;
         container.appendChild(row);
@@ -1244,7 +1277,7 @@ async function saveProductEdits() {
     const available_for_sale = document.getElementById('edit-prod-available-input').checked;
 
     if (!name || retail_price <= 0) {
-        alert('Product Name and a valid Retail Price are required!');
+        alert('Product Name and valid Retail Price are required!');
         return;
     }
 
@@ -1263,7 +1296,7 @@ async function saveProductEdits() {
     if (supabaseClient && isValidUUID(id)) {
         const { error } = await supabaseClient.from('products').update(updateData).eq('id', id);
         if (error) {
-            alert('Error updating product in database: ' + error.message);
+            alert('Error updating database: ' + error.message);
             return;
         }
     }
@@ -1274,7 +1307,7 @@ async function saveProductEdits() {
     }
     products = sortProductsAlphabetically(products);
 
-    alert('Product details updated successfully and synced to database!');
+    alert('Product details updated!');
     closeEditProductModal();
     renderProducts();
     renderManagerProductList();
@@ -1298,7 +1331,7 @@ async function addNewProductFromManager() {
     const available = document.getElementById('new-prod-available').checked;
 
     if (!name || retail <= 0) {
-        alert('Please provide Product Name and a valid Retail Price!');
+        alert('Provide Product Name and Retail Price!');
         return;
     }
 
@@ -1317,12 +1350,12 @@ async function addNewProductFromManager() {
     if (supabaseClient) {
         const { error } = await supabaseClient.from('products').insert([newProd]);
         if (error) {
-            alert('Error adding product to Supabase: ' + error.message);
+            alert('Error adding product: ' + error.message);
             return;
         }
     }
 
-    alert('Product added successfully!');
+    alert('Product added!');
     document.getElementById('new-prod-name').value = '';
     document.getElementById('new-prod-sku').value = '';
     document.getElementById('new-prod-barcode').value = '';
@@ -1335,7 +1368,7 @@ async function addNewProductFromManager() {
 }
 
 async function deleteProduct(id) {
-    if (!confirm('Are you sure you want to delete this product?')) return;
+    if (!confirm('Delete product?')) return;
 
     if (supabaseClient && isValidUUID(id)) {
         const { error } = await supabaseClient.from('products').delete().eq('id', id);
@@ -1346,7 +1379,7 @@ async function deleteProduct(id) {
     }
 
     products = products.filter(p => String(p.id) !== String(id));
-    alert('Product deleted successfully!');
+    alert('Product deleted!');
     await fetchProducts();
     renderProducts();
     renderManagerProductList();
@@ -1363,24 +1396,24 @@ function renderManagerCustomerDirectory() {
     );
 
     if (filtered.length === 0) {
-        container.innerHTML = '<p class="text-center text-gray-400 py-6 text-xs">No registered customers found.</p>';
+        container.innerHTML = '<p class="text-center text-gray-400 py-6 text-xs">No customers found.</p>';
         return;
     }
 
     filtered.forEach(c => {
         const row = document.createElement('div');
-        row.className = 'py-3 flex justify-between items-center text-xs border-b border-gray-100 last:border-0';
+        row.className = 'py-2.5 flex justify-between items-center text-xs border-b border-gray-100 last:border-0';
         row.innerHTML = `
-            <div class="flex-1 pr-3">
-                <p class="font-bold text-gray-800 text-sm">${c.name}</p>
-                <p class="text-gray-400">Phone: ${c.phone} | Email: ${c.email || 'N/A'}</p>
+            <div class="flex-1 pr-2">
+                <p class="font-bold text-gray-800 text-xs sm:text-sm">${c.name}</p>
+                <p class="text-gray-400 text-[10px]">Phone: ${c.phone} | Email: ${c.email || 'N/A'}</p>
             </div>
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-2">
                 <div class="text-right">
-                    <span class="bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">${c.loyalty_points || 0} Pts</span>
-                    <p class="text-gray-500 mt-1 font-semibold">Total Spent: ${formatBHD(c.total_spent || 0)}</p>
+                    <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full text-[10px]">${c.loyalty_points || 0} Pts</span>
+                    <p class="text-gray-500 font-semibold text-[10px]">${formatBHD(c.total_spent || 0)}</p>
                 </div>
-                <button onclick="openEditCustomerModal('${c.id}')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded transition shadow">Edit</button>
+                <button onclick="openEditCustomerModal('${c.id}')" class="bg-blue-600 text-white font-bold px-2.5 py-1 rounded text-[11px] shadow">Edit</button>
             </div>
         `;
         container.appendChild(row);
@@ -1410,7 +1443,7 @@ async function saveCustomerEdits() {
     const email = document.getElementById('edit-cust-email-input').value.trim();
 
     if (!name || !phone) {
-        alert('Customer Name and Phone number are required!');
+        alert('Customer Name and Phone required!');
         return;
     }
 
@@ -1419,7 +1452,7 @@ async function saveCustomerEdits() {
     if (supabaseClient && isValidUUID(id)) {
         const { error } = await supabaseClient.from('contacts').update(updateData).eq('id', id);
         if (error) {
-            alert('Error updating customer in database: ' + error.message);
+            alert('Error updating customer: ' + error.message);
             return;
         }
     }
@@ -1429,7 +1462,7 @@ async function saveCustomerEdits() {
         customers[idx] = Object.assign({}, customers[idx], updateData);
     }
 
-    alert('Customer details updated successfully and synced to database!');
+    alert('Customer updated!');
     closeEditCustomerModal();
     renderManagerCustomerDirectory();
     await fetchCustomers();
@@ -1451,7 +1484,7 @@ function downloadProductTemplate() {
 function handleCSVUploadPreview() {
     const fileInput = document.getElementById('csv-file-input');
     if (!fileInput.files || fileInput.files.length === 0) {
-        alert('Please select a CSV file to upload.');
+        alert('Select a CSV file.');
         return;
     }
 
@@ -1467,7 +1500,7 @@ function handleCSVUploadPreview() {
 function parseCSVText(text) {
     const lines = text.split(/\r\n|\n/);
     if (lines.length < 2) {
-        alert('CSV file appears empty or invalid.');
+        alert('CSV file empty or invalid.');
         return;
     }
 
@@ -1505,26 +1538,26 @@ function renderUploadComparisonTable() {
 
     parsedUploadRows.forEach((row, idx) => {
         const div = document.createElement('div');
-        div.className = 'py-2.5 flex justify-between items-center text-xs';
+        div.className = 'py-2 flex justify-between items-center text-xs';
         
         let statusBadge = row.status === 'NEW' 
-            ? '<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">New Item</span>' 
-            : '<span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold">Already Exists</span>';
+            ? '<span class="bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold text-[10px]">New Item</span>' 
+            : '<span class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold text-[10px]">Exists</span>';
 
         div.innerHTML = `
             <div class="flex-1 pr-2">
                 <p class="font-bold text-gray-800">${row.name} (${row.sku})</p>
-                <p class="text-gray-400">Retail: ${formatBHD(row.retail_price)} | Qty: ${row.stock_quantity}</p>
+                <p class="text-gray-400 text-[10px]">Retail: ${formatBHD(row.retail_price)} | Qty: ${row.stock_quantity}</p>
             </div>
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-2">
                 ${statusBadge}
                 ${row.status === 'EXISTS' ? `
-                    <select onchange="updateUploadRowAction(${idx}, this.value)" class="border border-gray-300 rounded px-2 py-1 font-bold text-xs bg-white">
+                    <select onchange="updateUploadRowAction(${idx}, this.value)" class="border border-gray-300 rounded px-1.5 py-0.5 font-bold text-[10px] bg-white">
                         <option value="skip" ${row.action === 'skip' ? 'selected' : ''}>Skip</option>
-                        <option value="replace" ${row.action === 'replace' ? 'selected' : ''}>Replace Details</option>
-                        <option value="add" ${row.action === 'add' ? 'selected' : ''}>Add Quantity (+${row.stock_quantity})</option>
+                        <option value="replace" ${row.action === 'replace' ? 'selected' : ''}>Replace</option>
+                        <option value="add" ${row.action === 'add' ? 'selected' : ''}>+ Qty</option>
                     </select>
-                ` : '<span class="text-gray-400 font-semibold">Will Add New</span>'}
+                ` : '<span class="text-gray-400 font-semibold text-[10px]">Will Add</span>'}
             </div>
         `;
         container.appendChild(div);
@@ -1583,7 +1616,7 @@ async function executeBatchUploadImport() {
         }
     }
 
-    alert(`Successfully processed upload import for ${successCount} products!`);
+    alert(`Processed import for ${successCount} products!`);
     document.getElementById('upload-comparison-box').classList.add('hidden');
     await fetchProducts();
     switchManagerTab('products');
@@ -1597,13 +1630,13 @@ function selectReportType(type) {
 
     if (type === 'sales') {
         document.getElementById('btn-rep-cat-sales').className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 transition';
-        document.getElementById('report-form-title').innerText = 'Sales Summary Report Configuration';
+        document.getElementById('report-form-title').innerText = 'Sales Summary Report';
     } else if (type === 'inventory') {
         document.getElementById('btn-rep-cat-inventory').className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 transition';
-        document.getElementById('report-form-title').innerText = 'Inventory Valuation Report Configuration';
+        document.getElementById('report-form-title').innerText = 'Inventory Valuation Report';
     } else if (type === 'lowstock') {
         document.getElementById('btn-rep-cat-lowstock').className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 transition';
-        document.getElementById('report-form-title').innerText = 'Low Stock Alert Report Configuration';
+        document.getElementById('report-form-title').innerText = 'Low Stock Report';
     }
 }
 
@@ -1634,8 +1667,6 @@ function getActiveReportContentHtml() {
         let sumLoyaltyDisc = 0;
         let sumDiscAmount = 0;
         let sumTaxAmount = 0;
-        let sumDeliveryCharges = 0;
-        let sumExtraCharge = 0;
         let sumNetAmount = 0;
 
         filteredSales.forEach(s => {
@@ -1653,81 +1684,72 @@ function getActiveReportContentHtml() {
 
                 rowsHtml += `
                     <tr class="hover:bg-gray-50 border-b border-gray-100">
-                        <td style="padding: 8px 6px; text-align: center; color: #374151;">${srNo++}</td>
-                        <td style="padding: 8px 6px; color: #374151; font-weight: 500;">${s.receiptId}</td>
-                        <td style="padding: 8px 6px; color: #374151; white-space: nowrap;">${s.timestamp}</td>
-                        <td style="padding: 8px 6px; color: #374151;">Store Retail</td>
-                        <td style="padding: 8px 6px; color: #111827; font-weight: 500;">${item.qty > 1 ? item.qty + 'x ' : ''}${item.name}</td>
-                        <td style="padding: 8px 6px; color: #374151;">${payType}</td>
-                        <td style="padding: 8px 6px; text-align: right; color: #374151;">${totalAmountExclTax.toFixed(3)}</td>
-                        <td style="padding: 8px 6px; text-align: center; color: #374151;">0.000</td>
-                        <td style="padding: 8px 6px; text-align: right; color: #374151;">${discAmt.toFixed(3)}</td>
-                        <td style="padding: 8px 6px; text-align: right; color: #374151;">${taxAmount.toFixed(3)}</td>
-                        <td style="padding: 8px 6px; text-align: center; color: #374151;">0.000</td>
-                        <td style="padding: 8px 6px; text-align: center; color: #374151;">0.000</td>
-                        <td style="padding: 8px 6px; text-align: right; color: #047857; font-weight: bold;">${lineTotal.toFixed(3)}</td>
-                        <td style="padding: 8px 6px; text-align: center;"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold text-[9px]">Paid</span></td>
-                        <td style="padding: 8px 6px; color: #374151;">Store Retail</td>
+                        <td style="padding: 6px; text-align: center;">${srNo++}</td>
+                        <td style="padding: 6px; font-weight: 500;">${s.receiptId}</td>
+                        <td style="padding: 6px; white-space: nowrap;">${s.timestamp}</td>
+                        <td style="padding: 6px;">Barakat Perfumes</td>
+                        <td style="padding: 6px; font-weight: 500;">${item.qty > 1 ? item.qty + 'x ' : ''}${item.name}</td>
+                        <td style="padding: 6px;">${payType}</td>
+                        <td style="padding: 6px; text-align: right;">${totalAmountExclTax.toFixed(3)}</td>
+                        <td style="padding: 6px; text-align: center;">0.000</td>
+                        <td style="padding: 6px; text-align: right;">${discAmt.toFixed(3)}</td>
+                        <td style="padding: 6px; text-align: right;">${taxAmount.toFixed(3)}</td>
+                        <td style="padding: 6px; text-align: right; color: #047857; font-weight: bold;">${lineTotal.toFixed(3)}</td>
+                        <td style="padding: 6px; text-align: center;"><span class="bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold text-[9px]">Paid</span></td>
                     </tr>
                 `;
             });
         });
 
         if (filteredSales.length === 0) {
-            rowsHtml = `<tr><td colspan="15" style="text-align: center; padding: 20px; color: #6b7280;">No sales transactions found for the selected date range.</td></tr>`;
+            rowsHtml = `<tr><td colspan="12" style="text-align: center; padding: 20px; color: #6b7280;">No sales transactions found for date range.</td></tr>`;
         }
 
         return {
-            title: `Sales Detail Day Wise Report`,
+            title: `Sales Detail Report`,
             html: `
-                <div style="background: white; border-radius: 8px; padding: 16px; font-family: sans-serif; box-sizing: border-box;">
-                    <div style="text-align: center; margin-bottom: 12px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">
-                        <h2 style="color: #6b21a8; font-size: 16px; font-weight: 900; letter-spacing: 0.5px; margin: 0;">BARAKAT PERFUMES</h2>
-                        <p style="font-size: 11px; font-weight: bold; color: #4b5563; margin: 2px 0 0 0;">Sales Detail Day Wise Report</p>
+                <div style="background: white; border-radius: 8px; padding: 12px; font-family: sans-serif;">
+                    <div style="text-align: center; margin-bottom: 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">
+                        <h2 style="color: #065f46; font-size: 15px; font-weight: 900; margin: 0;">BARAKAT PERFUMES</h2>
+                        <p style="font-size: 10px; font-weight: bold; color: #4b5563; margin: 2px 0 0 0;">Sales Detail Report</p>
                     </div>
 
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 11px; background: #f9fafb; padding: 8px 12px; border-radius: 6px; border: 1px solid #f3f4f6;">
-                        <div><strong style="color: #4b5563;">FROM DATE :</strong> <span style="color: #111827; font-weight: bold;">${startStr}</span></div>
-                        <div><strong style="color: #4b5563;">TO DATE :</strong> <span style="color: #111827; font-weight: bold;">${endStr}</span></div>
-                        <div><strong style="color: #4b5563;">USER NAME :</strong> <span style="color: #111827; font-weight: bold;">${currentUser ? currentUser.name.toUpperCase() : 'KAEM IT'}</span></div>
-                        <div><strong style="color: #4b5563;">PRINT DATE :</strong> <span style="color: #111827; font-weight: bold;">${new Date().toLocaleDateString('en-GB')}</span></div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 10px; background: #f9fafb; padding: 6px 10px; border-radius: 6px;">
+                        <div><strong>From:</strong> ${startStr}</div>
+                        <div><strong>To:</strong> ${endStr}</div>
+                        <div><strong>Printed By:</strong> ${currentUser ? currentUser.name : 'Owner'}</div>
                     </div>
 
                     <div style="overflow-x: auto;">
                         <table style="width: 100%; border-collapse: collapse; font-size: 10px; white-space: nowrap;">
                             <thead>
-                                <tr style="background: #f9fafb; color: #6b21a8; border-bottom: 2px solid #e5e7eb; border-top: 1px solid #e5e7eb; text-align: left;">
-                                    <th style="padding: 8px 6px; font-weight: bold;">S NO.</th>
-                                    <th style="padding: 8px 6px; font-weight: bold;">ORDER NO.</th>
-                                    <th style="padding: 8px 6px; font-weight: bold;">INVOICE DATE</th>
-                                    <th style="padding: 8px 6px; font-weight: bold;">OUTLET NAME</th>
-                                    <th style="padding: 8px 6px; font-weight: bold; min-width: 180px;">PRODUCT NAME</th>
-                                    <th style="padding: 8px 6px; font-weight: bold;">PAY TYPE</th>
-                                    <th style="padding: 8px 6px; font-weight: bold; text-align: right;">NET TOTAL</th>
-                                    <th style="padding: 8px 6px; font-weight: bold; text-align: center;">LOYALTY DISC.</th>
-                                    <th style="padding: 8px 6px; font-weight: bold; text-align: right;">DIS. AMOUNT</th>
-                                    <th style="padding: 8px 6px; font-weight: bold; text-align: right;">TAX AMOUNT</th>
-                                    <th style="padding: 8px 6px; font-weight: bold; text-align: center;">CHARGE (LEVY TAX)</th>
-                                    <th style="padding: 8px 6px; font-weight: bold; text-align: center;">EXTRA CHARGE AMOUNT</th>
-                                    <th style="padding: 8px 6px; font-weight: bold; text-align: right;">FINAL TOTAL</th>
-                                    <th style="padding: 8px 6px; font-weight: bold; text-align: center;">ORDER STATUS</th>
-                                    <th style="padding: 8px 6px; font-weight: bold;">ORDER TYPES</th>
+                                <tr style="background: #f9fafb; color: #065f46; border-bottom: 2px solid #e5e7eb; text-align: left;">
+                                    <th style="padding: 6px;">S NO.</th>
+                                    <th style="padding: 6px;">ORDER NO.</th>
+                                    <th style="padding: 6px;">DATE</th>
+                                    <th style="padding: 6px;">OUTLET</th>
+                                    <th style="padding: 6px;">PRODUCT</th>
+                                    <th style="padding: 6px;">PAYMENT</th>
+                                    <th style="padding: 6px; text-align: right;">SUBTOTAL</th>
+                                    <th style="padding: 6px; text-align: center;">LOYALTY</th>
+                                    <th style="padding: 6px; text-align: right;">DISCOUNT</th>
+                                    <th style="padding: 6px; text-align: right;">VAT</th>
+                                    <th style="padding: 6px; text-align: right;">NET TOTAL</th>
+                                    <th style="padding: 6px; text-align: center;">STATUS</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${rowsHtml}
                             </tbody>
                             <tfoot>
-                                <tr style="border-top: 2px solid #e5e7eb; border-bottom: 2px solid #e5e7eb; font-weight: bold; color: #6b21a8; background: #faf5ff;">
-                                    <td colspan="6" style="padding: 10px 6px; text-align: center;">Total</td>
-                                    <td style="padding: 10px 6px; text-align: right;">${sumTotalAmount.toFixed(3)}</td>
-                                    <td style="padding: 10px 6px; text-align: center;">${sumLoyaltyDisc.toFixed(3)}</td>
-                                    <td style="padding: 10px 6px; text-align: right;">${sumDiscAmount.toFixed(3)}</td>
-                                    <td style="padding: 10px 6px; text-align: right;">${sumTaxAmount.toFixed(3)}</td>
-                                    <td style="padding: 10px 6px; text-align: center;">${sumDeliveryCharges.toFixed(3)}</td>
-                                    <td style="padding: 10px 6px; text-align: center;">${sumExtraCharge.toFixed(3)}</td>
-                                    <td style="padding: 10px 6px; text-align: right;">${sumNetAmount.toFixed(3)}</td>
-                                    <td colspan="2"></td>
+                                <tr style="border-top: 2px solid #e5e7eb; font-weight: bold; color: #065f46; background: #ecfdf5;">
+                                    <td colspan="6" style="padding: 8px 6px; text-align: center;">Total</td>
+                                    <td style="padding: 8px 6px; text-align: right;">${sumTotalAmount.toFixed(3)}</td>
+                                    <td style="padding: 8px 6px; text-align: center;">0.000</td>
+                                    <td style="padding: 8px 6px; text-align: right;">${sumDiscAmount.toFixed(3)}</td>
+                                    <td style="padding: 8px 6px; text-align: right;">${sumTaxAmount.toFixed(3)}</td>
+                                    <td style="padding: 8px 6px; text-align: right;">${sumNetAmount.toFixed(3)}</td>
+                                    <td></td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -1743,9 +1765,8 @@ function getActiveReportContentHtml() {
             html: `
                 <div style="margin-bottom: 8px; font-size: 11px;">
                     <strong>Total Items:</strong> ${products.length} | 
-                    <strong>Total Retail Value:</strong> ${formatBHD(totalRetailVal)} | 
-                    <strong>Total Cost Capital:</strong> ${formatBHD(totalCostVal)} | 
-                    <strong>Projected Profit:</strong> ${formatBHD(totalRetailVal - totalCostVal)}
+                    <strong>Retail Value:</strong> ${formatBHD(totalRetailVal)} | 
+                    <strong>Cost Capital:</strong> ${formatBHD(totalCostVal)}
                 </div>
                 <table border="1" width="100%" style="border-collapse:collapse; font-size:10px;">
                     <thead>
@@ -1774,7 +1795,7 @@ function getActiveReportContentHtml() {
     } else {
         const low = products.filter(p => (p.stock_quantity ?? 0) <= (p.low_stock_threshold ?? 2));
         return {
-            title: 'Low Stock & Reorder Alert Report',
+            title: 'Low Stock Alert Report',
             html: `
                 <div style="margin-bottom: 8px; font-size: 11px;">
                     <strong>Items Needing Restock:</strong> ${low.length}
@@ -1819,11 +1840,9 @@ function executePrintActiveReport() {
     const reportData = getActiveReportContentHtml();
     const printContainer = document.getElementById('print-container');
     printContainer.innerHTML = `
-        <div style="padding: 24px; font-family: sans-serif; color: black;">
+        <div style="padding: 20px; font-family: sans-serif; color: black;">
             <h1 style="text-align: center; color: #065f46; margin: 0;">BARAKAT PERFUMES</h1>
             <h3 style="text-align: center; color: #374151; margin: 4px 0 15px 0;">${reportData.title}</h3>
-            <p style="text-align: center; font-size: 10px; color: #6b7280;">Generated on: ${new Date().toLocaleString()}</p>
-            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #d1d5db;"/>
             ${reportData.html}
         </div>
     `;
@@ -1832,7 +1851,6 @@ function executePrintActiveReport() {
     printContainer.classList.add('hidden');
 }
 
-// FIXED EXCEL EXPORT (CSV format with .csv extension to prevent Excel file-extension warning)
 function executeExcelActiveReport() {
     const startStr = document.getElementById('report-start-date').value;
     const endStr = document.getElementById('report-end-date').value;
@@ -1842,28 +1860,14 @@ function executeExcelActiveReport() {
     let csvRows = [];
 
     if (activeReportType === 'sales') {
-        // Report Metadata Headers
         csvRows.push(['BARAKAT PERFUMES']);
         csvRows.push(['Sales Detail Report']);
-        csvRows.push([`From Date: "${startStr}"`, '', `To Date: "${endStr}"`, '', `Generated By: "${currentUser ? currentUser.name : 'KAEM IT'}"`]);
+        csvRows.push([`From Date: "${startStr}"`, '', `To Date: "${endStr}"`, '', `Generated By: "${currentUser ? currentUser.name : 'Owner'}"`]);
         csvRows.push([`Print Date: "${new Date().toLocaleDateString('en-GB')}"`]);
-        csvRows.push([]); // Empty spacing row
+        csvRows.push([]);
 
-        // Table Headers (Cleaned & Aligned)
         csvRows.push([
-            'Sr No.',
-            'Order No.',
-            'Outlet Name',
-            'Order Date',
-            'Order Time',
-            'Order Type',
-            'Product Name',
-            'Pay Type',
-            'Subtotal (Excl. VAT)',
-            'Discount Amount',
-            'Tax Amount (VAT 10%)',
-            'Final Net Total',
-            'Status'
+            'Sr No.', 'Order No.', 'Outlet Name', 'Order Date', 'Order Time', 'Order Type', 'Product Name', 'Pay Type', 'Subtotal (Excl. VAT)', 'Discount Amount', 'Tax Amount (VAT 10%)', 'Final Net Total', 'Status'
         ]);
 
         let sr = 1;
@@ -1873,7 +1877,6 @@ function executeExcelActiveReport() {
         let sumNet = 0;
 
         filteredSales.forEach(s => {
-            // Split timestamp safely so commas don't shift columns
             const timeParts = (s.timestamp || '').split(',');
             const orderDate = timeParts[0] ? timeParts[0].trim() : s.timestamp;
             const orderTime = timeParts[1] ? timeParts[1].trim() : '';
@@ -1897,7 +1900,7 @@ function executeExcelActiveReport() {
                     `"${orderDate}"`,
                     `"${orderTime}"`,
                     '"Store Retail"',
-                    `"${item.name.replace(/"/g, '""')}"`, // Escape internal quotes
+                    `"${item.name.replace(/"/g, '""')}"`,
                     `"${payType}"`,
                     subtotalExclTax.toFixed(3),
                     discAmt.toFixed(3),
@@ -1908,7 +1911,6 @@ function executeExcelActiveReport() {
             });
         });
 
-        // Add Summary Totals Row
         csvRows.push([]);
         csvRows.push([
             'TOTALS', '', '', '', '', '', '', '',
@@ -1953,7 +1955,6 @@ function executeExcelActiveReport() {
         });
     }
 
-    // Convert array rows to BOM-encoded CSV string for clean opening in Excel
     const csvContent = "\uFEFF" + csvRows.map(e => e.join(",")).join("\n");
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
@@ -1964,47 +1965,6 @@ function executeExcelActiveReport() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-}
-function executeEmailActiveReport() {
-    const reportData = getActiveReportContentHtml();
-    const emailTo = prompt('Enter recipient email address:');
-    if (!emailTo) return;
-
-    const startStr = document.getElementById('report-start-date').value;
-    const endStr = document.getElementById('report-end-date').value;
-    const completedSales = salesHistory.filter(s => s.status !== 'REFUNDED');
-    const filteredSales = filterSalesByCustomDates(completedSales, startStr, endStr);
-
-    let bodyText = `BARAKAT PERFUMES REPORT\nReport: ${reportData.title}\nDate Range: ${startStr} to ${endStr}\nGenerated on: ${new Date().toLocaleString()}\n\n`;
-
-    if (activeReportType === 'sales') {
-        let totalRev = filteredSales.reduce((acc, s) => acc + s.netTotal, 0);
-        bodyText += `Total Completed Orders: ${filteredSales.length}\n`;
-        bodyText += `Total Revenue: ${formatBHD(totalRev)}\n\n`;
-        bodyText += `Transactions:\n`;
-        filteredSales.forEach(s => {
-            bodyText += `- ${s.receiptId} | ${s.custName} | ${formatBHD(s.netTotal)} | ${s.timestamp}\n`;
-        });
-    } else if (activeReportType === 'inventory') {
-        bodyText += `Total Catalog Items: ${products.length}\n`;
-        products.forEach(p => {
-            bodyText += `- ${p.name} | Stock: ${p.stock_quantity} | Price: ${formatBHD(p.retail_price)}\n`;
-        });
-    } else {
-        const low = products.filter(p => (p.stock_quantity ?? 0) <= (p.low_stock_threshold ?? 2));
-        bodyText += `Low Stock Items Count: ${low.length}\n`;
-        low.forEach(p => {
-            bodyText += `- ${p.name} | Stock: ${p.stock_quantity}\n`;
-        });
-    }
-
-    bodyText += `\nGenerated via Barakat POS Backoffice`;
-
-    const subject = encodeURIComponent(`Barakat Perfumes Report: ${reportData.title}`);
-    const mailtoLink = `mailto:${emailTo}?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
-    
-    window.location.href = mailtoLink;
-    alert(`Email client successfully opened with compiled report for ${emailTo}!`);
 }
 
 function openCustomerModal() {
@@ -2028,7 +1988,7 @@ function renderCustomerSearchResults() {
     );
 
     if (filtered.length === 0) {
-        container.innerHTML = '<p class="text-center text-gray-400 py-3 text-xs">No matching customers found.</p>';
+        container.innerHTML = '<p class="text-center text-gray-400 py-3 text-xs">No matching customers.</p>';
         return;
     }
 
@@ -2077,7 +2037,7 @@ async function addNewCustomerToDatabase() {
     const email = document.getElementById('new-cust-email').value.trim();
 
     if (!name || !phone) {
-        alert('Please provide both Name and Phone number!');
+        alert('Provide Name and Phone number!');
         return;
     }
 
@@ -2091,7 +2051,7 @@ async function addNewCustomerToDatabase() {
             }]).select();
 
             if (error) {
-                alert('Database Error adding customer: ' + error.message);
+                alert('Database Error: ' + error.message);
                 return;
             }
 
@@ -2104,7 +2064,7 @@ async function addNewCustomerToDatabase() {
                 document.getElementById('new-cust-phone').value = '';
                 document.getElementById('new-cust-email').value = '';
                 
-                alert(`Customer ${newCust.name} added successfully!`);
+                alert(`Customer ${newCust.name} added!`);
             }
         } catch(err) {}
     } else {
@@ -2146,7 +2106,7 @@ function redeemLoyaltyPoints() {
     document.getElementById('discount-val').value = discountBHD.toFixed(3);
     
     updateCartUI();
-    alert(`Applied ${formatBHD(discountBHD)} loyalty discount! ${pointsRedeemedCount} points will be deducted.`);
+    alert(`Applied ${formatBHD(discountBHD)} loyalty discount!`);
 }
 
 function renderProducts(list = products) {
@@ -2156,7 +2116,7 @@ function renderProducts(list = products) {
     const sortedList = sortProductsAlphabetically(list);
 
     if (!sortedList || sortedList.length === 0) {
-        grid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-10">No products found.</p>';
+        grid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8 text-xs">No products found.</p>';
         return;
     }
     
@@ -2168,16 +2128,16 @@ function renderProducts(list = products) {
         let badgeColor = stock > lowThreshold ? 'bg-emerald-100 text-emerald-800' : stock > 0 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800';
         
         const card = document.createElement('div');
-        card.className = 'bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition flex flex-col justify-between cursor-pointer select-none';
+        card.className = 'bg-white p-2.5 sm:p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition flex flex-col justify-between cursor-pointer select-none';
         card.onclick = () => addToCart(p);
         card.innerHTML = `
             <div>
                 <div class="flex justify-between items-start mb-1">
-                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${badgeColor}">Qty: ${stock}</span>
+                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${badgeColor}">Qty: ${stock}</span>
                 </div>
-                <h4 class="font-bold text-xs text-gray-800 line-clamp-2">${p.name}</h4>
+                <h4 class="font-bold text-xs text-gray-800 line-clamp-2 leading-snug">${p.name}</h4>
             </div>
-            <div class="mt-2 pt-2 border-t border-gray-100 flex justify-between items-center">
+            <div class="mt-2 pt-1.5 border-t border-gray-100 flex justify-between items-center">
                 <span class="text-xs font-black text-emerald-700">${formatBHD(price)}</span>
                 <span class="bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white p-1 rounded transition">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -2236,11 +2196,11 @@ function setDiscountType(type) {
     const bhdBtn = document.getElementById('disc-type-bhd');
     const pctBtn = document.getElementById('disc-type-pct');
     if (type === 'FIXED') {
-        bhdBtn.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-600 text-white';
-        pctBtn.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-gray-200 text-gray-700';
+        bhdBtn.className = 'px-2 py-0.5 text-[9px] font-bold rounded bg-emerald-600 text-white';
+        pctBtn.className = 'px-2 py-0.5 text-[9px] font-bold rounded bg-gray-200 text-gray-700';
     } else {
-        pctBtn.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-600 text-white';
-        bhdBtn.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-gray-200 text-gray-700';
+        pctBtn.className = 'px-2 py-0.5 text-[9px] font-bold rounded bg-emerald-600 text-white';
+        bhdBtn.className = 'px-2 py-0.5 text-[9px] font-bold rounded bg-gray-200 text-gray-700';
     }
     updateCartUI();
 }
@@ -2250,28 +2210,30 @@ function updateCartUI() {
     cartContainer.innerHTML = '';
 
     grossTotal = 0;
+    let totalItemCount = 0;
 
     if (cart.length === 0) {
-        cartContainer.innerHTML = '<p class="text-center text-gray-400 py-10 text-xs">Cart is empty.</p>';
+        cartContainer.innerHTML = '<p class="text-center text-gray-400 py-8 text-xs">Cart is empty.</p>';
     } else {
         cart.forEach(item => {
             const itemTotal = item.price * item.qty;
             grossTotal += itemTotal;
+            totalItemCount += item.qty;
 
             const row = document.createElement('div');
-            row.className = 'pt-2 flex justify-between items-center text-xs';
+            row.className = 'pt-1.5 flex justify-between items-center text-xs';
             row.innerHTML = `
                 <div class="flex-1 pr-2">
                     <p class="font-semibold text-gray-800 line-clamp-1">${item.name}</p>
                     <p class="text-gray-400 text-[10px]">${formatBHD(item.price)} each</p>
                 </div>
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-1.5">
                     <div class="flex items-center border rounded">
                         <button onclick="updateCartQty('${item.id}', -1)" class="px-1.5 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-700">-</button>
                         <span class="px-2 font-bold">${item.qty}</span>
                         <button onclick="updateCartQty('${item.id}', 1)" class="px-1.5 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-700">+</button>
                     </div>
-                    <span class="font-bold text-gray-800 w-16 text-right">${formatBHD(itemTotal)}</span>
+                    <span class="font-bold text-gray-800 w-14 text-right">${formatBHD(itemTotal)}</span>
                 </div>
             `;
             cartContainer.appendChild(row);
@@ -2305,6 +2267,27 @@ function updateCartUI() {
     document.getElementById('summary-vat').innerText = formatBHD(vatAmount);
     document.getElementById('summary-total').innerText = formatBHD(netTotalInclusive);
     document.getElementById('btn-total').innerText = formatBHD(netTotalInclusive);
+
+    // Update Floating Cart Bar & Mobile Badge
+    const floatBar = document.getElementById('floating-cart-bar');
+    const floatCount = document.getElementById('floating-cart-count');
+    const floatTotal = document.getElementById('floating-cart-total');
+    const mBadge = document.getElementById('m-tab-badge');
+
+    if (totalItemCount > 0) {
+        floatCount.innerText = totalItemCount;
+        floatTotal.innerText = formatBHD(netTotalInclusive);
+        floatBar.classList.remove('translate-y-24');
+        floatBar.classList.add('translate-y-0');
+
+        mBadge.innerText = totalItemCount;
+        mBadge.classList.remove('hidden');
+    } else {
+        floatBar.classList.remove('translate-y-0');
+        floatBar.classList.add('translate-y-24');
+
+        mBadge.classList.add('hidden');
+    }
 }
 
 function openItemManagerModal() {
@@ -2314,7 +2297,7 @@ function openItemManagerModal() {
         userRole = 'CASHIER';
     }
 
-    document.getElementById('manager-status-text').innerText = `Current View: ${userRole}`;
+    document.getElementById('manager-status-text').innerText = `View: ${userRole}`;
     if (userRole === 'ADMIN' || userRole === 'MANAGER') {
         document.getElementById('btn-unlock-manager').classList.add('hidden');
     } else {
@@ -2332,7 +2315,7 @@ function closeItemManagerModal() {
 }
 
 async function authenticateManagerRole() {
-    const pin = prompt('Enter Manager/Owner PIN to view and edit Cost Prices:');
+    const pin = prompt('Enter Manager/Owner PIN:');
     if (!pin) return;
 
     if (supabaseClient) {
@@ -2346,7 +2329,7 @@ async function authenticateManagerRole() {
             if (data && !error && (data.role === 'ADMIN' || data.role === 'MANAGER')) {
                 userRole = data.role;
                 currentUser = data;
-                document.getElementById('manager-status-text').innerText = `Current View: ${data.role} Access`;
+                document.getElementById('manager-status-text').innerText = `View: ${data.role}`;
                 document.getElementById('btn-unlock-manager').classList.add('hidden');
                 updateManagerPortalVisibility();
                 renderItemManagerList();
@@ -2357,12 +2340,12 @@ async function authenticateManagerRole() {
 
     if (pin === '1234' || pin === '9999') {
         userRole = 'MANAGER';
-        document.getElementById('manager-status-text').innerText = 'Current View: Manager Access';
+        document.getElementById('manager-status-text').innerText = 'View: Manager';
         document.getElementById('btn-unlock-manager').classList.add('hidden');
         updateManagerPortalVisibility();
         renderItemManagerList();
     } else {
-        alert('Invalid Manager PIN or insufficient privileges!');
+        alert('Invalid Manager PIN!');
     }
 }
 
@@ -2380,42 +2363,42 @@ function renderItemManagerList() {
     const sortedProducts = sortProductsAlphabetically(filteredProducts);
 
     if (sortedProducts.length === 0) {
-        listContainer.innerHTML = '<p class="text-center text-gray-400 py-6 text-xs">No items match your search.</p>';
+        listContainer.innerHTML = '<p class="text-center text-gray-400 py-6 text-xs">No items match search.</p>';
         return;
     }
 
     sortedProducts.forEach(p => {
         const row = document.createElement('div');
-        row.className = 'py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0 text-xs border-b border-gray-100 last:border-0';
+        row.className = 'py-2 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0 text-xs border-b border-gray-100 last:border-0';
         
         const isManager = (userRole === 'MANAGER' || userRole === 'ADMIN' || userRole === 'OWNER');
         
         const costInputHtml = isManager 
             ? `<div>
-                <label class="text-[9px] uppercase font-bold text-blue-600 block">Cost Price (BHD)</label>
-                <input type="number" id="edit-cost-${p.id}" step="0.001" value="${p.cost_price ?? 0}" class="w-24 border border-blue-300 rounded px-2 py-1 font-bold text-right outline-none focus:ring-1 focus:ring-blue-500 bg-blue-50/30">
+                <label class="text-[9px] uppercase font-bold text-blue-600 block">Cost (BHD)</label>
+                <input type="number" id="edit-cost-${p.id}" step="0.001" value="${p.cost_price ?? 0}" class="w-20 border border-blue-300 rounded px-1.5 py-1 font-bold text-right outline-none bg-blue-50/30 text-xs">
                </div>`
             : `<div>
-                <label class="text-[9px] uppercase font-bold text-gray-400 block">Cost Price</label>
-                <input type="text" disabled value="*** BHD" class="w-24 border border-gray-200 bg-gray-100 rounded px-2 py-1 font-bold text-center text-gray-400 cursor-not-allowed">
+                <label class="text-[9px] uppercase font-bold text-gray-400 block">Cost</label>
+                <input type="text" disabled value="*** BHD" class="w-20 border border-gray-200 bg-gray-100 rounded px-1.5 py-1 font-bold text-center text-gray-400 cursor-not-allowed text-xs">
                </div>`;
 
         row.innerHTML = `
-            <div class="flex-1 pr-3">
-                <p class="font-bold text-gray-800 text-sm">${p.name}</p>
-                <p class="text-gray-400">Barcode: ${p.barcode || 'N/A'}</p>
+            <div class="flex-1 pr-2">
+                <p class="font-bold text-gray-800 text-xs">${p.name}</p>
+                <p class="text-gray-400 text-[10px]">Barcode: ${p.barcode || 'N/A'}</p>
             </div>
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-1.5">
                 ${costInputHtml}
                 <div>
-                    <label class="text-[9px] uppercase font-bold text-gray-500 block">Retail Price (BHD)</label>
-                    <input type="number" id="edit-price-${p.id}" step="0.001" value="${p.retail_price}" class="w-24 border border-gray-300 rounded px-2 py-1 font-bold text-right outline-none focus:ring-1 focus:ring-emerald-500">
+                    <label class="text-[9px] uppercase font-bold text-gray-500 block">Retail (BHD)</label>
+                    <input type="number" id="edit-price-${p.id}" step="0.001" value="${p.retail_price}" class="w-20 border border-gray-300 rounded px-1.5 py-1 font-bold text-right outline-none text-xs">
                 </div>
                 <div>
-                    <label class="text-[9px] uppercase font-bold text-gray-500 block">Stock Qty</label>
-                    <input type="number" id="edit-stock-${p.id}" value="${p.stock_quantity ?? 0}" class="w-16 border border-gray-300 rounded px-2 py-1 font-bold text-center outline-none focus:ring-1 focus:ring-emerald-500">
+                    <label class="text-[9px] uppercase font-bold text-gray-500 block">Stock</label>
+                    <input type="number" id="edit-stock-${p.id}" value="${p.stock_quantity ?? 0}" class="w-14 border border-gray-300 rounded px-1.5 py-1 font-bold text-center outline-none text-xs">
                 </div>
-                <button onclick="saveItemChanges('${p.id}')" class="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1 rounded">Save</button>
+                <button onclick="saveItemChanges('${p.id}')" class="mt-3 bg-emerald-600 text-white font-bold px-2.5 py-1 rounded text-[11px]">Save</button>
             </div>
         `;
         listContainer.appendChild(row);
@@ -2546,18 +2529,18 @@ function renderSalesHistory() {
     );
 
     if (filtered.length === 0) {
-        container.innerHTML = '<p class="text-center text-gray-400 py-6 text-xs">No previous sales transactions found.</p>';
+        container.innerHTML = '<p class="text-center text-gray-400 py-6 text-xs">No previous sales found.</p>';
         return;
     }
 
     filtered.forEach(s => {
         const row = document.createElement('div');
-        row.className = 'py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0 text-xs';
+        row.className = 'py-2.5 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-1 sm:space-y-0 text-xs';
         
         const isRefunded = s.status === 'REFUNDED';
         const statusBadge = isRefunded 
-            ? '<span class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-0.5 rounded">REFUNDED</span>' 
-            : '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">COMPLETED</span>';
+            ? '<span class="bg-red-100 text-red-800 text-[9px] font-bold px-1.5 py-0.5 rounded">REFUNDED</span>' 
+            : '<span class="bg-emerald-100 text-emerald-800 text-[9px] font-bold px-1.5 py-0.5 rounded">COMPLETED</span>';
 
         row.innerHTML = `
             <div>
@@ -2565,14 +2548,14 @@ function renderSalesHistory() {
                     <strong class="text-emerald-800">${s.receiptId}</strong>
                     ${statusBadge}
                 </div>
-                <p class="text-gray-600 font-medium mt-0.5">${s.custName} (${s.custPhone}) - ${s.timestamp}</p>
+                <p class="text-gray-600 font-medium text-[11px]">${s.custName} (${s.custPhone}) - ${s.timestamp}</p>
                 <p class="text-gray-400 text-[10px]">${s.items.map(i => `${i.qty}x${i.name}`).join(', ')}</p>
             </div>
-            <div class="flex items-center space-x-2">
-                <span class="font-bold text-gray-900 mr-2 text-sm">${formatBHD(s.netTotal)}</span>
-                <button onclick="reprintReceipt('${s.receiptId}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded font-bold text-[10px]">Print</button>
-                <button onclick="resendWhatsApp('${s.receiptId}')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-bold text-[10px]">WhatsApp</button>
-                ${!isRefunded ? `<button onclick="processRefund('${s.receiptId}')" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded font-bold text-[10px]">Refund</button>` : ''}
+            <div class="flex items-center space-x-1.5 pt-1 sm:pt-0">
+                <span class="font-bold text-gray-900 mr-1 text-xs sm:text-sm">${formatBHD(s.netTotal)}</span>
+                <button onclick="reprintReceipt('${s.receiptId}')" class="bg-gray-100 text-gray-700 px-2 py-1 rounded font-bold text-[10px]">Print</button>
+                <button onclick="resendWhatsApp('${s.receiptId}')" class="bg-green-600 text-white px-2 py-1 rounded font-bold text-[10px]">WhatsApp</button>
+                ${!isRefunded ? `<button onclick="processRefund('${s.receiptId}')" class="bg-red-600 text-white px-2 py-1 rounded font-bold text-[10px]">Refund</button>` : ''}
             </div>
         `;
         container.appendChild(row);
@@ -2583,7 +2566,7 @@ async function processRefund(receiptId) {
     const sale = salesHistory.find(s => s.receiptId === receiptId);
     if (!sale) return;
 
-    if (!confirm(`Are you sure you want to refund Receipt #${receiptId} for ${formatBHD(sale.netTotal)}?`)) return;
+    if (!confirm(`Refund Receipt #${receiptId} for ${formatBHD(sale.netTotal)}?`)) return;
 
     if (supabaseClient) {
         try {
@@ -2604,7 +2587,7 @@ async function processRefund(receiptId) {
     });
 
     sale.status = 'REFUNDED';
-    alert(`Refund Processed successfully for Receipt #${receiptId}!`);
+    alert(`Refund Processed for Receipt #${receiptId}!`);
 
     saveSalesHistoryLocal();
     await fetchProducts();
@@ -2624,7 +2607,7 @@ function resendWhatsApp(receiptId) {
 
     let phone = sale.custPhone;
     if (!phone || phone === 'N/A') {
-        phone = prompt('Enter WhatsApp Phone Number (with country code, e.g. 973...):');
+        phone = prompt('Enter WhatsApp Phone Number (e.g. 973...):');
     }
     if (!phone) return;
 
@@ -2654,13 +2637,13 @@ function setPaymentType(type) {
     if (type === 'SINGLE') {
         singleContainer.classList.remove('hidden');
         splitContainer.classList.add('hidden');
-        document.getElementById('mode-single-btn').className = 'border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
-        document.getElementById('mode-split-btn').className = 'border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center';
+        document.getElementById('mode-single-btn').className = 'border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+        document.getElementById('mode-split-btn').className = 'border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center';
     } else {
         singleContainer.classList.add('hidden');
         splitContainer.classList.remove('hidden');
-        document.getElementById('mode-split-btn').className = 'border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
-        document.getElementById('mode-single-btn').className = 'border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center';
+        document.getElementById('mode-split-btn').className = 'border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+        document.getElementById('mode-single-btn').className = 'border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center';
         calculateSplitBalance();
     }
 }
@@ -2691,18 +2674,18 @@ function calculateSingleChange() {
 
 function setSplitPrimaryMethod(method) {
     splitPrimaryMethod = method;
-    document.querySelectorAll('.split-pri-btn').forEach(b => b.className = 'split-pri-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center');
-    if (method === 'CASH') document.getElementById('btn-split-pri-cash').className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
-    if (method === 'CARD') document.getElementById('btn-split-pri-card').className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
-    if (method === 'BENEFIT_PAY') document.getElementById('btn-split-pri-benefit').className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+    document.querySelectorAll('.split-pri-btn').forEach(b => b.className = 'split-pri-btn border border-gray-300 text-gray-700 font-bold py-1 text-xs rounded-lg text-center');
+    if (method === 'CASH') document.getElementById('btn-split-pri-cash').className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1 text-xs rounded-lg text-center';
+    if (method === 'CARD') document.getElementById('btn-split-pri-card').className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1 text-xs rounded-lg text-center';
+    if (method === 'BENEFIT_PAY') document.getElementById('btn-split-pri-benefit').className = 'split-pri-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1 text-xs rounded-lg text-center';
 }
 
 function setSplitSecondaryMethod(method) {
     splitSecondaryMethod = method;
-    document.querySelectorAll('.split-sec-btn').forEach(b => b.className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center');
-    if (method === 'CASH') document.getElementById('btn-split-sec-cash').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
-    if (method === 'CARD') document.getElementById('btn-split-sec-card').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
-    if (method === 'BENEFIT_PAY') document.getElementById('btn-split-sec-benefit').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
+    document.querySelectorAll('.split-sec-btn').forEach(b => b.className = 'split-sec-btn border border-gray-300 text-gray-700 font-bold py-1 text-xs rounded-lg text-center');
+    if (method === 'CASH') document.getElementById('btn-split-sec-cash').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1 text-xs rounded-lg text-center';
+    if (method === 'CARD') document.getElementById('btn-split-sec-card').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1 text-xs rounded-lg text-center';
+    if (method === 'BENEFIT_PAY') document.getElementById('btn-split-sec-benefit').className = 'split-sec-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1 text-xs rounded-lg text-center';
 }
 
 function calculateSplitBalance() {
@@ -2713,11 +2696,11 @@ function calculateSplitBalance() {
 
 function setPrintFormat(fmt) {
     selectedPrintFormat = fmt;
-    document.querySelectorAll('.print-fmt-btn').forEach(b => b.className = 'print-fmt-btn border border-gray-300 text-gray-700 font-bold py-2 text-xs rounded-lg text-center');
+    document.querySelectorAll('.print-fmt-btn').forEach(b => b.className = 'print-fmt-btn border border-gray-300 text-gray-700 font-bold py-1.5 text-xs rounded-lg text-center');
     if (fmt === '58mm') {
-        document.getElementById('btn-print-58mm').className = 'print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
+        document.getElementById('btn-print-58mm').className = 'print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
     } else {
-        document.getElementById('btn-print-a4').className = 'print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-2 text-xs rounded-lg text-center';
+        document.getElementById('btn-print-a4').className = 'print-fmt-btn border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-bold py-1.5 text-xs rounded-lg text-center';
     }
 }
 
@@ -2812,6 +2795,9 @@ async function processSale(action) {
 
     closePaymentModal();
     clearCart();
+    
+    // Switch back to Products catalog view on mobile after sale
+    switchMobileTab('products');
 }
 
 function executePrintReceipt(sale) {
@@ -2909,13 +2895,11 @@ function toggleCameraScanner() {
     }
 }
     </script>
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-      .then(() => console.log('App ready!'));
-  }
-</script>
-
-
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js')
+          .then(() => console.log('App ready!'));
+      }
+    </script>
 </body>
 </html>
