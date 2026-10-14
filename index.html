@@ -941,11 +941,6 @@ async function submitStartupPin() {
     pinInput.value = '';
     renderProducts();
 }
-    updateManagerPortalVisibility();
-    document.getElementById('startup-pin-modal').classList.add('hidden');
-    pinInput.value = '';
-    renderProducts();
-}
 
 // --- MOBILE TAB SWITCHING LOGIC ---
 function switchMobileTab(tab) {
@@ -1028,6 +1023,7 @@ async function switchUser() {
     updateManagerPortalVisibility();
     renderProducts();
 }
+
 async function fetchProducts() {
     if (!supabaseClient) {
         products = sortProductsAlphabetically(fallbackProducts);
