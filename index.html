@@ -69,7 +69,7 @@
     <!-- Main POS Interface Split View / Mobile Tabs -->
     <div id="pos-main-container" class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
         
-        <!-- Left Panel: Product Search, Scanner & Catalog (Visible on Desktop OR when Mobile 'Products' tab active) -->
+        <!-- Left Panel: Product Search, Scanner & Catalog -->
         <div id="panel-products" class="w-full md:w-3/5 lg:w-2/3 p-3 sm:p-4 flex flex-col h-full overflow-hidden flex-1">
             <div class="flex space-x-2 mb-3">
                 <div class="relative flex-1">
@@ -90,7 +90,7 @@
 
             <div id="product-grid" class="flex-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3 overflow-y-auto no-scrollbar pr-0.5 pb-16 md:pb-0"></div>
 
-            <!-- Floating Mobile Cart Bar (Shows when items in cart) -->
+            <!-- Floating Mobile Cart Bar -->
             <div id="floating-cart-bar" onclick="switchMobileTab('cart')" class="md:hidden fixed bottom-14 left-3 right-3 bg-emerald-700 text-white p-3 rounded-xl shadow-xl flex justify-between items-center cursor-pointer z-30 transform transition-transform duration-200 translate-y-24">
                 <div class="flex items-center space-x-2">
                     <span id="floating-cart-count" class="bg-amber-500 text-gray-900 font-black text-xs px-2 py-0.5 rounded-full">0</span>
@@ -100,7 +100,7 @@
             </div>
         </div>
 
-        <!-- Right Panel: Cart Register & Checkout (Visible on Desktop OR when Mobile 'Cart' tab active) -->
+        <!-- Right Panel: Cart Register & Checkout -->
         <div id="panel-cart" class="w-full md:w-2/5 lg:w-1/3 bg-white border-l border-gray-200 flex flex-col h-full shadow-lg hidden md:flex pb-14 md:pb-0">
             <div class="p-2.5 bg-gray-50 border-b border-gray-200 flex justify-between items-center shrink-0">
                 <h2 class="font-bold text-gray-700 text-xs sm:text-sm">Current Order</h2>
@@ -181,7 +181,7 @@
         </div>
     </div>
 
-    <!-- Mobile Bottom Tab Navigation Bar (Visible only on mobile screens) -->
+    <!-- Mobile Bottom Tab Navigation Bar -->
     <nav class="md:hidden bg-white border-t border-gray-200 flex justify-around items-center h-14 fixed bottom-0 left-0 right-0 z-40 shadow-lg">
         <button onclick="switchMobileTab('products')" id="m-tab-products" class="flex-1 flex flex-col items-center justify-center py-1 text-emerald-700 font-bold">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 12H4L5 11z"></path></svg>
@@ -196,7 +196,6 @@
 
     <!-- FULL WINDOW VIEW: MANAGER PORTAL -->
     <div id="manager-portal-window" class="hidden flex-1 bg-gray-50 flex flex-col overflow-hidden z-40">
-        <!-- Portal Header -->
         <div class="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center shadow-sm">
             <div class="flex items-center space-x-2 sm:space-x-3">
                 <div class="bg-amber-100 p-1.5 sm:p-2 rounded-lg text-amber-800">
@@ -213,7 +212,6 @@
             </button>
         </div>
 
-        <!-- Portal Sub-Navigation Tabs & Global Date Selector Bar -->
         <div class="bg-white border-b px-4 sm:px-6 py-2.5 flex flex-col md:flex-row justify-between items-center gap-2">
             <div class="flex space-x-1.5 overflow-x-auto w-full md:w-auto no-scrollbar pb-1 md:pb-0">
                 <button onclick="switchManagerTab('dashboard')" id="tab-btn-dashboard" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-amber-600 text-white transition shadow whitespace-nowrap">Dashboard</button>
@@ -223,7 +221,6 @@
                 <button onclick="switchManagerTab('reports')" id="tab-btn-reports" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition whitespace-nowrap">Reports</button>
             </div>
 
-            <!-- Date Range Selector Bar -->
             <div class="flex items-center space-x-1.5 bg-gray-50 p-1 rounded-lg border border-gray-200 text-xs w-full md:w-auto justify-between">
                 <span class="font-bold text-gray-600 px-1 text-[11px]">Filter:</span>
                 <select id="portal-date-filter" onchange="onDateFilterChange()" class="border border-gray-300 rounded px-2 py-0.5 bg-white font-medium outline-none focus:ring-1 focus:ring-amber-500 text-xs">
@@ -241,10 +238,7 @@
             </div>
         </div>
 
-        <!-- Portal Content Area -->
         <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
-            
-            <!-- Tab 1: Dashboard Analytics -->
             <div id="manager-tab-dashboard" class="space-y-6">
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     <div class="bg-emerald-50 border border-emerald-200 p-3 sm:p-4 rounded-xl shadow-sm">
@@ -265,7 +259,6 @@
                     </div>
                 </div>
 
-                <!-- Best Sellers & Top Customers Section -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <div class="bg-white border border-gray-200 p-4 rounded-xl shadow-sm">
                         <h4 class="font-bold text-xs sm:text-sm text-gray-800 mb-3 flex items-center space-x-2">
@@ -295,7 +288,6 @@
                 </div>
             </div>
 
-            <!-- Tab 2: Product Management -->
             <div id="manager-tab-products" class="space-y-6 hidden">
                 <div class="bg-emerald-50/50 border border-emerald-200 p-4 sm:p-5 rounded-xl space-y-3 shadow-sm">
                     <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Add New Product</h4>
@@ -308,8 +300,7 @@
                         <div>
                             <label class="text-[10px] font-bold text-gray-600 block mb-1">Category</label>
                             <div class="flex space-x-1">
-                                <select id="new-prod-category-select" onchange="onCategorySelectChange()" class="flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white outline-none">
-                                </select>
+                                <select id="new-prod-category-select" onchange="onCategorySelectChange()" class="flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white outline-none"></select>
                                 <input type="text" id="new-prod-category-custom" placeholder="New category" class="hidden flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white outline-none">
                             </div>
                         </div>
@@ -336,8 +327,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                         <h4 class="text-xs font-bold text-gray-700 uppercase">Catalog Items</h4>
                         <div class="relative w-full sm:w-72">
-                            <input type="text" id="manager-product-search" onkeyup="renderManagerProductList()" placeholder="Search catalog..." 
-                                   class="w-full pl-8 pr-3 py-1.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs shadow-sm">
+                            <input type="text" id="manager-product-search" onkeyup="renderManagerProductList()" placeholder="Search catalog..." class="w-full pl-8 pr-3 py-1.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs shadow-sm">
                             <svg class="w-4 h-4 text-gray-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                         </div>
                     </div>
@@ -345,7 +335,6 @@
                 </div>
             </div>
 
-            <!-- Tab 3: Upload Portal -->
             <div id="manager-tab-upload" class="space-y-6 hidden">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <div class="bg-white border border-gray-200 p-4 sm:p-5 rounded-xl shadow-sm space-y-3">
@@ -380,7 +369,6 @@
                 </div>
             </div>
 
-            <!-- Tab 4: Customers Tab -->
             <div id="manager-tab-customers" class="space-y-6 hidden">
                 <div class="bg-white border border-gray-200 p-4 sm:p-5 rounded-xl shadow-sm space-y-3">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
@@ -391,7 +379,6 @@
                 </div>
             </div>
 
-            <!-- Tab 5: Reports -->
             <div id="manager-tab-reports" class="space-y-6 hidden">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                     <div class="bg-white border border-gray-200 rounded-xl p-3 sm:p-4 space-y-1.5 shadow-sm">
@@ -428,7 +415,23 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
+    <!-- STARTUP PIN GATE MODAL -->
+    <div id="startup-pin-modal" class="fixed inset-0 bg-emerald-950/90 backdrop-blur-md flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4 text-center">
+            <div class="bg-emerald-100 text-emerald-800 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-2">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            </div>
+            <h3 class="text-xl font-black text-gray-900 tracking-wide">BARAKAT POS</h3>
+            <p class="text-xs text-gray-500">Enter your staff or owner PIN to unlock register</p>
+            
+            <input type="password" id="startup-pin-input" maxlength="10" placeholder="Enter PIN..." class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 text-center text-xl font-black tracking-widest outline-none focus:border-emerald-600 bg-gray-50">
+            
+            <button onclick="submitStartupPin()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-sm">
+                Unlock Register
+            </button>
         </div>
     </div>
 
@@ -560,9 +563,7 @@
                 </div>
                 <input type="email" id="new-cust-email" placeholder="Email Address (Optional)" class="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs outline-none">
                 
-                <button onclick="addNewCustomerToDatabase()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs shadow">
-                    Save & Select
-                </button>
+                <button onclick="addNewCustomerToDatabase()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs shadow">Save & Select</button>
             </div>
         </div>
     </div>
@@ -600,8 +601,7 @@
             </div>
 
             <div class="relative">
-                <input type="text" id="item-manager-search" onkeyup="renderItemManagerList()" placeholder="Search catalog..." 
-                       class="w-full pl-8 pr-3 py-1.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs shadow-sm">
+                <input type="text" id="item-manager-search" onkeyup="renderItemManagerList()" placeholder="Search catalog..." class="w-full pl-8 pr-3 py-1.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs shadow-sm">
                 <svg class="w-4 h-4 text-gray-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
 
@@ -867,10 +867,10 @@ const isValidUUID = (id) => {
 };
 
 window.onload = async () => {
+    document.getElementById('startup-pin-modal').classList.remove('hidden');
     await fetchProducts();
     await fetchCustomers();
     await loadSalesHistoryLocal();
-    updateManagerPortalVisibility();
     
     const todayStr = new Date().toISOString().split('T')[0];
     const startDateElem = document.getElementById('report-start-date');
@@ -878,6 +878,68 @@ window.onload = async () => {
     if (startDateElem) startDateElem.value = todayStr;
     if (endDateElem) endDateElem.value = todayStr;
 };
+
+async function submitStartupPin() {
+    const pinInput = document.getElementById('startup-pin-input');
+    const pin = pinInput.value.trim();
+    if (!pin) {
+        alert('Please enter your PIN.');
+        return;
+    }
+
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('pos_users')
+                .select('*')
+                .eq('pin_code', pin)
+                .single();
+
+            if (data && !error) {
+                currentUser = data;
+                userRole = data.role.toUpperCase();
+                document.getElementById('role-badge').innerText = userRole;
+                document.getElementById('user-name').innerText = data.name;
+                updateManagerPortalVisibility();
+                document.getElementById('startup-pin-modal').classList.add('hidden');
+                pinInput.value = '';
+                renderProducts();
+                return;
+            }
+        } catch (err) {}
+    }
+
+    if (pin === '1234' || pin === '9999') {
+        userRole = 'ADMIN';
+        currentUser = { id: null, name: 'Owner', role: 'ADMIN' };
+        document.getElementById('role-badge').innerText = 'Admin';
+        document.getElementById('user-name').innerText = 'Owner';
+    } else if (pin === '9632') {
+        userRole = 'ADMIN';
+        currentUser = { id: null, name: 'SAAD', role: 'ADMIN' };
+        document.getElementById('role-badge').innerText = 'Admin';
+        document.getElementById('user-name').innerText = 'SAAD';
+    } else if (pin === '1231') {
+        userRole = 'ADMIN';
+        currentUser = { id: null, name: 'SHAFIA', role: 'ADMIN' };
+        document.getElementById('role-badge').innerText = 'Admin';
+        document.getElementById('user-name').innerText = 'SHAFIA';
+    } else if (pin === '0000' || pin === '1122') {
+        userRole = 'CASHIER';
+        currentUser = { id: null, name: 'Cashier', role: 'CASHIER' };
+        document.getElementById('role-badge').innerText = 'Cashier';
+        document.getElementById('user-name').innerText = 'Cashier';
+    } else {
+        alert('Invalid PIN code!');
+        pinInput.value = '';
+        return;
+    }
+
+    updateManagerPortalVisibility();
+    document.getElementById('startup-pin-modal').classList.add('hidden');
+    pinInput.value = '';
+    renderProducts();
+}
 
 // --- MOBILE TAB SWITCHING LOGIC ---
 function switchMobileTab(tab) {
@@ -1281,17 +1343,7 @@ async function saveProductEdits() {
         return;
     }
 
-    const updateData = {
-        name,
-        sku: sku || null,
-        barcode: barcode || null,
-        category,
-        cost_price,
-        retail_price,
-        stock_quantity,
-        track_stock,
-        available_for_sale
-    };
+    const updateData = { name, sku: sku || null, barcode: barcode || null, category, cost_price, retail_price, stock_quantity, track_stock, available_for_sale };
 
     if (supabaseClient && isValidUUID(id)) {
         const { error } = await supabaseClient.from('products').update(updateData).eq('id', id);
@@ -1335,17 +1387,7 @@ async function addNewProductFromManager() {
         return;
     }
 
-    const newProd = {
-        name: name,
-        sku: sku,
-        barcode: barcode || null,
-        category: category,
-        cost_price: cost,
-        retail_price: retail,
-        stock_quantity: stock,
-        track_stock: trackStock,
-        available_for_sale: available
-    };
+    const newProd = { name, sku, barcode: barcode || null, category, cost_price: cost, retail_price: retail, stock_quantity: stock, track_stock: trackStock, available_for_sale: available };
 
     if (supabaseClient) {
         const { error } = await supabaseClient.from('products').insert([newProd]);
@@ -1491,8 +1533,7 @@ function handleCSVUploadPreview() {
     const file = fileInput.files[0];
     const reader = new FileReader();
     reader.onload = function(e) {
-        const text = e.target.result;
-        parseCSVText(text);
+        parseCSVText(e.target.result);
     };
     reader.readAsText(file);
 }
@@ -1570,9 +1611,7 @@ function updateUploadRowAction(idx, action) {
 
 function setGlobalUploadAction(action) {
     parsedUploadRows.forEach(row => {
-        if (row.status === 'EXISTS') {
-            row.action = action;
-        }
+        if (row.status === 'EXISTS') row.action = action;
     });
     renderUploadComparisonTable();
 }
@@ -1581,11 +1620,7 @@ async function executeBatchUploadImport() {
     let successCount = 0;
     for (let row of parsedUploadRows) {
         if (row.status === 'NEW') {
-            const newProd = {
-                name: row.name, sku: row.sku, barcode: row.barcode, category: row.category,
-                cost_price: row.cost_price, retail_price: row.retail_price, stock_quantity: row.stock_quantity,
-                track_stock: true, available_for_sale: true
-            };
+            const newProd = { name: row.name, sku: row.sku, barcode: row.barcode, category: row.category, cost_price: row.cost_price, retail_price: row.retail_price, stock_quantity: row.stock_quantity, track_stock: true, available_for_sale: true };
             if (supabaseClient) {
                 await supabaseClient.from('products').insert([newProd]);
             }
@@ -1596,12 +1631,7 @@ async function executeBatchUploadImport() {
             if (!existingProd) continue;
 
             if (row.action === 'replace') {
-                const updateData = {
-                    retail_price: row.retail_price,
-                    cost_price: row.cost_price,
-                    category: row.category,
-                    stock_quantity: row.stock_quantity
-                };
+                const updateData = { retail_price: row.retail_price, cost_price: row.cost_price, category: row.category, stock_quantity: row.stock_quantity };
                 if (supabaseClient && isValidUUID(row.existingId)) {
                     await supabaseClient.from('products').update(updateData).eq('id', row.existingId);
                 }
@@ -1664,7 +1694,6 @@ function getActiveReportContentHtml() {
         let rowsHtml = '';
         let srNo = 1;
         let sumTotalAmount = 0;
-        let sumLoyaltyDisc = 0;
         let sumDiscAmount = 0;
         let sumTaxAmount = 0;
         let sumNetAmount = 0;
@@ -1738,9 +1767,7 @@ function getActiveReportContentHtml() {
                                     <th style="padding: 6px; text-align: center;">STATUS</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                ${rowsHtml}
-                            </tbody>
+                            <tbody>${rowsHtml}</tbody>
                             <tfoot>
                                 <tr style="border-top: 2px solid #e5e7eb; font-weight: bold; color: #065f46; background: #ecfdf5;">
                                     <td colspan="6" style="padding: 8px 6px; text-align: center;">Total</td>
@@ -1858,17 +1885,13 @@ function executeExcelActiveReport() {
     const filteredSales = filterSalesByCustomDates(completedSales, startStr, endStr);
 
     let csvRows = [];
-
     if (activeReportType === 'sales') {
         csvRows.push(['BARAKAT PERFUMES']);
         csvRows.push(['Sales Detail Report']);
         csvRows.push([`From Date: "${startStr}"`, '', `To Date: "${endStr}"`, '', `Generated By: "${currentUser ? currentUser.name : 'Owner'}"`]);
         csvRows.push([`Print Date: "${new Date().toLocaleDateString('en-GB')}"`]);
         csvRows.push([]);
-
-        csvRows.push([
-            'Sr No.', 'Order No.', 'Outlet Name', 'Order Date', 'Order Time', 'Order Type', 'Product Name', 'Pay Type', 'Subtotal (Excl. VAT)', 'Discount Amount', 'Tax Amount (VAT 10%)', 'Final Net Total', 'Status'
-        ]);
+        csvRows.push(['Sr No.', 'Order No.', 'Outlet Name', 'Order Date', 'Order Time', 'Order Type', 'Product Name', 'Pay Type', 'Subtotal (Excl. VAT)', 'Discount Amount', 'Tax Amount (VAT 10%)', 'Final Net Total', 'Status']);
 
         let sr = 1;
         let sumSubtotal = 0;
@@ -1894,73 +1917,36 @@ function executeExcelActiveReport() {
                 sumNet += lineTotal;
 
                 csvRows.push([
-                    sr++,
-                    `"${s.receiptId}"`,
-                    '"BARAKAT PERFUMES"',
-                    `"${orderDate}"`,
-                    `"${orderTime}"`,
-                    '"Store Retail"',
-                    `"${item.name.replace(/"/g, '""')}"`,
-                    `"${payType}"`,
-                    subtotalExclTax.toFixed(3),
-                    discAmt.toFixed(3),
-                    taxAmount.toFixed(3),
-                    lineTotal.toFixed(3),
-                    '"Paid"'
+                    sr++, `"${s.receiptId}"`, '"BARAKAT PERFUMES"', `"${orderDate}"`, `"${orderTime}"`, '"Store Retail"',
+                    `"${item.name.replace(/"/g, '""')}"`, `"${payType}"`,
+                    subtotalExclTax.toFixed(3), discAmt.toFixed(3), taxAmount.toFixed(3), lineTotal.toFixed(3), '"Paid"'
                 ]);
             });
         });
-
         csvRows.push([]);
-        csvRows.push([
-            'TOTALS', '', '', '', '', '', '', '',
-            sumSubtotal.toFixed(3),
-            sumDiscount.toFixed(3),
-            sumTax.toFixed(3),
-            sumNet.toFixed(3),
-            ''
-        ]);
-
+        csvRows.push(['TOTALS', '', '', '', '', '', '', '', sumSubtotal.toFixed(3), sumDiscount.toFixed(3), sumTax.toFixed(3), sumNet.toFixed(3), '']);
     } else if (activeReportType === 'inventory') {
         csvRows.push(['BARAKAT PERFUMES - Inventory Valuation Report']);
         csvRows.push([`Print Date: "${new Date().toLocaleDateString('en-GB')}"`]);
         csvRows.push([]);
         csvRows.push(['Product Name', 'Category', 'Stock Qty', 'Cost Price (BHD)', 'Retail Price (BHD)', 'Total Retail Value (BHD)']);
-
         products.forEach(p => {
-            csvRows.push([
-                `"${p.name.replace(/"/g, '""')}"`,
-                `"${p.category || 'Perfumes'}"`,
-                p.stock_quantity,
-                (p.cost_price || 0).toFixed(3),
-                p.retail_price.toFixed(3),
-                (p.retail_price * p.stock_quantity).toFixed(3)
-            ]);
+            csvRows.push([`"${p.name.replace(/"/g, '""')}"`, `"${p.category || 'Perfumes'}"`, p.stock_quantity, (p.cost_price || 0).toFixed(3), p.retail_price.toFixed(3), (p.retail_price * p.stock_quantity).toFixed(3)]);
         });
-
     } else {
         csvRows.push(['BARAKAT PERFUMES - Low Stock Alert Report']);
         csvRows.push([`Print Date: "${new Date().toLocaleDateString('en-GB')}"`]);
         csvRows.push([]);
         csvRows.push(['Product Name', 'Current Stock', 'Threshold Limit', 'Retail Price (BHD)']);
-
-        const low = products.filter(p => (p.stock_quantity ?? 0) <= (p.low_stock_threshold ?? 2));
-        low.forEach(p => {
-            csvRows.push([
-                `"${p.name.replace(/"/g, '""')}"`,
-                p.stock_quantity,
-                p.low_stock_threshold ?? 2,
-                p.retail_price.toFixed(3)
-            ]);
+        products.filter(p => (p.stock_quantity ?? 0) <= (p.low_stock_threshold ?? 2)).forEach(p => {
+            csvRows.push([`"${p.name.replace(/"/g, '""')}"`, p.stock_quantity, p.low_stock_threshold ?? 2, p.retail_price.toFixed(3)]);
         });
     }
 
     const csvContent = "\uFEFF" + csvRows.map(e => e.join(",")).join("\n");
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute("href", url);
+    link.setAttribute("href", URL.createObjectURL(blob));
     link.setAttribute("download", `Sales_Detail_Report_${startStr}_to_${endStr}.csv`);
     document.body.appendChild(link);
     link.click();
@@ -1982,11 +1968,7 @@ function renderCustomerSearchResults() {
     const container = document.getElementById('cust-modal-results');
     container.innerHTML = '';
 
-    const filtered = customers.filter(c => 
-        (c.name && c.name.toLowerCase().includes(term)) ||
-        (c.phone && c.phone.toLowerCase().includes(term))
-    );
-
+    const filtered = customers.filter(c => (c.name && c.name.toLowerCase().includes(term)) || (c.phone && c.phone.toLowerCase().includes(term)));
     if (filtered.length === 0) {
         container.innerHTML = '<p class="text-center text-gray-400 py-3 text-xs">No matching customers.</p>';
         return;
@@ -2010,11 +1992,9 @@ function renderCustomerSearchResults() {
 function selectCustomer(cust) {
     selectedCustomer = cust;
     currentCustomerPoints = cust.loyalty_points || 0;
-
     document.getElementById('disp-cust-name').innerText = cust.name;
     document.getElementById('disp-cust-phone').innerText = cust.phone;
     document.getElementById('btn-clear-cust').classList.remove('hidden');
-
     updateLoyaltyUI();
     closeCustomerModal();
 }
@@ -2023,11 +2003,9 @@ function clearSelectedCustomer() {
     selectedCustomer = null;
     currentCustomerPoints = 0;
     pointsRedeemedCount = 0;
-
     document.getElementById('disp-cust-name').innerText = 'Walk-in Customer';
     document.getElementById('disp-cust-phone').innerText = 'No phone attached';
     document.getElementById('btn-clear-cust').classList.add('hidden');
-
     updateLoyaltyUI();
 }
 
@@ -2043,32 +2021,23 @@ async function addNewCustomerToDatabase() {
 
     if (supabaseClient) {
         try {
-            const { data, error } = await supabaseClient.from('contacts').insert([{
-                name: name,
-                phone: phone,
-                email: email || null,
-                loyalty_points: 0
-            }]).select();
-
+            const { data, error } = await supabaseClient.from('contacts').insert([{ name, phone, email: email || null, loyalty_points: 0 }]).select();
             if (error) {
                 alert('Database Error: ' + error.message);
                 return;
             }
-
             if (data && data.length > 0) {
                 const newCust = data[0];
                 customers.unshift(newCust);
                 selectCustomer(newCust);
-                
                 document.getElementById('new-cust-name').value = '';
                 document.getElementById('new-cust-phone').value = '';
                 document.getElementById('new-cust-email').value = '';
-                
                 alert(`Customer ${newCust.name} added!`);
             }
         } catch(err) {}
     } else {
-        const offlineCust = { id: 'temp_' + Date.now(), name: name, phone: phone, loyalty_points: 0 };
+        const offlineCust = { id: 'temp_' + Date.now(), name, phone, loyalty_points: 0 };
         customers.unshift(offlineCust);
         selectCustomer(offlineCust);
         closeCustomerModal();
@@ -2078,13 +2047,11 @@ async function addNewCustomerToDatabase() {
 function updateLoyaltyUI() {
     const ptsBalanceElem = document.getElementById('cust-pts-balance');
     const redeemBtn = document.getElementById('btn-redeem-pts');
-    
     ptsBalanceElem.innerText = `${currentCustomerPoints} Pts`;
 
     if (currentCustomerPoints >= 100) {
         const maxRedeemablePts = Math.floor(currentCustomerPoints / 100) * 100;
         const potentialDiscount = maxRedeemablePts / 100;
-        
         redeemBtn.disabled = false;
         redeemBtn.className = 'bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold px-2 py-1 rounded shadow cursor-pointer';
         redeemBtn.innerText = `Redeem ${maxRedeemablePts} Pts (-${formatBHD(potentialDiscount)})`;
@@ -2097,14 +2064,11 @@ function updateLoyaltyUI() {
 
 function redeemLoyaltyPoints() {
     if (currentCustomerPoints < 100) return;
-
     pointsRedeemedCount = Math.floor(currentCustomerPoints / 100) * 100;
     const discountBHD = pointsRedeemedCount / 100;
-
     setDiscountType('FIXED');
     document.getElementById('discount-title').value = `Loyalty (${pointsRedeemedCount} pts)`;
     document.getElementById('discount-val').value = discountBHD.toFixed(3);
-    
     updateCartUI();
     alert(`Applied ${formatBHD(discountBHD)} loyalty discount!`);
 }
@@ -2112,7 +2076,6 @@ function redeemLoyaltyPoints() {
 function renderProducts(list = products) {
     const grid = document.getElementById('product-grid');
     grid.innerHTML = '';
-
     const sortedList = sortProductsAlphabetically(list);
 
     if (!sortedList || sortedList.length === 0) {
@@ -2124,7 +2087,6 @@ function renderProducts(list = products) {
         let stock = p.stock_quantity ?? 0;
         let price = p.retail_price ?? 0;
         let lowThreshold = p.low_stock_threshold ?? 2;
-        
         let badgeColor = stock > lowThreshold ? 'bg-emerald-100 text-emerald-800' : stock > 0 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800';
         
         const card = document.createElement('div');
@@ -2150,10 +2112,7 @@ function renderProducts(list = products) {
 
 function filterProducts() {
     const term = document.getElementById('search-input').value.toLowerCase().trim();
-    const filtered = products.filter(p => 
-        (p.name && p.name.toLowerCase().includes(term)) || 
-        (p.barcode && p.barcode.toLowerCase().includes(term))
-    );
+    const filtered = products.filter(p => (p.name && p.name.toLowerCase().includes(term)) || (p.barcode && p.barcode.toLowerCase().includes(term)));
     renderProducts(filtered);
 }
 
@@ -2162,12 +2121,7 @@ function addToCart(product) {
     if (existing) {
         existing.qty += 1;
     } else {
-        cart.push({
-            id: product.id,
-            name: product.name,
-            price: product.retail_price,
-            qty: 1
-        });
+        cart.push({ id: product.id, name: product.name, price: product.retail_price, qty: 1 });
     }
     updateCartUI();
 }
@@ -2268,7 +2222,6 @@ function updateCartUI() {
     document.getElementById('summary-total').innerText = formatBHD(netTotalInclusive);
     document.getElementById('btn-total').innerText = formatBHD(netTotalInclusive);
 
-    // Update Floating Cart Bar & Mobile Badge
     const floatBar = document.getElementById('floating-cart-bar');
     const floatCount = document.getElementById('floating-cart-count');
     const floatTotal = document.getElementById('floating-cart-total');
@@ -2279,13 +2232,11 @@ function updateCartUI() {
         floatTotal.innerText = formatBHD(netTotalInclusive);
         floatBar.classList.remove('translate-y-24');
         floatBar.classList.add('translate-y-0');
-
         mBadge.innerText = totalItemCount;
         mBadge.classList.remove('hidden');
     } else {
         floatBar.classList.remove('translate-y-0');
         floatBar.classList.add('translate-y-24');
-
         mBadge.classList.add('hidden');
     }
 }
@@ -2320,12 +2271,7 @@ async function authenticateManagerRole() {
 
     if (supabaseClient) {
         try {
-            const { data, error } = await supabaseClient
-                .from('pos_users')
-                .select('*')
-                .eq('pin_code', pin.trim())
-                .single();
-
+            const { data, error } = await supabaseClient.from('pos_users').select('*').eq('pin_code', pin.trim()).single();
             if (data && !error && (data.role === 'ADMIN' || data.role === 'MANAGER')) {
                 userRole = data.role;
                 currentUser = data;
@@ -2354,12 +2300,7 @@ function renderItemManagerList() {
     listContainer.innerHTML = '';
 
     const term = document.getElementById('item-manager-search') ? document.getElementById('item-manager-search').value.toLowerCase().trim() : '';
-    const filteredProducts = products.filter(p => 
-        (p.name && p.name.toLowerCase().includes(term)) ||
-        (p.barcode && p.barcode.toLowerCase().includes(term)) ||
-        (p.sku && p.sku.toLowerCase().includes(term))
-    );
-
+    const filteredProducts = products.filter(p => (p.name && p.name.toLowerCase().includes(term)) || (p.barcode && p.barcode.toLowerCase().includes(term)) || (p.sku && p.sku.toLowerCase().includes(term)));
     const sortedProducts = sortProductsAlphabetically(filteredProducts);
 
     if (sortedProducts.length === 0) {
@@ -2372,16 +2313,9 @@ function renderItemManagerList() {
         row.className = 'py-2 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0 text-xs border-b border-gray-100 last:border-0';
         
         const isManager = (userRole === 'MANAGER' || userRole === 'ADMIN' || userRole === 'OWNER');
-        
         const costInputHtml = isManager 
-            ? `<div>
-                <label class="text-[9px] uppercase font-bold text-blue-600 block">Cost (BHD)</label>
-                <input type="number" id="edit-cost-${p.id}" step="0.001" value="${p.cost_price ?? 0}" class="w-20 border border-blue-300 rounded px-1.5 py-1 font-bold text-right outline-none bg-blue-50/30 text-xs">
-               </div>`
-            : `<div>
-                <label class="text-[9px] uppercase font-bold text-gray-400 block">Cost</label>
-                <input type="text" disabled value="*** BHD" class="w-20 border border-gray-200 bg-gray-100 rounded px-1.5 py-1 font-bold text-center text-gray-400 cursor-not-allowed text-xs">
-               </div>`;
+            ? `<div><label class="text-[9px] uppercase font-bold text-blue-600 block">Cost (BHD)</label><input type="number" id="edit-cost-${p.id}" step="0.001" value="${p.cost_price ?? 0}" class="w-20 border border-blue-300 rounded px-1.5 py-1 font-bold text-right outline-none bg-blue-50/30 text-xs"></div>`
+            : `<div><label class="text-[9px] uppercase font-bold text-gray-400 block">Cost</label><input type="text" disabled value="*** BHD" class="w-20 border border-gray-200 bg-gray-100 rounded px-1.5 py-1 font-bold text-center text-gray-400 cursor-not-allowed text-xs"></div>`;
 
         row.innerHTML = `
             <div class="flex-1 pr-2">
@@ -2412,18 +2346,12 @@ async function saveItemChanges(id) {
 
         const newPrice = parseFloat(document.getElementById("edit-price-" + id).value) || 0;
         const newStock = parseInt(document.getElementById("edit-stock-" + id).value) || 0;
-
-        let updateData = {
-            retail_price: newPrice,
-            stock_quantity: newStock
-        };
+        let updateData = { retail_price: newPrice, stock_quantity: newStock };
 
         const isManager = (userRole === "MANAGER" || userRole === "ADMIN" || userRole === "OWNER");
         if (isManager) {
             const costElem = document.getElementById("edit-cost-" + id);
-            if (costElem) {
-                updateData.cost_price = parseFloat(costElem.value) || 0;
-            }
+            if (costElem) updateData.cost_price = parseFloat(costElem.value) || 0;
         }
 
         if (supabaseClient && isValidUUID(id)) {
@@ -2453,29 +2381,7 @@ async function loadSalesHistoryLocal() {
         try {
             const { data, error } = await supabaseClient
                 .from('sales_orders')
-                .select(`
-                    id,
-                    receipt_number,
-                    customer_name,
-                    customer_phone,
-                    total_amount,
-                    gross_total,
-                    discount_amount,
-                    points_earned,
-                    points_redeemed,
-                    payment_method,
-                    payment_details,
-                    status,
-                    created_at,
-                    order_items (
-                        product_id,
-                        quantity,
-                        unit_price,
-                        products (
-                            name
-                        )
-                    )
-                `)
+                .select(`id, receipt_number, customer_name, customer_phone, total_amount, gross_total, discount_amount, points_earned, points_redeemed, payment_method, payment_details, status, created_at, order_items (product_id, quantity, unit_price, products (name))`)
                 .order('created_at', { ascending: false });
 
             if (!error && data) {
@@ -2522,12 +2428,7 @@ function renderSalesHistory() {
     const term = document.getElementById('sales-search-input').value.toLowerCase().trim();
     container.innerHTML = '';
 
-    const filtered = salesHistory.filter(s => 
-        s.receiptId.toLowerCase().includes(term) ||
-        s.custName.toLowerCase().includes(term) ||
-        s.custPhone.toLowerCase().includes(term)
-    );
-
+    const filtered = salesHistory.filter(s => s.receiptId.toLowerCase().includes(term) || s.custName.toLowerCase().includes(term) || s.custPhone.toLowerCase().includes(term));
     if (filtered.length === 0) {
         container.innerHTML = '<p class="text-center text-gray-400 py-6 text-xs">No previous sales found.</p>';
         return;
@@ -2536,18 +2437,12 @@ function renderSalesHistory() {
     filtered.forEach(s => {
         const row = document.createElement('div');
         row.className = 'py-2.5 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-1 sm:space-y-0 text-xs';
-        
         const isRefunded = s.status === 'REFUNDED';
-        const statusBadge = isRefunded 
-            ? '<span class="bg-red-100 text-red-800 text-[9px] font-bold px-1.5 py-0.5 rounded">REFUNDED</span>' 
-            : '<span class="bg-emerald-100 text-emerald-800 text-[9px] font-bold px-1.5 py-0.5 rounded">COMPLETED</span>';
+        const statusBadge = isRefunded ? '<span class="bg-red-100 text-red-800 text-[9px] font-bold px-1.5 py-0.5 rounded">REFUNDED</span>' : '<span class="bg-emerald-100 text-emerald-800 text-[9px] font-bold px-1.5 py-0.5 rounded">COMPLETED</span>';
 
         row.innerHTML = `
             <div>
-                <div class="flex items-center space-x-2">
-                    <strong class="text-emerald-800">${s.receiptId}</strong>
-                    ${statusBadge}
-                </div>
+                <div class="flex items-center space-x-2"><strong class="text-emerald-800">${s.receiptId}</strong>${statusBadge}</div>
                 <p class="text-gray-600 font-medium text-[11px]">${s.custName} (${s.custPhone}) - ${s.timestamp}</p>
                 <p class="text-gray-400 text-[10px]">${s.items.map(i => `${i.qty}x${i.name}`).join(', ')}</p>
             </div>
@@ -2565,30 +2460,23 @@ function renderSalesHistory() {
 async function processRefund(receiptId) {
     const sale = salesHistory.find(s => s.receiptId === receiptId);
     if (!sale) return;
-
     if (!confirm(`Refund Receipt #${receiptId} for ${formatBHD(sale.netTotal)}?`)) return;
 
     if (supabaseClient) {
         try {
             if (sale.db_id && isValidUUID(sale.db_id)) {
-                await supabaseClient.rpc('process_pos_refund', {
-                    p_order_id: sale.db_id,
-                    p_items: sale.items
-                });
+                await supabaseClient.rpc('process_pos_refund', { p_order_id: sale.db_id, p_items: sale.items });
             }
         } catch (err) {}
     }
 
     sale.items.forEach(item => {
         const prod = products.find(p => String(p.id) === String(item.id));
-        if (prod) {
-            prod.stock_quantity = (prod.stock_quantity || 0) + item.qty;
-        }
+        if (prod) prod.stock_quantity = (prod.stock_quantity || 0) + item.qty;
     });
 
     sale.status = 'REFUNDED';
     alert(`Refund Processed for Receipt #${receiptId}!`);
-
     saveSalesHistoryLocal();
     await fetchProducts();
     await fetchCustomers();
@@ -2719,11 +2607,7 @@ async function processSale(action) {
     } else {
         const priAmt = parseFloat(document.getElementById('split-pri-amount').value) || 0;
         const secAmt = Math.max(0, netTotalInclusive - priAmt);
-        paymentDetails = { 
-            type: 'SPLIT', 
-            primary: { method: splitPrimaryMethod, amount: priAmt },
-            secondary: { method: splitSecondaryMethod, amount: secAmt }
-        };
+        paymentDetails = { type: 'SPLIT', primary: { method: splitPrimaryMethod, amount: priAmt }, secondary: { method: splitSecondaryMethod, amount: secAmt } };
     }
 
     const vatAmt = netTotalInclusive - (netTotalInclusive / 1.10);
@@ -2795,8 +2679,6 @@ async function processSale(action) {
 
     closePaymentModal();
     clearCart();
-    
-    // Switch back to Products catalog view on mobile after sale
     switchMobileTab('products');
 }
 
