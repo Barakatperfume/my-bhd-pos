@@ -909,6 +909,7 @@ async function submitStartupPin() {
         } catch (err) {}
     }
 
+    // Local fallback check (0000 removed completely)
     if (pin === '1234' || pin === '9999') {
         userRole = 'ADMIN';
         currentUser = { id: null, name: 'Owner', role: 'ADMIN' };
@@ -924,17 +925,22 @@ async function submitStartupPin() {
         currentUser = { id: null, name: 'SHAFIA', role: 'ADMIN' };
         document.getElementById('role-badge').innerText = 'Admin';
         document.getElementById('user-name').innerText = 'SHAFIA';
-    } else if (pin === '0000' || pin === '1122') {
+    } else if (pin === '1122') {
         userRole = 'CASHIER';
-        currentUser = { id: null, name: 'Cashier', role: 'CASHIER' };
+        currentUser = { id: null, name: 'AHMED', role: 'CASHIER' };
         document.getElementById('role-badge').innerText = 'Cashier';
-        document.getElementById('user-name').innerText = 'Cashier';
+        document.getElementById('user-name').innerText = 'AHMED';
     } else {
         alert('Invalid PIN code!');
         pinInput.value = '';
         return;
     }
 
+    updateManagerPortalVisibility();
+    document.getElementById('startup-pin-modal').classList.add('hidden');
+    pinInput.value = '';
+    renderProducts();
+}
     updateManagerPortalVisibility();
     document.getElementById('startup-pin-modal').classList.add('hidden');
     pinInput.value = '';
@@ -995,23 +1001,33 @@ async function switchUser() {
         } catch (err) {}
     }
 
+    // Local fallback check (0000 removed completely)
     if (pin === '1234' || pin === '9999') {
         userRole = 'ADMIN';
         currentUser = { id: null, name: 'Owner', role: 'ADMIN' };
         document.getElementById('role-badge').innerText = 'Admin';
         document.getElementById('user-name').innerText = 'Owner';
-    } else if (pin === '0000') {
+    } else if (pin === '9632') {
+        userRole = 'ADMIN';
+        currentUser = { id: null, name: 'SAAD', role: 'ADMIN' };
+        document.getElementById('role-badge').innerText = 'Admin';
+        document.getElementById('user-name').innerText = 'SAAD';
+    } else if (pin === '1231') {
+        userRole = 'ADMIN';
+        currentUser = { id: null, name: 'SHAFIA', role: 'ADMIN' };
+        document.getElementById('role-badge').innerText = 'Admin';
+        document.getElementById('user-name').innerText = 'SHAFIA';
+    } else if (pin === '1122') {
         userRole = 'CASHIER';
-        currentUser = { id: null, name: 'Cashier 1', role: 'CASHIER' };
+        currentUser = { id: null, name: 'AHMED', role: 'CASHIER' };
         document.getElementById('role-badge').innerText = 'Cashier';
-        document.getElementById('user-name').innerText = 'Cashier 1';
+        document.getElementById('user-name').innerText = 'AHMED';
     } else {
         alert('Invalid User PIN code!');
     }
     updateManagerPortalVisibility();
     renderProducts();
 }
-
 async function fetchProducts() {
     if (!supabaseClient) {
         products = sortProductsAlphabetically(fallbackProducts);
