@@ -2,6 +2,7 @@
   "name": "Barakat Perfumes POS",
   "short_name": "Barakat POS",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#047857",
