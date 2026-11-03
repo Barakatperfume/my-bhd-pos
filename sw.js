@@ -4,8 +4,11 @@ self.addEventListener('install', (e) => {
       return cache.addAll([
         './',
         './index.html',
-        './PCBH_LOGO-BG.png'
-      ]);
+        './manifest.json'
+      ]).catch(() => {
+        // Fallback to ensure core offline shell installs even if optional assets fail
+        return cache.add('./index.html');
+      });
     })
   );
 });
