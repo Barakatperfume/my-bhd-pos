@@ -38,7 +38,6 @@
     </style>
 </head>
 <body class="bg-gray-100 font-sans h-[100dvh] flex flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
-
     <!-- Isolated Container for Printing -->
     <div id="print-container" class="hidden"></div>
 
@@ -49,6 +48,11 @@
             <span id="role-badge" class="bg-emerald-900 text-emerald-200 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Cashier</span>
         </div>
         <div class="flex items-center space-x-1.5 sm:space-x-2">
+            <!-- Bluetooth Printer Button Added Here -->
+            <button id="btn-bluetooth-connect" onclick="toggleBluetoothPrinter()" class="bg-blue-600 hover:bg-blue-700 text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded transition flex items-center space-x-1 font-bold shadow" title="Connect Bluetooth Printer">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v18m0-18l6 6-6 6m6-6l-6 6"></path></svg>
+                <span id="bt-status-text" class="hidden sm:inline">Bluetooth</span>
+            </button>
             <button id="btn-manager-portal" onclick="openManagerPortal()" class="hidden bg-amber-600 hover:bg-amber-700 text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded transition flex items-center space-x-1 font-bold shadow">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                 <span class="hidden sm:inline">Manager Portal</span>
@@ -848,6 +852,156 @@ let pointsRedeemedCount = 0;
 let userRole = 'CASHIER';
 let currentUser = { id: null, name: 'Cashier 1', role: 'CASHIER' };
 
+// --- WEB BLUETOOTH PRINTER STATE ---
+let bluetoothDevice = null;
+let bluetoothCharacteristic = null;
+
+async function toggleBluetoothPrinter() {
+    if (!navigator.bluetooth) {
+        alert('Web Bluetooth is not supported by your browser or device. Please use Chrome or Edge on Android/Windows/Mac.');
+        return;
+    }
+
+    try {
+        if (!bluetoothDevice || !bluetoothDevice.gatt.connected) {
+            document.getElementById('bt-status-text').innerText = 'Connecting...';
+            bluetoothDevice = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb', '0000ff00-0000-1000-8000-00805f9b34fb', 'e7810a71-73ae-499d-8c15-faa9aef0c3f2']
+            });
+            
+            const server = await bluetoothDevice.gatt.connect();
+            const services = await server.getPrimaryServices();
+            
+            for (const service of services) {
+                const characteristics = await service.getCharacteristics();
+                for (const char of characteristics) {
+                    if (char.properties.write || char.properties.writeWithoutResponse) {
+                        bluetoothCharacteristic = char;
+                        break;
+                    }
+                }
+                if (bluetoothCharacteristic) break;
+            }
+
+            if (!bluetoothCharacteristic) {
+                throw new Error('No writable printer characteristic found.');
+            }
+
+            document.getElementById('btn-bluetooth-connect').className = 'bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded transition flex items-center space-x-1 font-bold shadow';
+            document.getElementById('bt-status-text').innerText = 'Connected';
+            alert(`Successfully connected to Bluetooth printer: ${bluetoothDevice.name || 'Thermal Printer'}`);
+        } else {
+            if (bluetoothDevice.gatt.connected) {
+                bluetoothDevice.gatt.disconnect();
+            }
+            bluetoothDevice = null;
+            bluetoothCharacteristic = null;
+            document.getElementById('btn-bluetooth-connect').className = 'bg-blue-600 hover:bg-blue-700 text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded transition flex items-center space-x-1 font-bold shadow';
+            document.getElementById('bt-status-text').innerText = 'Bluetooth';
+            alert('Bluetooth printer disconnected.');
+        }
+    } catch (err) {
+        document.getElementById('btn-bluetooth-connect').className = 'bg-blue-600 hover:bg-blue-700 text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded transition flex items-center space-x-1 font-bold shadow';
+        document.getElementById('bt-status-text').innerText = 'Bluetooth';
+        console.error(err);
+        alert('Bluetooth connection failed: ' + (err.message || err));
+    }
+}
+
+async function sendBytesToBluetoothPrinter(buffer) {
+    if (!bluetoothCharacteristic) return false;
+    try {
+        const CHUNK_SIZE = 512;
+        for (let i = 0; i < buffer.length; i += CHUNK_SIZE) {
+            const chunk = buffer.slice(i, i + CHUNK_SIZE);
+            if (bluetoothCharacteristic.properties.writeWithoutResponse) {
+                await bluetoothCharacteristic.writeValueWithoutResponse(chunk);
+            } else {
+                await bluetoothCharacteristic.writeValue(chunk);
+            }
+        }
+        return true;
+    } catch (err) {
+        console.error('Print stream error:', err);
+        return false;
+    }
+}
+
+async function printViaBluetoothThermal(sale) {
+    if (!bluetoothCharacteristic || !bluetoothDevice || !bluetoothDevice.gatt.connected) {
+        return false;
+    }
+
+    let encoder = new TextEncoder();
+    let commands = [];
+
+    // Initialize printer
+    commands.push(new Uint8Array([0x1B, 0x40])); 
+    // Align center
+    commands.push(new Uint8Array([0x1B, 0x61, 0x01]));
+
+    let text = "\nBARAKAT PERFUMES\n";
+    text += "District 1, Janabiya\n";
+    text += "CR: 13812-04 | Tel: 36051011\n";
+    text += "--------------------------------\n";
+    text += `Receipt #: ${sale.receiptId}\n`;
+    text += `Customer: ${sale.custName}\n`;
+    text += `Phone: ${sale.custPhone}\n`;
+    text += `Date: ${sale.timestamp}\n`;
+    text += "--------------------------------\n";
+    
+    // Align left for items
+    commands.push(new Uint8Array([0x1B, 0x61, 0x00]));
+    commands.push(encoder.encode(text));
+
+    sale.items.forEach(i => {
+        let line = `${i.qty}x ${i.name}`.substring(0, 20).padEnd(22, ' ');
+        let totalStr = formatBHD(i.price * i.qty).replace('BHD ', '');
+        let itemLine = `${line} ${totalStr}\n`;
+        commands.push(encoder.encode(itemLine));
+    });
+
+    let footerText = "--------------------------------\n";
+    footerText += `Gross Total:    ${formatBHD(sale.grossTotal)}\n`;
+    if (sale.discountAmount > 0) {
+        footerText += `Discount:      -${formatBHD(sale.discountAmount)}\n`;
+    }
+    let vatAmt = sale.netTotal - (sale.netTotal / 1.10);
+    footerText += `Subtotal(Excl): ${formatBHD(sale.netTotal - vatAmt)}\n`;
+    footerText += `VAT (10% Incl): ${formatBHD(vatAmt)}\n`;
+    footerText += `TOTAL BILL:     ${formatBHD(sale.netTotal)}\n`;
+    footerText += "--------------------------------\n";
+    footerText += `Points Earned: ${sale.pointsEarned} | Bal: ${sale.pointsBalance}\n`;
+    
+    let payStr = 'CASH';
+    if (sale.paymentDetails && sale.paymentDetails.type === 'SPLIT') {
+        payStr = `SPLIT (${sale.paymentDetails.primary.method}/${sale.paymentDetails.secondary.method})`;
+    } else if (sale.paymentDetails) {
+        payStr = sale.paymentDetails.method;
+    }
+    footerText += `Payment: ${payStr}\n`;
+    footerText += "--------------------------------\n";
+    footerText += "Thank you for shopping with us!\n";
+    footerText += "Instagram: @perfume_club.bh\n";
+    footerText += "www.theperfumesclub.com\n\n\n";
+
+    commands.push(encoder.encode(footerText));
+    // Cut paper command
+    commands.push(new Uint8Array([0x1D, 0x56, 0x41, 0x00]));
+
+    // Concatenate all chunks into one buffer
+    let totalLength = commands.reduce((acc, arr) => acc + arr.length, 0);
+    let fullBuffer = new Uint8Array(totalLength);
+    let offset = 0;
+    for (let cmd of commands) {
+        fullBuffer.set(cmd, offset);
+        offset += cmd.length;
+    }
+
+    return await sendBytesToBluetoothPrinter(fullBuffer);
+}
+
 const fallbackProducts = [
     { id: '1', name: 'Aromatix Frost Bite 100ml', retail_price: 22.000, cost_price: 11.200, stock_quantity: 3, barcode: '10003', category: 'Perfumes', track_stock: true, available_for_sale: true },
     { id: '2', name: 'Lattafa Maahir Honor 100ml', retail_price: 14.000, cost_price: 6.500, stock_quantity: 8, barcode: '10002', category: 'Perfumes', track_stock: true, available_for_sale: true },
@@ -909,7 +1063,7 @@ async function submitStartupPin() {
         } catch (err) {}
     }
 
-    // Local fallback check (0000 removed completely)
+    // Local fallback check
     if (pin === '4321' || pin === '9999') {
         userRole = 'ADMIN';
         currentUser = { id: null, name: 'Owner', role: 'ADMIN' };
@@ -996,7 +1150,6 @@ async function switchUser() {
         } catch (err) {}
     }
 
-    // Local fallback check (0000 removed completely)
     if (pin === '4321' || pin === '9999') {
         userRole = 'ADMIN';
         currentUser = { id: null, name: 'Owner', role: 'ADMIN' };
@@ -2694,7 +2847,14 @@ async function processSale(action) {
     switchMobileTab('products');
 }
 
-function executePrintReceipt(sale) {
+async function executePrintReceipt(sale) {
+    // Attempt Bluetooth Thermal Printing First
+    if (selectedPrintFormat === '58mm' && bluetoothCharacteristic && bluetoothDevice && bluetoothDevice.gatt.connected) {
+        let success = await printViaBluetoothThermal(sale);
+        if (success) return; // Printed successfully via Bluetooth
+    }
+
+    // Fallback to standard browser print dialog
     const printContainer = document.getElementById('print-container');
     printContainer.innerHTML = '';
 
