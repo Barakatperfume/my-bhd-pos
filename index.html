@@ -2353,29 +2353,48 @@ function renderItemManagerList() {
 async function saveItemChanges(id) {
     try {
         const itemIndex = products.findIndex(p => String(p.id) === String(id));
-        if (itemIndex === -1) return;
+        if (itemIndex === -1) {
+            alert("Product not found locally.");
+            return;
+        }
 
-        const newPrice = parseFloat(document.getElementById("edit-price-" + id).value) || 0;
-        const newStock = parseInt(document.getElementById("edit-stock-" + id).value) || 0;
+        const priceInput = document.getElementById("edit-price-" + id);
+        const stockInput = document.getElementById("edit-stock-" + id);
+
+        if (!priceInput || !stockInput) {
+            alert("Error: Input elements not found.");
+            return;
+        }
+
+        const newPrice = parseFloat(priceInput.value) || 0;
+        const newStock = parseInt(stockInput.value) || 0;
         let updateData = { retail_price: newPrice, stock_quantity: newStock };
 
         const isManager = (userRole === "MANAGER" || userRole === "ADMIN" || userRole === "OWNER");
         if (isManager) {
             const costElem = document.getElementById("edit-cost-" + id);
-            if (costElem) updateData.cost_price = parseFloat(costElem.value) || 0;
+            if (costElem) {
+                updateData.cost_price = parseFloat(costElem.value) || 0;
+            }
         }
 
         if (supabaseClient && isValidUUID(id)) {
-            await supabaseClient.from("products").update(updateData).eq("id", id).select();
+            const { data, error } = await supabaseClient.from("products").update(updateData).eq("id", id).select();
+            if (error) {
+                alert("Database update failed: " + error.message);
+                return;
+            }
         }
 
         products[itemIndex] = Object.assign({}, products[itemIndex], updateData);
         products = sortProductsAlphabetically(products);
-        alert("Updated " + products[itemIndex].name + " successfully!");
+        alert("Updated " + products[itemIndex].name + " successfully in database and POS!");
 
         renderProducts();
         renderItemManagerList();
-    } catch (err) {}
+    } catch (err) {
+        alert("Unexpected error: " + err.message);
+    }
 }
 
 function openSalesHistoryModal() {
