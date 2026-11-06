@@ -828,7 +828,7 @@ let supabaseClient = null;
 if (window.supabase && window.supabase.createClient) {
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
-    // Enable Realtime Subscriptions for multi-user real-time sync across all terminals
+    -- Enable Realtime Subscriptions for multi-user real-time sync across all terminals
     supabaseClient
         .channel('barakat-pos-realtime')
         .on('postgres_changes', { event: '*', schema: 'public' }, async (payload) => {
@@ -920,7 +920,6 @@ async function submitStartupPin() {
         } catch (err) {}
     }
 
-    // Local fallback check
     if (pin === '4321' || pin === '9999') {
         userRole = 'ADMIN';
         currentUser = { id: null, name: 'Owner', role: 'ADMIN' };
@@ -953,7 +952,6 @@ async function submitStartupPin() {
     renderProducts();
 }
 
-// --- MOBILE TAB SWITCHING LOGIC ---
 function switchMobileTab(tab) {
     const prodPanel = document.getElementById('panel-products');
     const cartPanel = document.getElementById('panel-cart');
@@ -2379,7 +2377,7 @@ async function saveItemChanges(id) {
         if (supabaseClient && isValidUUID(id)) {
             const { error } = await supabaseClient.from("products").update(updateData).eq("id", id).select();
             if (error) {
-                alert('Error updating item: ' + error.message);
+                alert('Error updating item in database: ' + error.message);
                 return;
             }
         }
