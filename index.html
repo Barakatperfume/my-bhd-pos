@@ -2231,30 +2231,32 @@ async function saveItemChanges(id) {
 
         const newPrice = parseFloat(document.getElementById("edit-price-" + id).value) || 0;
         const newStock = parseInt(document.getElementById("edit-stock-" + id).value) || 0;
-        let updateData = { retail_price: newPrice, stock_quantity: newStock };
-
+        
+        let newCost = products[itemIndex].cost_price || 0;
         const isManager = (userRole === "MANAGER" || userRole === "ADMIN" || userRole === "OWNER");
         if (isManager) {
             const costElem = document.getElementById("edit-cost-" + id);
-            if (costElem) updateData.cost_price = parseFloat(costElem.value) || 0;
+            if (costElem) newCost = parseFloat(costElem.value) || 0;
         }
 
-        if (supabaseClient) {
-            // Using .match() instead of .eq() prevents URL formatting errors causing 404s
-            const { data, error } = await supabaseClient
-                .from("products")
-                .update(updateData)
-                .match({ id: id })
-                .select();
+        if (supabaseClient && isValidUUID(id)) {
+            // Call the database RPC function, bypassing REST routing 404s
+            const { data, error } = await supabaseClient.rpc('update_product', {
+                p_id: id,
+                p_retail_price: newPrice,
+                p_cost_price: newCost,
+                p_stock_quantity: newStock
+            });
 
             if (error) {
                 console.error("Supabase update error:", error.message);
                 alert('Error updating item in database: ' + error.message);
                 return;
             }
-            console.log("Supabase update successful:", data);
+            console.log("Supabase RPC update successful:", data);
         }
 
+        const updateData = { retail_price: newPrice, cost_price: newCost, stock_quantity: newStock };
         products[itemIndex] = Object.assign({}, products[itemIndex], updateData);
         products = sortProductsAlphabetically(products);
         alert("Updated " + products[itemIndex].name + " successfully!");
@@ -2265,7 +2267,7 @@ async function saveItemChanges(id) {
         console.error("Unexpected error during save:", err);
     }
 }
-function openSalesHistoryModal() {
+    function openSalesHistoryModal() {
     document.getElementById('sales-history-modal').classList.remove('hidden');
     renderSalesHistory();
 }
