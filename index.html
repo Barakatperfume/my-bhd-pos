@@ -38,7 +38,6 @@
     </style>
 </head>
 <body class="bg-gray-100 font-sans h-[100dvh] flex flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
-
     <!-- Isolated Container for Printing -->
     <div id="print-container" class="hidden"></div>
 
@@ -83,7 +82,7 @@
                 </button>
             </div>
 
-            <div id="camera-reader-wrapper" class="hidden mb-3 bg-black rounded-lg overflow-hidden relative max-h-64">
+            <div id="camera-reader-wrapper" class="hidden mb-3 bg-black rounded-lg overflow-hidden relative max-h-48">
                 <div id="reader" class="w-full"></div>
                 <button onclick="toggleCameraScanner()" class="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 text-xs rounded shadow z-10">Close Camera</button>
             </div>
@@ -2768,40 +2767,19 @@ function toggleCameraScanner() {
     if (wrapper.classList.contains('hidden')) {
         wrapper.classList.remove('hidden');
         html5QrCode = new Html5Qrcode("reader");
-        
-        const config = { 
-            fps: 15, 
-            qrbox: { width: 280, height: 160 },
-            formatsToSupport: [
-                Html5QrcodeSupportedFormats.QR_CODE,
-                Html5QrcodeSupportedFormats.EAN_13,
-                Html5QrcodeSupportedFormats.EAN_8,
-                Html5QrcodeSupportedFormats.CODE_128,
-                Html5QrcodeSupportedFormats.CODE_39,
-                Html5QrcodeSupportedFormats.UPC_A,
-                Html5QrcodeSupportedFormats.UPC_E
-            ]
-        };
-
         html5QrCode.start(
             { facingMode: "environment" },
-            config,
+            { fps: 10, qrbox: { width: 250, height: 150 } },
             (decodedText) => {
                 document.getElementById('search-input').value = decodedText;
                 filterProducts();
                 toggleCameraScanner();
             },
             () => {}
-        ).catch(err => {
-            console.error("Camera start error:", err);
-            alert("Could not start camera. Please ensure camera permissions are allowed.");
-            wrapper.classList.add('hidden');
-        });
+        );
     } else {
         if (html5QrCode) {
             html5QrCode.stop().then(() => {
-                wrapper.classList.add('hidden');
-            }).catch(() => {
                 wrapper.classList.add('hidden');
             });
         } else {
