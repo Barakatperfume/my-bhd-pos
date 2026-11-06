@@ -37,7 +37,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans h-screen flex flex-col overflow-hidden">
+<body class="bg-gray-100 font-sans h-[100dvh] flex flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
 
     <!-- Isolated Container for Printing -->
     <div id="print-container" class="hidden"></div>
@@ -827,6 +827,17 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 let supabaseClient = null;
 if (window.supabase && window.supabase.createClient) {
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // Enable Realtime Subscriptions for multi-user real-time sync across all terminals
+    supabaseClient
+        .channel('barakat-pos-realtime')
+        .on('postgres_changes', { event: '*', schema: 'public' }, async (payload) => {
+            console.log('Realtime update received:', payload);
+            await fetchProducts();
+            await fetchCustomers();
+            await loadSalesHistoryLocal();
+        })
+        .subscribe();
 }
 
 let products = [];
@@ -909,7 +920,7 @@ async function submitStartupPin() {
         } catch (err) {}
     }
 
-    // Local fallback check (0000 removed completely)
+    // Local fallback check
     if (pin === '4321' || pin === '9999') {
         userRole = 'ADMIN';
         currentUser = { id: null, name: 'Owner', role: 'ADMIN' };
@@ -996,7 +1007,6 @@ async function switchUser() {
         } catch (err) {}
     }
 
-    // Local fallback check (0000 removed completely)
     if (pin === '4321' || pin === '9999') {
         userRole = 'ADMIN';
         currentUser = { id: null, name: 'Owner', role: 'ADMIN' };
@@ -2367,7 +2377,11 @@ async function saveItemChanges(id) {
         }
 
         if (supabaseClient && isValidUUID(id)) {
-            await supabaseClient.from("products").update(updateData).eq("id", id).select();
+            const { error } = await supabaseClient.from("products").update(updateData).eq("id", id).select();
+            if (error) {
+                alert('Error updating item: ' + error.message);
+                return;
+            }
         }
 
         products[itemIndex] = Object.assign({}, products[itemIndex], updateData);
