@@ -37,7 +37,8 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans h-[100dvh] flex flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
+<body class="bg-gray-100 font-sans h-screen flex flex-col overflow-hidden">
+
     <!-- Isolated Container for Printing -->
     <div id="print-container" class="hidden"></div>
 
@@ -908,7 +909,7 @@ async function submitStartupPin() {
         } catch (err) {}
     }
 
-    // Local fallback check
+    // Local fallback check (0000 removed completely)
     if (pin === '4321' || pin === '9999') {
         userRole = 'ADMIN';
         currentUser = { id: null, name: 'Owner', role: 'ADMIN' };
@@ -995,6 +996,7 @@ async function switchUser() {
         } catch (err) {}
     }
 
+    // Local fallback check (0000 removed completely)
     if (pin === '4321' || pin === '9999') {
         userRole = 'ADMIN';
         currentUser = { id: null, name: 'Owner', role: 'ADMIN' };
@@ -2649,17 +2651,6 @@ async function processSale(action) {
                 const { data: orderData } = await supabaseClient.from('sales_orders').select('receipt_number').eq('id', newDbOrderId).single();
                 if (orderData && orderData.receipt_number) {
                     receiptId = 'BP-' + String(orderData.receipt_number).padStart(6, '0');
-                }
-            } else if (error) {
-                console.error('Error in process_pos_sale RPC:', error.message);
-            }
-
-            // Explicitly ensure inventory levels decrement if the RPC lacks internal stock updating logic
-            for (let item of cart) {
-                const prod = products.find(p => String(p.id) === String(item.id));
-                if (prod && isValidUUID(item.id)) {
-                    const newStockQty = Math.max(0, (prod.stock_quantity || 0) - item.qty);
-                    await supabaseClient.from('products').update({ stock_quantity: newStockQty }).eq('id', item.id);
                 }
             }
 
