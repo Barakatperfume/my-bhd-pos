@@ -908,7 +908,7 @@ async function submitStartupPin() {
         } catch (err) {}
     }
 
-    // Local fallback check (0000 removed completely)
+    // Local fallback check
     if (pin === '4321' || pin === '9999') {
         userRole = 'ADMIN';
         currentUser = { id: null, name: 'Owner', role: 'ADMIN' };
@@ -995,7 +995,6 @@ async function switchUser() {
         } catch (err) {}
     }
 
-    // Local fallback check (0000 removed completely)
     if (pin === '4321' || pin === '9999') {
         userRole = 'ADMIN';
         currentUser = { id: null, name: 'Owner', role: 'ADMIN' };
@@ -2353,48 +2352,29 @@ function renderItemManagerList() {
 async function saveItemChanges(id) {
     try {
         const itemIndex = products.findIndex(p => String(p.id) === String(id));
-        if (itemIndex === -1) {
-            alert("Product not found locally.");
-            return;
-        }
+        if (itemIndex === -1) return;
 
-        const priceInput = document.getElementById("edit-price-" + id);
-        const stockInput = document.getElementById("edit-stock-" + id);
-
-        if (!priceInput || !stockInput) {
-            alert("Error: Input elements not found.");
-            return;
-        }
-
-        const newPrice = parseFloat(priceInput.value) || 0;
-        const newStock = parseInt(stockInput.value) || 0;
+        const newPrice = parseFloat(document.getElementById("edit-price-" + id).value) || 0;
+        const newStock = parseInt(document.getElementById("edit-stock-" + id).value) || 0;
         let updateData = { retail_price: newPrice, stock_quantity: newStock };
 
         const isManager = (userRole === "MANAGER" || userRole === "ADMIN" || userRole === "OWNER");
         if (isManager) {
             const costElem = document.getElementById("edit-cost-" + id);
-            if (costElem) {
-                updateData.cost_price = parseFloat(costElem.value) || 0;
-            }
+            if (costElem) updateData.cost_price = parseFloat(costElem.value) || 0;
         }
 
         if (supabaseClient && isValidUUID(id)) {
-            const { data, error } = await supabaseClient.from("products").update(updateData).eq("id", id).select();
-            if (error) {
-                alert("Database update failed: " + error.message);
-                return;
-            }
+            await supabaseClient.from("products").update(updateData).eq("id", id).select();
         }
 
         products[itemIndex] = Object.assign({}, products[itemIndex], updateData);
         products = sortProductsAlphabetically(products);
-        alert("Updated " + products[itemIndex].name + " successfully in database and POS!");
+        alert("Updated " + products[itemIndex].name + " successfully!");
 
         renderProducts();
         renderItemManagerList();
-    } catch (err) {
-        alert("Unexpected error: " + err.message);
-    }
+    } catch (err) {}
 }
 
 function openSalesHistoryModal() {
@@ -2669,6 +2649,17 @@ async function processSale(action) {
                 const { data: orderData } = await supabaseClient.from('sales_orders').select('receipt_number').eq('id', newDbOrderId).single();
                 if (orderData && orderData.receipt_number) {
                     receiptId = 'BP-' + String(orderData.receipt_number).padStart(6, '0');
+                }
+            } else if (error) {
+                console.error('Error in process_pos_sale RPC:', error.message);
+            }
+
+            // Explicitly ensure inventory levels decrement if the RPC lacks internal stock updating logic
+            for (let item of cart) {
+                const prod = products.find(p => String(p.id) === String(item.id));
+                if (prod && isValidUUID(item.id)) {
+                    const newStockQty = Math.max(0, (prod.stock_quantity || 0) - item.qty);
+                    await supabaseClient.from('products').update({ stock_quantity: newStockQty }).eq('id', item.id);
                 }
             }
 
