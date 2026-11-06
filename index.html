@@ -2239,11 +2239,12 @@ async function saveItemChanges(id) {
             if (costElem) updateData.cost_price = parseFloat(costElem.value) || 0;
         }
 
-        if (supabaseClient && isValidUUID(id)) {
+        if (supabaseClient) {
+            // Using .match() instead of .eq() prevents URL formatting errors causing 404s
             const { data, error } = await supabaseClient
                 .from("products")
                 .update(updateData)
-                .eq("id", id)
+                .match({ id: id })
                 .select();
 
             if (error) {
@@ -2252,8 +2253,6 @@ async function saveItemChanges(id) {
                 return;
             }
             console.log("Supabase update successful:", data);
-        } else {
-            console.warn("Skipping Supabase sync: Invalid UUID or client not initialized.");
         }
 
         products[itemIndex] = Object.assign({}, products[itemIndex], updateData);
