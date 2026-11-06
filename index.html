@@ -931,7 +931,6 @@ async function fetchCustomers() {
     } catch (err) {}
 }
 
-// Populate product category dropdown dynamically from database products
 function populateCategoryDropdown() {
     const selectElem = document.getElementById('new-prod-category-select');
     if (!selectElem) return;
@@ -962,9 +961,6 @@ function populateCategoryDropdown() {
     selectElem.appendChild(newOpt);
 }
 
-// ==========================================================
-// FULL-WINDOW MANAGER PORTAL & ADVANCED TABS
-// ==========================================================
 async function openManagerPortal() {
     if (userRole !== 'ADMIN' && userRole !== 'MANAGER') {
         const pin = prompt('Enter Manager/Owner PIN to access Full-Window Manager Portal:');
@@ -1161,9 +1157,6 @@ function renderManagerDashboard() {
     }
 }
 
-// ==========================================================
-// MANAGER PORTAL - MANAGE PRODUCTS & EDIT/DELETE WORKFLOW
-// ==========================================================
 function renderManagerProductList() {
     const container = document.getElementById('manager-products-list');
     const term = document.getElementById('manager-product-search') ? document.getElementById('manager-product-search').value.toLowerCase().trim() : '';
@@ -1250,7 +1243,12 @@ async function saveProductEdits() {
     };
 
     if (supabaseClient && isValidUUID(id)) {
-        const { error } = await supabaseClient.from('products').update(updateData).eq('id', id);
+        const { error } = await supabaseClient.rpc('update_product', {
+            p_id: id,
+            p_retail_price: retail_price,
+            p_cost_price: cost_price,
+            p_stock_quantity: stock_quantity
+        });
         if (error) {
             alert('Error updating product in database: ' + error.message);
             return;
@@ -1341,9 +1339,6 @@ async function deleteProduct(id) {
     renderManagerProductList();
 }
 
-// ==========================================================
-// CUSTOMER DIRECTORY & EDITING WORKFLOW (SYNCED TO DB)
-// ==========================================================
 function renderManagerCustomerDirectory() {
     const container = document.getElementById('manager-customer-list');
     const term = document.getElementById('manager-cust-search').value.toLowerCase().trim();
@@ -1427,9 +1422,6 @@ async function saveCustomerEdits() {
     await fetchCustomers();
 }
 
-// ==========================================================
-// UPLOAD PORTAL & CSV TEMPLATE COMPARISON WORKFLOW
-// ==========================================================
 function downloadProductTemplate() {
     const csvContent = "data:text/csv;charset=utf-8,name,sku,barcode,category,cost_price,retail_price,stock_quantity\n" +
         "Aromatix Frost Bite 100ml,SKU-1001,10003,Perfumes,11.200,22.000,10\n" +
@@ -1558,20 +1550,24 @@ async function executeBatchUploadImport() {
             if (!existingProd) continue;
 
             if (row.action === 'replace') {
-                const updateData = {
-                    retail_price: row.retail_price,
-                    cost_price: row.cost_price,
-                    category: row.category,
-                    stock_quantity: row.stock_quantity
-                };
                 if (supabaseClient && isValidUUID(row.existingId)) {
-                    await supabaseClient.from('products').update(updateData).eq('id', row.existingId);
+                    await supabaseClient.rpc('update_product', {
+                        p_id: row.existingId,
+                        p_retail_price: row.retail_price,
+                        p_cost_price: row.cost_price,
+                        p_stock_quantity: row.stock_quantity
+                    });
                 }
                 successCount++;
             } else if (row.action === 'add') {
                 const newStockQty = (existingProd.stock_quantity || 0) + row.stock_quantity;
                 if (supabaseClient && isValidUUID(row.existingId)) {
-                    await supabaseClient.from('products').update({ stock_quantity: newStockQty }).eq('id', row.existingId);
+                    await supabaseClient.rpc('update_product', {
+                        p_id: row.existingId,
+                        p_retail_price: existingProd.retail_price,
+                        p_cost_price: existingProd.cost_price || 0,
+                        p_stock_quantity: newStockQty
+                    });
                 }
                 successCount++;
             }
@@ -1584,9 +1580,6 @@ async function executeBatchUploadImport() {
     switchManagerTab('products');
 }
 
-// ==========================================================
-// REPORTS & ISSUANCE PREVIEW WORKFLOW (EXACT SAMPLE MATCH)
-// ==========================================================
 function selectReportType(type) {
     activeReportType = type;
     document.getElementById('btn-rep-cat-sales').className = 'w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition';
@@ -1803,9 +1796,6 @@ function executeEmailActiveReport() {
     alert(`Report "${reportData.title}" successfully compiled and dispatched to ${emailTo}!`);
 }
 
-// ==========================================
-// EXISTING POS CODE PRESERVED BELOW
-// ==========================================
 function openCustomerModal() {
     document.getElementById('customer-modal').classList.remove('hidden');
     document.getElementById('cust-modal-search').value = '';
@@ -2240,7 +2230,7 @@ async function saveItemChanges(id) {
         }
 
         if (supabaseClient && isValidUUID(id)) {
-            // Call the database RPC function, bypassing REST routing 404s
+            // Calls the database RPC function to bypass REST routing 404s
             const { data, error } = await supabaseClient.rpc('update_product', {
                 p_id: id,
                 p_retail_price: newPrice,
@@ -2267,7 +2257,8 @@ async function saveItemChanges(id) {
         console.error("Unexpected error during save:", err);
     }
 }
-    function openSalesHistoryModal() {
+
+function openSalesHistoryModal() {
     document.getElementById('sales-history-modal').classList.remove('hidden');
     renderSalesHistory();
 }
