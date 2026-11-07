@@ -2367,7 +2367,12 @@ async function saveItemChanges(id) {
         }
 
         if (supabaseClient && isValidUUID(id)) {
-            await supabaseClient.from("products").update(updateData).eq("id", id).select();
+            // Added explicit error checking to catch database rejection
+            const { error } = await supabaseClient.from("products").update(updateData).eq("id", id);
+            if (error) {
+                alert("Database update failed: " + error.message);
+                return;
+            }
         }
 
         products[itemIndex] = Object.assign({}, products[itemIndex], updateData);
@@ -2376,9 +2381,12 @@ async function saveItemChanges(id) {
 
         renderProducts();
         renderItemManagerList();
-    } catch (err) {}
+    } catch (err) {
+        console.error("Error saving item changes:", err);
+        alert("An unexpected error occurred while saving.");
+    }
 }
-
+        
 function openSalesHistoryModal() {
     document.getElementById('sales-history-modal').classList.remove('hidden');
     renderSalesHistory();
@@ -2627,6 +2635,13 @@ async function processSale(action) {
     const validCustomerId = (selectedCustomer && isValidUUID(selectedCustomer.id)) ? selectedCustomer.id : null;
     let newDbOrderId = null;
 
+    // Format cart items explicitly to match database JSONB expectations
+    const formattedCartItems = cart.map(item => ({
+        id: item.id,
+        qty: item.qty,
+        price: item.price
+    }));
+
     if (supabaseClient) {
         try {
             const { data, error } = await supabaseClient.rpc('process_pos_sale', {
@@ -2643,10 +2658,15 @@ async function processSale(action) {
                 p_payment_details: paymentDetails,
                 p_points_earned: pointsEarned,
                 p_points_redeemed: pointsRedeemedCount,
-                p_items: cart
+                p_items: formattedCartItems
             });
 
-            if (!error && data) {
+            if (error) {
+                alert('Sale transaction failed on database: ' + error.message);
+                return;
+            }
+
+            if (data) {
                 newDbOrderId = data;
                 const { data: orderData } = await supabaseClient.from('sales_orders').select('receipt_number').eq('id', newDbOrderId).single();
                 if (orderData && orderData.receipt_number) {
@@ -2656,7 +2676,11 @@ async function processSale(action) {
 
             await fetchProducts();
             await fetchCustomers();
-        } catch(e) {}
+        } catch(e) {
+            console.error("RPC execution error:", e);
+            alert("Network or database execution error during checkout.");
+            return;
+        }
     }
 
     const saleRecord = {
@@ -2693,7 +2717,7 @@ async function processSale(action) {
     clearCart();
     switchMobileTab('products');
 }
-
+        
 function executePrintReceipt(sale) {
     const printContainer = document.getElementById('print-container');
     printContainer.innerHTML = '';
